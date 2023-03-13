@@ -1,0 +1,6 @@
+version: '3'
+tasks:
+  docker:
+    desc: docker install
+  kubernetes:
+    desc: kubernetes install

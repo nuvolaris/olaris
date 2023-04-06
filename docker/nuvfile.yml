@@ -1,0 +1,53 @@
+version: '3'
+
+tasks:
+    version:
+      desc: version
+      cmds:
+      - kind version
+ 
+    _kind.yaml:
+      cmds:
+      - mkdir -p $DATADIR
+      - envsubst -i kind.yaml -o _kind.yaml
+      env:
+        DATADIR:
+          sh: echo $HOME/.nuv/kind
+    
+    _cluster: kind create cluster --wait=1m --name=nuvolaris --config=_kind.yaml
+
+    _ingress: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+
+
+    create:
+      desc: create
+      cmds:
+      - task: _kind.yaml
+      - task: _cluster
+      - task: _ingress
+
+    destroy:
+      desc: destroy
+      cmds:
+      - kind delete clusters nuvolaris
+
+    status:
+      desc: status
+      cmds:
+      - |
+        if kind get clusters | grep nuvolaris
+        then echo cluster up and running
+        else echo cluster not found
+        fi 
+    
+    boh:
+      desc: status
+      cmds:
+      - |
+        kind get clusters 2>/dev/null | grep nuvolaris
+        echo -e "pippo\npluto" | grep none
+        echo $?
+        #if  | grep nuvolaris
+        #then echo cluster up and running
+        #else echo cluster not found
+        #fi 

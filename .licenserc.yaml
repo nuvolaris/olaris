@@ -23,9 +23,5 @@ header:
   paths-ignore:
     - '.git-hooks/pre-commit'
     - '**/_*'
-    - '**/LICENSE'
- 
-dependency:
-  files:
-    - go.mod
-    - package.json 
+    - 'nuvroot.json'
+    - 'LICENSE'

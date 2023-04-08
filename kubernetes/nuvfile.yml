@@ -23,10 +23,10 @@ env:
 tasks:
 
   status:
+    desc: show Nuvolaris cluster status 
     silent: true
     cmds:
     - kubectl -n nuvolaris get no,sts,po
-    desc: show Nuvolaris cluster status 
 
   _config: kubectl apply  -f common -f roles -f crds 
 
@@ -37,9 +37,16 @@ tasks:
   _instance:
   - envsubst -i whisk.yaml -o _whisk.yaml
 
-  destroy:
+  delete:
     desc: destroy Nuvolaris
     cmds:
     - kubectl -n nuvolaris delete all --all
     - kubectl delete ns nuvolaris
 
+  create:
+    cmds:
+    - echo create context={{._context_}}
+
+  configure:
+    cmds:
+    - echo config all={{.__all}}

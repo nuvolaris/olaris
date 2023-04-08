@@ -3,7 +3,16 @@ Subcommand:
 nuv kubernetes 
 
 Usage:
-  kubernetes configure [--redis] [--mongo] [--cron]
-  kubernetes create
-  kubernetes delete
-  kubernetes status
+  kubernetes configure [--all] [--redis] [--mongo] [--minio] [--cron] [--static]
+  kubernetes create <context>
+  kubernetes delete [<context>]
+  kubernetes status [<context>]
+
+
+Options:
+  --all     deploy all services
+  --redis   deploy redis
+  --mongo   deploy mongo
+  --minio   deploy minio
+  --cron    deploy cron
+  --static  deploy static

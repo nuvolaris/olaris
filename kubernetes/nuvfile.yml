@@ -49,4 +49,4 @@ tasks:
 
   configure:
     cmds:
-    - echo config all={{.__all}}
+    - echo configure all={{.__all}}

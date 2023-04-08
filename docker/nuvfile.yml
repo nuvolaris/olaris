@@ -17,6 +17,9 @@
 
 version: '3'
 
+vars:
+  OPERATOR:
+
 tasks:
     version:
       desc: version
@@ -35,6 +38,8 @@ tasks:
 
     _ingress: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
 
+    _preload:
+      - kind load
 
     create:
       desc: create
@@ -49,22 +54,11 @@ tasks:
       - kind delete clusters nuvolaris
 
     status:
+      silent: true
       desc: status
       cmds:
       - |
         if kind get clusters | grep nuvolaris
-        then echo cluster up and running
-        else echo cluster not found
+        then echo Cluster Nuvolaris up and running
+        else echo Cluster Nuvolaris not found
         fi 
-    
-    boh:
-      desc: status
-      cmds:
-      - |
-        kind get clusters 2>/dev/null | grep nuvolaris
-        echo -e "pippo\npluto" | grep none
-        echo $?
-        #if  | grep nuvolaris
-        #then echo cluster up and running
-        #else echo cluster not found
-        #fi 

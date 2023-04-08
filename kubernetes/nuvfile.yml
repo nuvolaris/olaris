@@ -1,0 +1,28 @@
+version: '3'
+
+env:
+  OPERATOR: "ghcr.io/msciabarra/nuvolaris-operator:0.3.0-morpheus.23040711"
+
+tasks:
+
+  status:
+    silent: true
+    cmds:
+    - kubectl -n nuvolaris get no,sts,po
+    desc: show Nuvolaris cluster status 
+
+  _config: kubectl apply  -f common -f roles -f crds 
+
+  _operator:
+  - envsubst -i operator.yaml -o _operator.yaml
+  - kubectl apply -f _operator.yaml
+
+  _instance:
+  - envsubst -i whisk.yaml -o _whisk.yaml
+
+  destroy:
+    desc: destroy Nuvolaris
+    cmds:
+    - kubectl -n nuvolaris delete all --all
+    - kubectl delete ns nuvolaris
+

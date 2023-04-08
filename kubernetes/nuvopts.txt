@@ -1,0 +1,9 @@
+Subcommand:
+
+nuv kubernetes 
+
+Usage:
+  kubernetes configure [--redis] [--mongo] [--cron]
+  kubernetes create
+  kubernetes delete
+  kubernetes status

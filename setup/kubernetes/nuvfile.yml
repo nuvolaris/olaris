@@ -16,9 +16,14 @@
 # under the License.
 
 version: '3'
+vars:
+  DRY: false
 
 env:
   OPERATOR: "ghcr.io/msciabarra/nuvolaris-operator:0.3.0-morpheus.23040711"
+
+dotenv:
+- ../_env
 
 tasks:
 
@@ -26,27 +31,43 @@ tasks:
     desc: show Nuvolaris cluster status 
     silent: true
     cmds:
+    - echo "*** Nodes ***"
     - kubectl -n nuvolaris get no,sts,po
 
-  _config: kubectl apply  -f common -f roles -f crds 
+  prepare: 
+  - |
+    if {{.DRY}}
+    then cat common/*.yaml roles/*.yaml crds/*.yaml
+    else kubectl apply  -f common -f roles -f crds
+    fi
 
-  _operator:
+  operator:
   - envsubst -i operator.yaml -o _operator.yaml
-  - kubectl apply -f _operator.yaml
+  - |
+    if {{.DRY}}
+    then cat _operator.yaml
+    else kubectl apply -f _operator.yaml
+    fi
 
-  _instance:
+  instance:
   - envsubst -i whisk.yaml -o _whisk.yaml
+  - |
+    if {{.DRY}}
+    then cat _whisk.yaml
+    else kubectl apply -f _whisk.yaml
+    fi
 
   delete:
     desc: destroy Nuvolaris
     cmds:
+    - kubectl -n nuvolaris delete wsk/controller
     - kubectl -n nuvolaris delete all --all
+    - kubectl -n nuvolaris delete pvc
     - kubectl delete ns nuvolaris
 
   create:
+    silent: true
     cmds:
-    - echo create context={{._context_}}
-
-  configure:
-    cmds:
-    - echo configure all={{.__all}}
+    - task: prepare
+    - task: operator
+    - task: instance

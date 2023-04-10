@@ -21,8 +21,7 @@ vars:
   OPERATOR:
 
 tasks:
-    version:
-      desc: version
+    _version:
       cmds:
       - kind version
  
@@ -42,20 +41,26 @@ tasks:
       - kind load
 
     create:
-      desc: create
+      desc: create the Nuvolaris cluster in Docker
       cmds:
       - task: _kind.yaml
       - task: _cluster
       - task: _ingress
 
     destroy:
-      desc: destroy
+      desc: destroy the Nuvolaris cluster in Docker
       cmds:
       - kind delete clusters nuvolaris
 
+
+    select:
+      desc: destroy the Nuvolaris cluster in Docker
+      cmds:
+      - kind export kubeconfig --name=nuvolaris
+
     status:
       silent: true
-      desc: status
+      desc: status of the Nuvolaris cluster in Docker
       cmds:
       - |
         if kind get clusters | grep nuvolaris

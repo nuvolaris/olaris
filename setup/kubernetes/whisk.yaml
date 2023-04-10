@@ -35,17 +35,17 @@ spec:
     # start kafka
     kafka: false
     # start mongodb
-    mongodb: true
+    mongodb: ${ENABLE_MONGO:-false}
     # start redis
-    redis: true
+    redis: ${ENABLE_REDIS:-false}
     # start cron based action parser
-    cron: true 
+    cron: ${ENABLE_CRON:-false}
     # enable TLS
     tls: true
     # minio enabled or not
-    minio: true
+    minio: ${ENABLE_MINIO:-false}
     # minio static enabled or not
-    static: true        
+    static: ${ENABLE_STATIC:-false}        
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP

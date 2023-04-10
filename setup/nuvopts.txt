@@ -1,0 +1,15 @@
+Subcommand: nuv setup 
+
+Usage:
+  setup configure [--all] [--redis] [--mongo] [--minio] [--cron] [--static]
+  setup status 
+  setup docker
+  setup kubernetes 
+
+Options:
+  --all     deploy all services
+  --redis   deploy redis
+  --mongo   deploy mongo
+  --minio   deploy minio
+  --cron    deploy cron
+  --static  deploy static

@@ -17,5 +17,6 @@
 
 version: '3'
 tasks:
+
   setup:
     desc:  Install Nuvolaris

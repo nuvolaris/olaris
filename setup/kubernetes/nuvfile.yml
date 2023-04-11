@@ -19,10 +19,8 @@ version: '3'
 vars:
   DRY: false
 
-env:
-  OPERATOR: "ghcr.io/msciabarra/nuvolaris-operator:0.3.0-morpheus.23040711"
-
 dotenv:
+- ../../env.src
 - ../_env
 
 tasks:
@@ -57,17 +55,17 @@ tasks:
     else kubectl apply -f _whisk.yaml
     fi
 
-  delete:
-    desc: destroy Nuvolaris
-    cmds:
-    - kubectl -n nuvolaris delete wsk/controller
-    - kubectl -n nuvolaris delete all --all
-    - kubectl -n nuvolaris delete pvc
-    - kubectl delete ns nuvolaris
-
   create:
     silent: true
     cmds:
     - task: prepare
     - task: operator
     - task: instance
+  
+  delete:
+    cmds:
+    - kubectl -n nuvolaris delete wsk/controller
+    - kubectl -n nuvolaris delete all --all
+    - kubectl -n nuvolaris delete pvc --all
+    - kubectl delete ns nuvolaris
+

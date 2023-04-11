@@ -18,6 +18,16 @@
 version: '3'
 tasks:
 
+  default:
+    silent: true
+    cmds:
+    - |
+      if {{.__devcluster}} 
+      then
+        nuv setup docker create
+        nuv setup kubernetes create
+      fi
+
   configure:
     silent: true
     cmds:

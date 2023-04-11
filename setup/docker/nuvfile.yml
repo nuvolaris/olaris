@@ -14,56 +14,76 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
 version: '3'
 
 vars:
-  OPERATOR:
+  DRY: false
+  INGRESS: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
+
+
+dotenv:
+- ../../env.src
+
+env:
+  DATADIR:
+    sh: echo $HOME/.nuv/kind
 
 tasks:
-    _version:
-      cmds:
-      - kind version
- 
-    _kind.yaml:
-      cmds:
-      - mkdir -p $DATADIR
-      - envsubst -i kind.yaml -o _kind.yaml
-      env:
-        DATADIR:
-          sh: echo $HOME/.nuv/kind
+  version:
+    cmds:
+    - kind version
     
-    _cluster: kind create cluster --wait=1m --name=nuvolaris --config=_kind.yaml
+  cluster: 
+    cmds:
+    - mkdir -p $DATADIR
+    - envsubst -i kind.yaml -o _kind.yaml
+    - |
+      if {{.DRY}}
+      then cat _kind.yaml
+      else kind create cluster --wait=1m --name=nuvolaris --config=_kind.yaml
+      fi
 
-    _ingress: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+  ingress: 
+  - kubectl apply -f "{{.INGRESS}}"
 
-    _preload:
-      - kind load
-
-    create:
-      desc: create the Nuvolaris cluster in Docker
-      cmds:
-      - task: _kind.yaml
-      - task: _cluster
-      - task: _ingress
-
-    destroy:
-      desc: destroy the Nuvolaris cluster in Docker
-      cmds:
-      - kind delete clusters nuvolaris
-
-
-    select:
-      desc: destroy the Nuvolaris cluster in Docker
-      cmds:
-      - kind export kubeconfig --name=nuvolaris
-
+  preload:
+  - docker pull $OPERATOR_IMAGE:$OPERATOR_TAG
+  - kind load docker-image -n nuvolaris $OPERATOR_IMAGE:$OPERATOR_TAG 
+  - docker pull $CONTROLLER_IMAGE:$CONTROLLER_TAG
+  - kind load docker-image -n nuvolaris $CONTROLLER_IMAGE:$CONTROLLER_TAG
+  - docker pull $COUCHDB_IMAGE:$COUCHDB_TAG
+  - kind load docker-image -n nuvolaris $COUCHDB_IMAGE:$COUCHDB_TAG
+  - docker pull $NODEJS_IMAGE:$NODEJS_TAG
+  - kind load docker-image -n nuvolaris $NODEJS_IMAGE:$NODEJS_TAG
+  - docker pull $PYTHON_IMAGE:$PYTHON_TAG
+  - kind load docker-image -n nuvolaris $PYTHON_IMAGE:$PYTHON_TAG
+  
+  create:
+    desc: create the Nuvolaris cluster in Docker
+    cmds:
+    - task: cluster
+    - task: ingress
+    - task: preload
+    - task: use
     status:
-      silent: true
-      desc: status of the Nuvolaris cluster in Docker
-      cmds:
-      - |
-        if kind get clusters | grep nuvolaris
-        then echo Cluster Nuvolaris up and running
-        else echo Cluster Nuvolaris not found
-        fi 
+    - kind get clusters | grep nuvolaris
+
+  delete:
+    desc: destroy the Nuvolaris cluster in Docker
+    cmds:
+    - kind delete clusters nuvolaris
+
+  use:
+    desc: use the Nuvolaris cluster in Docker
+    cmds:
+    - kind export kubeconfig --name=nuvolaris
+
+  status:
+    silent: true
+    desc: status of the Nuvolaris cluster in Docker
+    cmds:
+    - |
+      if kind get clusters | grep nuvolaris
+      then echo Cluster Nuvolaris up and running
+      else echo Cluster Nuvolaris not found
+      fi

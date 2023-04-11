@@ -1,6 +1,7 @@
 Subcommand: nuv setup 
 
 Usage:
+  setup --devcluster
   setup configure [--all] [--redis] [--mongo] [--minio] [--cron] [--static]
   setup status 
   setup docker

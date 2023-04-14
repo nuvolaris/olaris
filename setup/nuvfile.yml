@@ -26,6 +26,7 @@ tasks:
       then
         nuv setup docker create
         nuv setup kubernetes create
+        nuv setup nuvolaris config
       fi
 
   configure:
@@ -55,6 +56,9 @@ tasks:
 
   kubernetes:
     desc: kubernetes install
+
+  nuvolaris:
+    desc: nuvolaris install
 
   status:
     silent: true

@@ -19,4 +19,10 @@ version: '3'
 tasks:
 
   setup:
-    desc:  Install Nuvolaris
+    desc: Install Nuvolaris
+
+  actions:
+    desc: Install Actions
+    cmds:
+    - wsk {{.CLI_ARGS}}
+

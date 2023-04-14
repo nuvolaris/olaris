@@ -18,6 +18,8 @@
 version: '3'
 vars:
   DRY: false
+  MAX: 10
+  TIMEOUT: 5
 
 dotenv:
 - ../../env.src
@@ -33,19 +35,59 @@ tasks:
     - kubectl -n nuvolaris get no,sts,po
 
   prepare: 
-  - |
-    if {{.DRY}}
-    then cat common/*.yaml roles/*.yaml crds/*.yaml
-    else kubectl apply  -f common -f roles -f crds
-    fi
+    silent: true
+    cmds:
+    - |
+      if {{.DRY}}
+      then cat common/*.yaml roles/*.yaml crds/*.yaml
+      else kubectl apply  -f common -f roles -f crds
+      fi
+
+  boh:
+    - |
+      N=0
+      while [[ $N -lt {{.MAX}} ]]
+      do 
+        echo "$N Waiting for {{.OBJECT}}"
+        N=$((N + 1))
+        echo $N
+      done
+
+  wait-ready:
+    silent: true
+    cmds:
+    - |
+      echo "Waiting for {{.OBJECT}}"
+      while ! kubectl -n nuvolaris get {{.OBJECT}} 2>/dev/null
+      do sleep {{.TIMEOUT}}
+      done
+    - |
+      N=0
+      RES=false
+      while [[ $N -lt {{.MAX}} ]]
+      do 
+          N=$((N + 1))
+          echo "$N Waiting for {{.OBJECT}} ready"
+          if kubectl -n nuvolaris wait --for=condition=ready {{.OBJECT}} --timeout={{.TIMEOUT}}s 2>/dev/null
+          then 
+                RES=true
+                break
+          fi
+      done
+      $RES
 
   operator:
-  - envsubst -i operator.yaml -o _operator.yaml
-  - |
-    if {{.DRY}}
-    then cat _operator.yaml
-    else kubectl apply -f _operator.yaml
-    fi
+    silent: true
+    cmds:
+    - envsubst -i operator.yaml -o _operator.yaml
+    - |
+      if {{.DRY}}
+      then cat _operator.yaml
+      else kubectl apply -f _operator.yaml
+      fi
+    - task: wait-ready 
+      vars:
+        OBJECT: pod/nuvolaris-operator
 
   instance:
   - envsubst -i whisk.yaml -o _whisk.yaml
@@ -54,6 +96,12 @@ tasks:
     then cat _whisk.yaml
     else kubectl apply -f _whisk.yaml
     fi
+  - task: wait-ready 
+    vars:
+      OBJECT: pod/couchdb-0
+  - task: wait-ready 
+    vars:
+      OBJECT: pod/controller-0
 
   create:
     silent: true
@@ -69,3 +117,22 @@ tasks:
     - kubectl -n nuvolaris delete pvc --all
     - kubectl delete ns nuvolaris
 
+  detect:
+    silent: true
+    cmds: 
+    - |-
+      LABELS="$(kubectl get nodes -ojsonpath='{.items[].metadata.labels}' 2>/dev/null)"
+      if echo "$LABELS" | jq . | grep eksctl.io >/dev/null
+      then echo "eks"
+      elif echo "$LABELS" | jq . | grep microk8s.io >/dev/null
+      then echo "microk8s"
+      elif echo "$LABELS" | jq . | grep lke.linode.com >/dev/null
+      then echo "lks"
+      elif echo "$LABELS" | jq . | grep openshift.io >/dev/null
+      then echo "openshift"
+      elif echo "$LABELS" | jq . | grep 'instance-type.*k3s' >/dev/null
+      then echo "k3s"
+      elif echo "$LABELS" | jq . | awk '/nuvolaris.io\/kube/ {print $2}' | grep kind >/dev/null
+      then echo "kind"
+      else echo "generic"
+      fi

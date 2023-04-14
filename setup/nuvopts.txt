@@ -6,6 +6,7 @@ Usage:
   setup status 
   setup docker
   setup kubernetes 
+  setup nuvolaris
 
 Options:
   --all     deploy all services

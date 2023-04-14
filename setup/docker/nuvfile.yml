@@ -18,6 +18,7 @@ version: '3'
 
 vars:
   DRY: false
+  SILENT: true
   INGRESS: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
 
 
@@ -27,6 +28,7 @@ dotenv:
 env:
   DATADIR:
     sh: echo $HOME/.nuv/kind
+  SILENT: true
 
 tasks:
   version:
@@ -34,6 +36,7 @@ tasks:
     - kind version
     
   cluster: 
+    silent: true
     cmds:
     - mkdir -p $DATADIR
     - envsubst -i kind.yaml -o _kind.yaml
@@ -59,21 +62,23 @@ tasks:
   - kind load docker-image -n nuvolaris $PYTHON_IMAGE:$PYTHON_TAG
   
   create:
+    silent: true
     desc: create the Nuvolaris cluster in Docker
     cmds:
     - task: cluster
     - task: ingress
-    - task: preload
     - task: use
     status:
     - kind get clusters | grep nuvolaris
 
   delete:
+    silent: true
     desc: destroy the Nuvolaris cluster in Docker
     cmds:
     - kind delete clusters nuvolaris
 
   use:
+    silent: true
     desc: use the Nuvolaris cluster in Docker
     cmds:
     - kind export kubeconfig --name=nuvolaris

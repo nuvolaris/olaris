@@ -21,6 +21,7 @@ tasks:
 
   wait-ready:
     desc: apihost
+    silent: true
     cmds:
     - |
       N=1
@@ -39,6 +40,7 @@ tasks:
 
   config:
     desc: configuring nuvolaris
+    silent: true
     cmds:
       - task: wait-ready
       - wsk property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"

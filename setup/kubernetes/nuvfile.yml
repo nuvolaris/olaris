@@ -43,16 +43,6 @@ tasks:
       else kubectl apply  -f common -f roles -f crds
       fi
 
-  boh:
-    - |
-      N=0
-      while [[ $N -lt {{.MAX}} ]]
-      do 
-        echo "$N Waiting for {{.OBJECT}}"
-        N=$((N + 1))
-        echo $N
-      done
-
   wait-ready:
     silent: true
     cmds:
@@ -90,18 +80,20 @@ tasks:
         OBJECT: pod/nuvolaris-operator
 
   instance:
-  - envsubst -i whisk.yaml -o _whisk.yaml
-  - |
-    if {{.DRY}}
-    then cat _whisk.yaml
-    else kubectl apply -f _whisk.yaml
-    fi
-  - task: wait-ready 
-    vars:
-      OBJECT: pod/couchdb-0
-  - task: wait-ready 
-    vars:
-      OBJECT: pod/controller-0
+    silent: true
+    cmds:
+    - envsubst -i whisk.yaml -o _whisk.yaml
+    - |
+      if {{.DRY}}
+      then cat _whisk.yaml
+      else kubectl apply -f _whisk.yaml
+      fi
+    - task: wait-ready 
+      vars:
+        OBJECT: pod/couchdb-0
+    - task: wait-ready 
+      vars:
+        OBJECT: pod/controller-0
 
   create:
     silent: true

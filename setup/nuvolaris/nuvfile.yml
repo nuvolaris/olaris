@@ -32,7 +32,7 @@ tasks:
         if [[ "$APIHOST" != "" ]] && [[ "$HOST" != "//pending" ]]
         then break
         fi
-        echo "$N... waiting for apihost ready"
+        echo "$N... waiting for APIHOST ready"
         N=$((N + 1))
         sleep 5
       done
@@ -42,10 +42,16 @@ tasks:
     desc: configuring nuvolaris
     silent: true
     cmds:
-      - task: wait-ready
       - wsk property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
     vars:
       APIHOST:
         sh: kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}'
       AUTH:
         sh: kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}'
+
+  login:
+    silent: true
+    desc: configuring nuvolaris
+    cmds:
+    - task: wait-ready
+    - task: config

@@ -26,7 +26,7 @@ tasks:
       then
         nuv setup docker create
         nuv setup kubernetes create
-        nuv setup nuvolaris config
+        nuv setup nuvolaris login
       fi
 
   configure:

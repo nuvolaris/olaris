@@ -29,10 +29,10 @@ tasks:
       do
         APIHOST="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}')"
         HOST="$(echo $APIHOST | awk -F: '{print $2}')"
-        if [[ "$HOST" != "//pending" ]]
+        if [[ "$APIHOST" != "" ]] && [[ "$HOST" != "//pending" ]]
         then break
         fi
-        echo "$N... waiting for APIHOST ready"
+        echo "$N... waiting for apihost ready"
         N=$((N + 1))
         sleep 5
       done

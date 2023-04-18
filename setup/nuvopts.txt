@@ -1,17 +1,18 @@
 Subcommand: nuv setup 
 
 Usage:
-  setup --devcluster
   setup configure [--all] [--redis] [--mongo] [--minio] [--cron] [--static]
-  setup status 
-  setup docker
-  setup kubernetes 
-  setup nuvolaris
+  setup --devcluster
+  setup --current
+  setup status
+  setup clean
 
 Options:
-  --all     deploy all services
-  --redis   deploy redis
-  --mongo   deploy mongo
-  --minio   deploy minio
-  --cron    deploy cron
-  --static  deploy static
+  --devcluster  deploy a local development cluster in docker
+  --current     deploy in the current kubernetes cluster
+  --all         enable all services
+  --redis       enable redis
+  --mongo       enable mongo
+  --minio       enable minio
+  --cron        enable cron
+  --static      enable static

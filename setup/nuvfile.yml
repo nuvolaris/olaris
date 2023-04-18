@@ -23,10 +23,11 @@ tasks:
     cmds:
     - |
       if {{.__devcluster}} 
-      then
-        nuv setup docker create
-        nuv setup kubernetes create
-        nuv setup nuvolaris login
+      then nuv setup docker create
+      fi
+      if {{.__devcluster}} || {{.__current}}
+      then  nuv setup kubernetes create
+            nuv setup nuvolaris login
       fi
 
   configure:
@@ -71,3 +72,4 @@ tasks:
       else
         echo "Default (no services enabled)"
       fi
+

@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+
+  nodes:
+    desc: show nodes
+    cmds:
+    - kubectl get nodes
+
+  pods:
+    desc: show pods
+    cmds:
+    - |-
+      if test -z "{{._log_}}"
+      then kubectl -n nuvolaris get po,sts,jobs
+      else echo log '{{._log_}}'
+      fi
+
+  svcs:
+    desc: show services
+    cmds:
+    - kubectl -n nuvolaris get svc
+
+  
+  
+

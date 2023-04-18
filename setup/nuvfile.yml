@@ -64,8 +64,10 @@ tasks:
     silent: true
     cmds:    
     - |
+      echo "*** Configuration ***"
       if test -e _env 
       then 
-        echo "*** Configuration ***"
         cat _env 
+      else
+        echo "Default (no services enabled)"
       fi

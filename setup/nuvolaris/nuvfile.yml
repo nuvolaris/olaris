@@ -42,7 +42,7 @@ tasks:
     desc: configuring nuvolaris
     silent: true
     cmds:
-      - wsk property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
+      - retry wsk property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
     vars:
       APIHOST:
         sh: kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}'

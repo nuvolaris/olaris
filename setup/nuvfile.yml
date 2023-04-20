@@ -17,7 +17,6 @@
 
 version: '3'
 tasks:
-
   default:
     silent: true
     cmds:
@@ -25,7 +24,7 @@ tasks:
       if {{.__devcluster}} 
       then nuv setup local
       fi
- 
+
   local:
     silent: true
     cmds:
@@ -38,13 +37,22 @@ tasks:
     cmds:
     - |
       if test -n "{{._context_}}"
-      then if kubectl config use-context "{{._context_}}"
-           then kubectl config get-contexts
-           else false
-           fi
+      then  if kubectl config use-context "{{._context_}}"
+            then kubectl config get-contexts
+            else false
+            fi
       fi
     - nuv setup kubernetes create
     - nuv setup nuvolaris login
+
+  server:
+    silent: false
+    cmds:
+    - |
+      if test -z "{{._user_}}"
+      then k3sup --host={{._server_}}
+      else k3sup --host=={{._server_}} --user={{._user_}}
+      fi
 
   configure:
     silent: true
@@ -68,12 +76,9 @@ tasks:
       fi
     - task: status
 
- 
   status:
     silent: true
     cmds:
-    - echo "*** Deployment ***"
-    - nuv setup kubernetes status  
     - |
       echo "*** Configuration ***"
       if test -e _env 

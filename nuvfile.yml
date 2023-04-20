@@ -21,8 +21,11 @@ tasks:
   setup:
     desc: Install Nuvolaris
 
-  actions:
-    desc: Install Actions
+  status:
+    silent: true
+    desc: Status
     cmds:
-    - wsk {{.CLI_ARGS}}
-
+    - nuv setup nuvolaris status
+    - if {{.__config}} ; then nuv setup status ; fi
+    - if {{.__cluster}} ; then nuv setup kubernetes status ; fi
+ 

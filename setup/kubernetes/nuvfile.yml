@@ -31,6 +31,7 @@ tasks:
     desc: show nuvolaris cluster status 
     silent: true
     cmds:
+    - echo "*** Deployment ***"
     - kubectl -n nuvolaris get no,sts,po,svc
 
   watch:

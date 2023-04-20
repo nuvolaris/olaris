@@ -2,17 +2,17 @@ Subcommand: nuv setup
 
 Usage:
   setup configure [--all] [--redis] [--mongo] [--minio] [--cron] [--static]
+  setup cluster [<context>]
   setup local
   setup server <server> [<user>]
-  setup cluster [<context>]
   setup status
   setup --devcluster
 
 Commands:
-  local         creates a local Kubernetes  in docker and deploy Nuvolaris
+  cluster       deploy Nuvolaris in the Kubernetes cluster using the <context>, default the current
+  local         creates a local Kubernetes in docker and deploy Nuvolaris
   server        create a Kubernetes in server <server> and deploy Nuvolaris
                 the server must be accessible with ssh using the <user>, default root
-  cluster       deploy Nuvolaris in the Kubernetes cluster
 
 Options:
   --all         enable all services

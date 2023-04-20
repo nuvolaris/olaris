@@ -1,0 +1,10 @@
+Welcome to Nuv, the all-mighty Nuvolaris Build Tool
+
+
+Usage:
+  setup 
+  status [--cluster] [--config] 
+
+Note: 
+ each command has many subcommands,
+ just type the command for its subcommands

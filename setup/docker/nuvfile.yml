@@ -47,7 +47,8 @@ tasks:
       fi
 
   ingress: 
-  - kubectl apply -f "{{.INGRESS}}"
+  #- kubectl apply -f "{{.INGRESS}}"
+  - kubectl apply -f ingress-deploy.yaml
 
   preload:
   - docker pull $OPERATOR_IMAGE:$OPERATOR_TAG

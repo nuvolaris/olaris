@@ -16,6 +16,8 @@
 # under the License.
 
 version: '3'
+vars:
+  WSK: "wsk -i"
 
 tasks:
 
@@ -42,8 +44,9 @@ tasks:
     desc: configuring nuvolaris
     silent: true
     cmds:
-    - retry -t 100 -m 600 wsk --apihost "{{.APIHOST}}" --auth "{{.AUTH}}" namespace list
-    - wsk property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
+    - retry -t 100 -m 600 {{.WSK}} --apihost "{{.APIHOST}}" --auth "{{.AUTH}}" namespace list
+    - >
+     {{.WSK}} property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
     vars:
       APIHOST:
         sh: kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}'
@@ -58,6 +61,7 @@ tasks:
     - task: config
 
   hello:
-  - wsk package update hello
-  - wsk action update hello/hello hello.js
-  - wsk action invoke hello/hello -p name Nuvolaris -r | grep "Nuvolaris"
+  - "{{.WSK}} package update hello"
+  - "{{.WSK}} action update hello/hello hello.js"
+  - >
+    {{.WSK}} action invoke hello/hello -p name Nuvolaris -r | grep Nuvolaris

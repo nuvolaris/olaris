@@ -18,7 +18,7 @@
 version: '3'
 vars:
   DRY: false
-  MAX: 10
+  MAX: 100
   TIMEOUT: 5
 
 dotenv:

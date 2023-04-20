@@ -42,6 +42,8 @@ tasks:
     desc: show services
     cmds:
     - kubectl -n nuvolaris get wsk/controller -o yaml
-
   
-
+  cm:
+    desc: show config
+    cmds:
+    - kubectl -n nuvolaris get cm/config -o yaml

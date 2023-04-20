@@ -3,7 +3,7 @@ Welcome to Nuv, the all-mighty Nuvolaris Build Tool
 
 Usage:
   setup 
-  status [--cluster] [--config] 
+  status [--cluster] [--config]
 
 Note: 
  each command has many subcommands,

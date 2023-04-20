@@ -32,9 +32,10 @@ tasks:
     - nuv setup kubernetes create
     - nuv setup nuvolaris login
 
-  cluster:
+  
+  use-context:
     silent: true
-    cmds:
+    cmds: 
     - |
       if test -n "{{._context_}}"
       then  if kubectl config use-context "{{._context_}}"
@@ -42,6 +43,12 @@ tasks:
             else false
             fi
       fi
+      kubectl config get-contexts 
+
+  cluster:
+    silent: true
+    cmds:
+    - task: use-context
     - nuv setup kubernetes create
     - nuv setup nuvolaris login
 
@@ -95,3 +102,12 @@ tasks:
       then cat _apihost
       fi
 
+  clean:
+    silent: true
+    cmds:
+    - task: use-context
+    - |
+      if {{.__local}}
+      then nuv setup docker delete
+      else nuv setup kubernetes delete
+      fi

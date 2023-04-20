@@ -7,6 +7,7 @@ Usage:
   setup local
   setup server <server> [<user>]
   setup status
+  setup clean [<context>] [--local]
   setup --devcluster
 
 Commands:
@@ -16,6 +17,7 @@ Commands:
   local         creates a local Kubernetes in docker and deploy Nuvolaris
   server        create a Kubernetes in server <server> and deploy Nuvolaris
                 the server must be accessible with ssh using the <user>, default root
+  clean         remove Nuvolaris from the server, and also the local cluster if there is one
 
 Options:
   --all         enable all services

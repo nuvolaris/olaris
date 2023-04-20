@@ -28,4 +28,4 @@ tasks:
     - nuv setup nuvolaris status
     - if {{.__config}} ; then nuv setup status ; fi
     - if {{.__cluster}} ; then nuv setup kubernetes status ; fi
- 
+

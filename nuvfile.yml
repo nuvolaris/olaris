@@ -16,8 +16,8 @@
 # under the License.
 
 version: '3'
-tasks:
 
+tasks:
   setup:
     desc: Install Nuvolaris
 

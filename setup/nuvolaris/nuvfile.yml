@@ -17,7 +17,7 @@
 
 version: '3'
 vars:
-  WSK: "wsk -i"
+  WSK: "nuv -wsk -i"
 
 tasks:
 
@@ -46,7 +46,7 @@ tasks:
     cmds:
     - retry -t 100 -m 600 {{.WSK}} --apihost "{{.APIHOST}}" --auth "{{.AUTH}}" namespace list
     - >
-     {{.WSK}} property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
+      {{.WSK}} property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
     vars:
       APIHOST:
         sh: kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}'

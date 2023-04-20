@@ -32,7 +32,6 @@ tasks:
     - nuv setup kubernetes create
     - nuv setup nuvolaris login
 
-  
   use-context:
     silent: true
     cmds: 
@@ -56,10 +55,15 @@ tasks:
     silent: false
     cmds:
     - |
-      if test -z "{{._user_}}"
-      then k3sup --host={{._server_}}
-      else k3sup --host=={{._server_}} --user={{._user_}}
-      fi
+      mkdir -p ~/.kube
+      k3sup install --host={{._server_}} --user="$USER" \
+      --local-path=~/.kube/config --merge --context=k3s
+      kubectl config use-context k3s
+    - nuv setup kubernetes create
+    - nuv setup nuvolaris login
+    env:
+      USER:
+        sh: if test -z "{{._user_}}"; then echo root ; else echo "{{._user_}}" ; fi
 
   configure:
     silent: true

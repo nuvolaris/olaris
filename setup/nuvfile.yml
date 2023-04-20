@@ -23,12 +23,28 @@ tasks:
     cmds:
     - |
       if {{.__devcluster}} 
-      then nuv setup docker create
+      then nuv setup local
       fi
-      if {{.__devcluster}} || {{.__current}}
-      then  nuv setup kubernetes create
-            nuv setup nuvolaris login
+ 
+  local:
+    silent: true
+    cmds:
+    - nuv setup docker create
+    - nuv setup kubernetes create
+    - nuv setup nuvolaris login
+
+  cluster:
+    silent: true
+    cmds:
+    - |
+      if test -n "{{._context_}}"
+      then if kubectl config use-context "{{._context_}}"
+           then kubectl config get-contexts
+           else false
+           fi
       fi
+    - nuv setup kubernetes create
+    - nuv setup nuvolaris login
 
   configure:
     silent: true
@@ -52,15 +68,7 @@ tasks:
       fi
     - task: status
 
-  docker:
-    desc: docker install
-
-  kubernetes:
-    desc: kubernetes install
-
-  nuvolaris:
-    desc: nuvolaris install
-
+ 
   status:
     silent: true
     cmds:

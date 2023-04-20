@@ -54,6 +54,7 @@ tasks:
   server:
     silent: false
     cmds:
+    - nuv setup apihost {{._server_}}
     - |
       mkdir -p ~/.kube
       k3sup install --host={{._server_}} --user="$USER" \

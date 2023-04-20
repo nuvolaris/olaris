@@ -1,9 +1,0 @@
-Subcommand: 
-  nuv kubernetes 
-
-Usage:
-  kubernetes create [<context>]
-  kubernetes delete [<context>]
-  kubernetes status [<context>]
-  kubernetes detect [<context>]
-

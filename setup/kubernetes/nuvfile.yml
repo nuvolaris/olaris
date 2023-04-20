@@ -28,13 +28,19 @@ dotenv:
 tasks:
 
   status:
-    desc: show Nuvolaris cluster status 
+    desc: show nuvolaris cluster status 
     silent: true
     cmds:
-    - echo "*** Nodes ***"
-    - kubectl -n nuvolaris get no,sts,po
+    - kubectl -n nuvolaris get no,sts,po,svc
 
-  prepare: 
+  watch:
+    desc: watch pod deployment
+    silent: true
+    cmds: 
+    - watch kubectl -n nuvolaris get po
+
+  prepare:
+    desc: prepare the environment
     silent: true
     cmds:
     - |
@@ -43,7 +49,8 @@ tasks:
       else kubectl apply  -f common -f roles -f crds
       fi
 
-  wait-ready:
+  wait:
+    desc: wait for cluster ready
     silent: true
     cmds:
     - |
@@ -67,6 +74,7 @@ tasks:
       $RES
 
   operator:
+    desc: deploy operator
     silent: true
     cmds:
     - envsubst -i operator.yaml -o _operator.yaml
@@ -75,11 +83,12 @@ tasks:
       then cat _operator.yaml
       else kubectl apply -f _operator.yaml
       fi
-    - task: wait-ready 
+    - task: wait 
       vars:
         OBJECT: pod/nuvolaris-operator
 
   instance:
+    desc: deploy instance
     silent: true
     cmds:
     - envsubst -i whisk.yaml -o _whisk.yaml
@@ -88,14 +97,15 @@ tasks:
       then cat _whisk.yaml
       else kubectl apply -f _whisk.yaml
       fi
-    - task: wait-ready 
+    - task: wait 
       vars:
         OBJECT: pod/couchdb-0
-    - task: wait-ready 
+    - task: wait
       vars:
         OBJECT: pod/controller-0
 
   create:
+    desc: prepare+operator+instance
     silent: true
     cmds:
     - task: prepare
@@ -103,6 +113,7 @@ tasks:
     - task: instance
   
   delete:
+    desc: delete cluster
     cmds:
     - kubectl -n nuvolaris delete wsk/controller
     - kubectl -n nuvolaris delete all --all
@@ -110,6 +121,7 @@ tasks:
     - kubectl delete ns nuvolaris
 
   detect:
+    desc: detect kind
     silent: true
     cmds: 
     - |-
@@ -128,3 +140,4 @@ tasks:
       then echo "kind"
       else echo "generic"
       fi
+

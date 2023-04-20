@@ -63,7 +63,9 @@ tasks:
 
   status:
     silent: true
-    cmds:    
+    cmds:
+    - echo "*** Deployment ***"
+    - nuv setup kubernetes status  
     - |
       echo "*** Configuration ***"
       if test -e _env 

@@ -74,7 +74,14 @@ tasks:
       ENABLE_STATIC={{.__static}}
       EOF
       fi
-    - task: status
+
+  apihost:
+    silent: true
+    cmds:
+    - |
+      if test -n "{{._apihost_}}"
+      then echo APIHOST={{._apihost_}} >_apihost
+      fi
 
   status:
     silent: true
@@ -82,9 +89,9 @@ tasks:
     - |
       echo "*** Configuration ***"
       if test -e _env 
-      then 
-        cat _env 
-      else
-        echo "Default (no services enabled)"
+      then cat _env  
+      fi
+      if test -e _apihost 
+      then cat _apihost
       fi
 

@@ -24,6 +24,7 @@ vars:
 dotenv:
 - ../../env.src
 - ../_env
+- ../_apihost
 
 tasks:
 

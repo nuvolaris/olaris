@@ -26,9 +26,6 @@ tasks:
       then nuv setup local
       fi
 
-  get-cert-manager:
-    cmds:
-    - curl https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
 
   local:
     silent: true
@@ -60,17 +57,9 @@ tasks:
     silent: false
     cmds:
     - nuv setup apihost {{._server_}}
-    - |
-      mkdir -p ~/.kube
-      k3sup install --host={{._server_}} --user="$USER" \
-      --local-path=~/.kube/config --merge --context=k3s
-      kubectl config use-context k3s
-    - kubectl apply -f cert-manager.yaml
+    - nuv setup k3s create SERVER="{{._server_}}" USER="{{._user_}}"
     - nuv setup kubernetes create
     - nuv setup nuvolaris login
-    env:
-      USER:
-        sh: if test -z "{{._user_}}"; then echo root ; else echo "{{._user_}}" ; fi
 
   configure:
     silent: true

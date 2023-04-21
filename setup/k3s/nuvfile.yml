@@ -36,20 +36,22 @@ tasks:
     - curl -L https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
 
   prepare:
+    silent: true
     desc: prepare
     cmds:
     - echo nuv setup apihost $SERVER
     - mkdir -p ~/.kube
     - |
       if kubectl config get-contexts | grep '{{.CTX}}'
-      then echo there is already a {{.CTX}} context 
-           echo please remove it from kubeconfig and retry
-           exit 1 
-           #kubectl config rename-context '{{.CTX}}' "k3s-$(date +%s)" 
+      then  echo there is already a {{.CTX}} context 
+            echo please remove it from kubeconfig and retry
+            exit 1 
+            #kubectl config rename-context '{{.CTX}}' "k3s-$(date +%s)" 
       fi
 
   
   install:
+    silent: true
     desc: install
     cmds:
       - >
@@ -59,12 +61,14 @@ tasks:
       - kubectl config use-context {{.CTX}}
   
   cert-manager:
+    silent: true
     desc: install cert-manager
     cmds:
     - kubectl config use-context {{.CTX}}
     - kubectl apply -f cert-manager.yaml
 
   create:
+    silent: true
     desc: create a k3s in server
     cmds:
     - task: prepare
@@ -72,6 +76,8 @@ tasks:
     - task: cert-manager
   
   status:
+    silent: true
+    cmds:
     - kubectl get nodes
 
   delete:

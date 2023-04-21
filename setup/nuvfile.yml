@@ -54,7 +54,7 @@ tasks:
     - nuv setup nuvolaris login
 
   server:
-    silent: false
+    silent: true
     cmds:
     - nuv setup apihost {{._server_}}
     - nuv setup k3s create SERVER="{{._server_}}" USER="{{._user_}}"

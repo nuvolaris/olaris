@@ -57,7 +57,7 @@ tasks:
     silent: true
     cmds:
     - nuv setup apihost {{._server_}}
-    - nuv setup k3s create SERVER="{{._server_}}" USER="{{._user_}}"
+    - nuv setup k3s create SERVER="{{._server_}}" USERNAME="{{._user_}}"
     - nuv setup kubernetes create
     - nuv setup nuvolaris login
 

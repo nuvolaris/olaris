@@ -48,7 +48,7 @@ tasks:
     silent: true
     desc: prepare
     cmds:
-    - nuv setup apihost $SERVER
+    - nuv setup apihost $_SERVER
     - mkdir -p ~/.kube
     - |
       if kubectl config get-contexts | grep '{{.CTX}}'

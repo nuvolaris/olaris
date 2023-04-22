@@ -19,15 +19,26 @@ version: '3'
 
 vars:
   CTX: k3s-nuvolaris
-  _USER:
+
+env:
+
+  _SERVER:
     sh: |-
-        if test -z "{{.USER}}" 
-        then echo root
-        else echo "{{.USER}}"
+        if test -z "{{.SERVER}}"
+        then echo localhost
+        else echo "{{.SERVER}}"
         fi
-  _SERVER: "{{.SERVER}}"
+
+  _USERNAME:
+    sh: |-
+        if test -z "{{.USERNAME}}" 
+        then echo root
+        else echo "{{.USERNAME}}"
+        fi
 
 tasks:
+
+  info: echo SERVER=${_SERVER} USERNAME=${_USERNAME}
 
   get-cert-manager:
     cmds:
@@ -37,24 +48,23 @@ tasks:
     silent: true
     desc: prepare
     cmds:
-    - echo nuv setup apihost $SERVER
+    - nuv setup apihost $SERVER
     - mkdir -p ~/.kube
     - |
       if kubectl config get-contexts | grep '{{.CTX}}'
       then  echo there is already a {{.CTX}} context 
             echo please remove it from kubeconfig and retry
             exit 1 
-            #kubectl config rename-context '{{.CTX}}' "k3s-$(date +%s)" 
       fi
 
-  
+
   install:
     silent: true
     desc: install
     cmds:
       - >
         k3sup install --context={{.CTX}}
-        --host="{{._SERVER}}" --user="{{._USER}}"
+        --host="$_SERVER" --user="$_USERNAME"
         --local-path=~/.kube/config --merge
       - kubectl config use-context {{.CTX}}
   
@@ -81,6 +91,6 @@ tasks:
   delete:
     desc: uninstall
     cmds:
-    - ssh -o StrictHostKeyChecking=no "{{._USER}}@{{._SERVER}}" sudo /usr/local/bin/k3s-uninstall.sh
+    - echo ssh -o StrictHostKeyChecking=no "$_USER@$_SERVER" sudo /usr/local/bin/k3s-uninstall.sh
     ignore_error: true
   

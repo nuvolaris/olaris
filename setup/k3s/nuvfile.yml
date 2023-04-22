@@ -19,15 +19,13 @@ version: '3'
 
 vars:
   CTX: k3s-nuvolaris
-
-env:
-  USER:
+  _USER:
     sh: |-
         if test -z "{{.USER}}" 
         then echo root
         else echo "{{.USER}}"
         fi
-  SERVER: "{{.SERVER}}"
+  _SERVER: "{{.SERVER}}"
 
 tasks:
 
@@ -56,7 +54,7 @@ tasks:
     cmds:
       - >
         k3sup install --context={{.CTX}}
-        --host="$SERVER" --user="$USER"
+        --host="{{._SERVER}}" --user="{{._USER}}"
         --local-path=~/.kube/config --merge
       - kubectl config use-context {{.CTX}}
   
@@ -83,6 +81,6 @@ tasks:
   delete:
     desc: uninstall
     cmds:
-    - ssh -o StrictHostKeyChecking=no $USER@$SERVER sudo /usr/local/bin/k3s-uninstall.sh
+    - ssh -o StrictHostKeyChecking=no "{{._USER}}@{{._SERVER}}" sudo /usr/local/bin/k3s-uninstall.sh
     ignore_error: true
   

@@ -21,6 +21,7 @@ header:
     copyright-owner: Apache Software Foundation
 
   paths-ignore:
+    - '**/*.sample'
     - 'env.src'
     - '.git-hooks/pre-commit'
     - '**/_*'

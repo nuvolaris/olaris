@@ -17,28 +17,17 @@
 
 version: '3'
 
-vars:
-  CTX: k3s-nuvolaris
-
 env:
-
-  _SERVER:
-    sh: |-
-        if test -z "{{.SERVER}}"
-        then echo localhost
-        else echo "{{.SERVER}}"
+  KUBECONFIG: 
+    sh: |- 
+        if test -e "$NUV_TMP/kubeconfig"
+        then echo "$NUV_TMP/kubeconfig"
+        else echo ~/kube/config
         fi
-
-  _USERNAME:
-    sh: |-
-        if test -z "{{.USERNAME}}" 
-        then echo root
-        else echo "{{.USERNAME}}"
-        fi
+  SERVER: "{{or .SERVER  \"localhost\"}}"
+  USERNAME: "{{or .USERNAME \"root\"}}"
 
 tasks:
-
-  info: echo SERVER=${_SERVER} USERNAME=${_USERNAME}
 
   get-cert-manager:
     cmds:
@@ -48,38 +37,28 @@ tasks:
     silent: true
     desc: prepare
     cmds:
-    - nuv setup apihost $_SERVER
-    - mkdir -p ~/.kube
-    - |
-      if kubectl config get-contexts | grep '{{.CTX}}'
-      then  echo there is already a {{.CTX}} context 
-            echo please remove it from kubeconfig and retry
-            exit 1 
-      fi
-
+    
 
   install:
     silent: true
-    desc: install
+    desc: install k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo
     cmds:
       - >
-        k3sup install --context={{.CTX}}
-        --host="$_SERVER" --user="$_USERNAME"
-        --local-path=~/.kube/config --merge
-      - kubectl config use-context {{.CTX}}
+        k3sup install
+        --host="$SERVER" --user="$USERNAME"
+        --local-path=$NUV_TMP/kubeconfig
   
   cert-manager:
     silent: true
     desc: install cert-manager
     cmds:
-    - kubectl config use-context {{.CTX}}
-    - kubectl apply -f cert-manager.yaml
+      - kubectl --kubeconfig $NUV_TMP/kubeconfig apply -f cert-manager.yaml
 
   create:
     silent: true
-    desc: create a k3s in server
+    desc: create a k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo
     cmds:
-    - task: prepare
+    - task: configure
     - task: install
     - task: cert-manager
   
@@ -89,8 +68,26 @@ tasks:
     - kubectl get nodes
 
   delete:
-    desc: uninstall
+    desc: uninstall with ssh in SERVER=<server> using USER=<user> with sudo
     cmds:
-    - echo ssh -o StrictHostKeyChecking=no "$_USER@$_SERVER" sudo /usr/local/bin/k3s-uninstall.sh
+    - ssh -o StrictHostKeyChecking=no "$USERNAME@$SERVER" sudo /usr/local/bin/k3s-uninstall.sh
+    - rm $NUV_TMP/kubeconfig
+    - rm _server_
     ignore_error: true
   
+  info:
+    silent: true
+    cmds:
+    - echo KUBECONFIG="$KUBECONFIG"
+    - echo SERVER="$SERVER"
+    - echo USERNAME="$USERNAME"
+
+  configure:
+    desc: save configuration
+    cmds:
+    - |
+      cat >_server_ <<EOF 
+      SERVER={{.SERVER}}
+      USERNAME={{.USERNAME}}
+      EOF
+    - nuv setup apihost "{{.SERVER}}"

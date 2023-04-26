@@ -1,0 +1,30 @@
+version: '3'
+
+tasks:
+
+  dotenv:
+  - env
+
+  env:
+    KUBECONFIG: |-
+      if test -e $NUV_TMP/eks.kubeconfig
+      then echo $NUV_TMP/eks.kubeconfig
+      else echo ~/.kube/config
+      fi
+
+  check:
+    silent: true
+    desc: preflight check
+    cmds:
+    - |
+      aws --version || {
+        echo "You need to install and configure aws cli tool before running this command."
+        false
+      }
+
+  kubeconfig:
+    desc: extract kubeconfig
+    cmds:
+    - task: check
+    - aws eks update-kubeconfig --name nuvolaris-eks
+

@@ -1,10 +1,10 @@
 Welcome to Nuv, the all-mighty Nuvolaris Build Tool
 
-
 Usage:
   setup 
   status [--cluster] [--config]
+  uninstall [--cluster|--server|--local]
 
 Note: 
- each command has many subcommands,
- just type the command for its subcommands
+ many commands have subcommands,
+ just type the command to see its subcommands.

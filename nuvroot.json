@@ -1,3 +1,21 @@
 {
-  "version": "0.3.0-morpheus.23031908"
+  "version": "0.3.0-morpheus.23031908",
+  "images": {
+    "operator": "",
+    "controller": "",
+    "invoker": ""
+  },
+  "config": {
+    "nuvolaris": {
+      "apihost": "auto",
+      "email": "ask",
+      "redis": false,
+      "minio": false,
+      "mongodb": false
+    },
+    "server": {
+        "host:": "localhost",
+        "username": "root" 
+    }
+  }
 }

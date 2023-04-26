@@ -1,0 +1,35 @@
+version: '3'
+
+tasks:
+
+  dotenv:
+  - env
+
+  
+  env:
+    KUBECONFIG: |-
+      if test -e $NUV_TMP/azure.kubeconfig
+      then echo $NUV_TMP/azure.kubeconfig
+      else echo ~/.kube/config
+      fi
+
+  check:
+    silent: true
+    desc: pleflight check
+    cmds:
+    - |
+      az version || {
+        echo "You need to install and configure az cli tool before running this command."
+        false
+      }
+
+  login:
+    desc: login
+    cmds:
+      - task: check
+      - az login
+
+  create:
+    desc: create aks cluster
+    cmds:
+    - echo az aks create -g MyResourceGroup -n MyManagedCluster

@@ -16,8 +16,10 @@
 # under the License.
 
 version: '3'
+
 vars:
   ETC: "-i"
+
 
 tasks:
 
@@ -44,14 +46,11 @@ tasks:
     desc: configuring nuvolaris
     silent: true
     cmds:
-    - retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "{{.APIHOST}}" --auth "{{.AUTH}}" namespace list
-    - >
-      wsk {{.ETC}} property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
-    vars:
-      APIHOST:
-        sh: kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}'
-      AUTH:
-        sh: kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}'
+    - | 
+      APIHOST=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}')
+      AUTH=$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}')
+      retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "$APIHOST" --auth "$AUTH" namespace list
+      wsk {{.ETC}} property set --apihost "$APIHOST"  --auth "$AUTH"
 
   login:
     silent: true

@@ -14,7 +14,7 @@
       "mongodb": false
     },
     "server": {
-        "host:": "localhost",
+        "host": "localhost",
         "username": "root" 
     }
   }

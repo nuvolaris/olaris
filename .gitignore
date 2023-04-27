@@ -20,3 +20,4 @@ _*
 .git-hooks/
 TODO.txt
 **/.env
+**/id_rsa*

@@ -79,8 +79,21 @@ tasks:
     cmds:
     - curl -L "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml" >ingress-deploy.yaml
 
-  prepare-apihost:
+  apihost:
     cmds:
+    - echo EKS NLB hostname $EKS_LB_HOSTNAME
+    - |
+      while true
+      do
+          echo "Attempting to resolve EKS NLB ip address..."
+          EKS_IP=$(dig +short $EKS_LB_HOSTNAME|awk '{ print ; exit}'|sed -e "s/\./-/g")
+          if [[ -z "$EKS_IP" ]]; 
+          then
+                sleep {{.TIMEOUT}}
+          else
+            break
+          fi
+      done
     - nuv setup apihost api.$(dig +short $EKS_LB_HOSTNAME|awk '{ print ; exit}'|sed -e "s/\./-/g").nip.io
     env:
       EKS_LB_HOSTNAME:
@@ -113,7 +126,9 @@ tasks:
     silent: true
     desc: install nginx-ingress
     cmds:
-      - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig apply -f ingress-deploy.yaml  
+      - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig apply -f ingress-deploy.yaml 
+      - task: wait-ingress-lb
+      - task: apihost
   
   prepare:
     silent: True
@@ -126,7 +141,8 @@ tasks:
     silent: true
     desc: install EKS using aws configure CLI
     cmds:
-      - eksctl create cluster -f _eks-cluster.yml       
+      #- eksctl create cluster -f _eks-cluster.yml --kubeconfig $NUV_TMP/eks.kubeconfig
+      - eksctl create cluster -f _eks-cluster.yml
 
   create:
     silent: true
@@ -138,8 +154,6 @@ tasks:
     - task: wait
     - task: cert-manager
     - task: ingress
-    - task: wait-ingress-lb
-    - task: prepare-apihost
 
   delete:
     desc: uninstall the EKS cluster

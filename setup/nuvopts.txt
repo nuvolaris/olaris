@@ -2,6 +2,7 @@ Subcommand: nuv setup
 
 Usage:
   setup configure [<apihost>] [--all] [--redis] [--mongo] [--minio] [--cron] [--static]
+  setup apihost [<apihost>]
   setup [local|--devcluster]
   setup cluster [<context>]
   setup server <server> [<user>]

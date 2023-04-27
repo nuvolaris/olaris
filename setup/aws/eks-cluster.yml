@@ -21,7 +21,7 @@ kind: ClusterConfig
 metadata:
   name: ${EKS_CLUSTER_NAME:-nuvolaris-eks}
   region: ${AWS_REGION:-us-east-1}
-  version: "${EKS_KUBERNETES_VERSION:-1.25}"
+  version: "${EKS_KUBERNETES_VERSION:-1.22}"
 iam:
   withOIDC: true
 nodeGroups:

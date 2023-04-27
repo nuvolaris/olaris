@@ -14,9 +14,25 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+#
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
 
-_*
-.vscode/
-.git-hooks/
-TODO.txt
-**/.env
+metadata:
+  name: ${EKS_CLUSTER_NAME:-nuvolaris-eks}
+  region: ${AWS_REGION:-us-east-1}
+  version: "${EKS_KUBERNETES_VERSION:-1.25}"
+iam:
+  withOIDC: true
+nodeGroups:
+  - name: ${EKS_NODE_GROUP_NAME:-ng-1}
+    instanceType: ${EKS_INSTANCE_TYPE:-m5.xlarge}
+    desiredCapacity: ${EKS_DESIRED_CAPACITY:-2}
+    volumeSize: ${EKS_VOLUME_SIZE:-100}
+    ssh:
+      publicKeyPath: id_rsa.pub
+    iam:
+      withAddonPolicies:
+        ebs: true
+addons:
+  - name: aws-ebs-csi-driver

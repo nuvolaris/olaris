@@ -17,17 +17,75 @@
 
 version: '3'
 
+vars:
+  MAX: 100
+  TIMEOUT: 5
+
+dotenv:
+  - .env
+
 tasks:
 
-  dotenv:
-  - env
+  wait:
+    desc: wait for eks cluster ready
+    silent: true
+    cmds:
+    - |
+      echo "Waiting for {{.OBJECT}}"
+      while ! kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get {{.OBJECT}} 2>/dev/null
+      do sleep {{.TIMEOUT}}
+      done
+    - |
+      N=0
+      RES=false
+      while [[ $N -lt {{.MAX}} ]]
+      do 
+          N=$((N + 1))
+          echo "$N Waiting for {{.OBJECT}} ready"
+          if kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get {{.OBJECT}} 2>/dev/null
+          then 
+                RES=true
+                break
+          else
+                sleep {{.TIMEOUT}}
+          fi
+      done
+      $RES
+    vars:
+      OBJECT: nodes
 
-  env:
-    KUBECONFIG: |-
-      if test -e $NUV_TMP/eks.kubeconfig
-      then echo $NUV_TMP/eks.kubeconfig
-      else echo ~/.kube/config
-      fi
+  wait-ingress-lb:
+    desc: wait for EKS managed LB hostname availability
+    silent: true
+    cmds:
+    - |
+      while true
+      do
+          echo "waiting for EKS LB hostname assignment..."
+          EKS_LB_HOSTNAME=$(kubectl --kubeconfig $NUV_TMP/eks.kubeconfig -n ingress-nginx get service/ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
+          if [[ -z "$EKS_LB_HOSTNAME" ]]; 
+          then
+                sleep {{.TIMEOUT}}
+          else
+            break
+          fi
+      done
+
+  get-cert-manager:
+    cmds:
+    - curl -L https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
+
+  get-ingress:
+    cmds:
+    - curl -L "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml" >ingress-deploy.yaml
+
+  prepare-apihost:
+    cmds:
+    - nuv setup apihost api.$(dig +short $EKS_LB_HOSTNAME|awk '{ print ; exit}'|sed -e "s/\./-/g").nip.io
+    env:
+      EKS_LB_HOSTNAME:
+        sh:
+          kubectl --kubeconfig $NUV_TMP/eks.kubeconfig -n ingress-nginx get service/ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"   
 
   check:
     silent: true
@@ -42,6 +100,58 @@ tasks:
   kubeconfig:
     desc: extract kubeconfig
     cmds:
-    - task: check
-    - aws eks update-kubeconfig --name nuvolaris-eks
+    - rm $NUV_TMP/eks.kubeconfig
+    - eksctl utils write-kubeconfig --cluster=$EKS_CLUSTER_NAME --kubeconfig $NUV_TMP/eks.kubeconfig
+
+  cert-manager:
+    silent: true
+    desc: install cert-manager
+    cmds:
+      - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig apply -f cert-manager.yaml
+
+  ingress:
+    silent: true
+    desc: install nginx-ingress
+    cmds:
+      - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig apply -f ingress-deploy.yaml  
+  
+  prepare:
+    silent: True
+    desc: prepare required resources before deploying EKS
+    cmds:
+      - echo "$EKS_RSA_PUB_KEY" >id_rsa.pub
+      - envsubst -i eks-cluster.yml  -o _eks-cluster.yml 
+
+  eks-create:
+    silent: true
+    desc: install EKS using aws configure CLI
+    cmds:
+      - eksctl create cluster -f _eks-cluster.yml       
+
+  create:
+    silent: true
+    desc: create a EKS cluster
+    cmds:
+    - task: prepare
+    - task: eks-create
+    - task: kubeconfig
+    - task: wait
+    - task: cert-manager
+    - task: ingress
+    - task: wait-ingress-lb
+    - task: prepare-apihost
+
+  delete:
+    desc: uninstall the EKS cluster
+    cmds:
+    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig delete -f cert-manager.yaml
+    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig delete -f ingress-deploy.yaml 
+    - eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction 
+    - rm $NUV_TMP/eks.kubeconfig
+    ignore_error: true
+
+  status:
+    silent: true
+    cmds:
+    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get nodes 
 

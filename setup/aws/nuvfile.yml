@@ -85,7 +85,7 @@ tasks:
     - |
       while true
       do
-          echo "Attempting to resolve EKS NLB ip address..."
+          echo "Resolving EKS NLB ip addresses..."
           EKS_IP=$(dig +short $EKS_LB_HOSTNAME|awk '{ print ; exit}'|sed -e "s/\./-/g")
           if [[ -z "$EKS_IP" ]]; 
           then
@@ -139,10 +139,9 @@ tasks:
 
   eks-create:
     silent: true
-    desc: install EKS using aws configure CLI
+    desc: install EKS using eksctl CLI
     cmds:
-      #- eksctl create cluster -f _eks-cluster.yml --kubeconfig $NUV_TMP/eks.kubeconfig
-      - eksctl create cluster -f _eks-cluster.yml
+      - eksctl create cluster -f _eks-cluster.yml --kubeconfig $NUV_TMP/eks.kubeconfig
 
   create:
     silent: true
@@ -150,7 +149,6 @@ tasks:
     cmds:
     - task: prepare
     - task: eks-create
-    - task: kubeconfig
     - task: wait
     - task: cert-manager
     - task: ingress
@@ -167,5 +165,5 @@ tasks:
   status:
     silent: true
     cmds:
-    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get nodes 
+    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get nodes
 

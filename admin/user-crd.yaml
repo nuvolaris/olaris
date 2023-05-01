@@ -14,21 +14,13 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
+#
 
-version: '3'
-
-tasks:
-  admin:
-    desc: Admin tasks
-
-  setup:
-    desc: Install Nuvolaris
-
-  status:
-    silent: true
-    desc: Status
-    cmds:
-    - nuv setup nuvolaris status
-    - if {{.__config}} ; then nuv setup status ; fi
-    - if {{.__cluster}} ; then nuv setup kubernetes status ; fi
-
+apiVersion: nuvolaris.org/v1
+kind: WhiskUser
+metadata:
+  name: nuvolaris-user
+spec:
+  email: ${EMAIL}
+  password: ${PASSWORD}
+  namespace: nuvolaris

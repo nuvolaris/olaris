@@ -16,19 +16,20 @@
 # under the License.
 
 version: '3'
+vars:
+  DRY: false
+
 
 tasks:
-  admin:
-    desc: Admin tasks
-
-  setup:
-    desc: Install Nuvolaris
-
-  status:
+  adduser:
     silent: true
-    desc: Status
     cmds:
-    - nuv setup nuvolaris status
-    - if {{.__config}} ; then nuv setup status ; fi
-    - if {{.__cluster}} ; then nuv setup kubernetes status ; fi
+    - EMAIL={{._user_}} 
+      PASSWORD={{._password_}} 
+      envsubst -i user-crd.yaml -o _user-crd.yaml
+    - |
+      if {{.DRY}}
+      then cat _user-crd.yaml
+      else kubectl apply -f _user-crd.yaml
+      fi
 

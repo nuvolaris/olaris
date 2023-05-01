@@ -1,0 +1,7 @@
+Subcommand: nuv admin
+
+Usage:
+  admin adduser <user> <password>
+
+Commands:
+  admin adduser       create a new user in Nuvolaris with username and password

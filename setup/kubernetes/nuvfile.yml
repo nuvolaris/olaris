@@ -26,7 +26,6 @@ dotenv:
 - ../../env.src
 - ../_env
 - ../_apihost
-- ../_kubenv
 
 tasks:
 
@@ -117,14 +116,12 @@ tasks:
     - task: instance
   
   delete:
-    silent: true
     desc: delete cluster
     cmds:
     - kubectl -n nuvolaris delete wsk/controller
     - kubectl -n nuvolaris delete all --all
     - kubectl -n nuvolaris delete pvc --all
     - kubectl delete ns nuvolaris
-    - rm -f ../_kubenv
 
   detect:
     desc: detect kind
@@ -146,4 +143,3 @@ tasks:
       then echo "kind"
       else echo "generic"
       fi
-

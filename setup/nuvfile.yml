@@ -26,6 +26,7 @@ tasks:
       then nuv setup local
       fi
 
+
   local:
     silent: true
     cmds:
@@ -43,7 +44,7 @@ tasks:
             else false
             fi
       fi
-      kubectl config get-contexts
+      kubectl config get-contexts 
 
   cluster:
     silent: true
@@ -64,7 +65,6 @@ tasks:
     silent: true
     cmds:
     - |
-      if test -n "{{._apihost_}}"
       if {{.__all}}
       then cat <<EOF >_env
       ENABLE_REDIS=true
@@ -86,9 +86,8 @@ tasks:
     silent: true
     cmds:
     - |
-      if test -n "{{.APIHOST}}"
-      then echo APIHOST={{._apihost_}} >_apihost_
-      else rm nuvolaris/_apihost_
+      if test -n "{{._apihost_}}"
+      then echo APIHOST={{._apihost_}} >_apihost
       fi
 
   status:
@@ -99,19 +98,16 @@ tasks:
       if test -e _env 
       then cat _env  
       fi
-      if test -e _apihost_ 
-      then cat _apihost_
+      if test -e _apihost 
+      then cat _apihost
       fi
 
-  delete:
-    silent: false
+  clean:
+    silent: true
     cmds:
     - task: use-context
     - |
       if {{.__local}}
       then nuv setup docker delete
-      elif {{.__server}}
-      then nuv setup k3s delete
       else nuv setup kubernetes delete
       fi
-

@@ -19,8 +19,10 @@
 apiVersion: nuvolaris.org/v1
 kind: WhiskUser
 metadata:
-  name: nuvolaris-user
-spec:
+  name: ${USERNAME}
+  namespace: nuvolaris
+spec: 
   email: ${EMAIL}
   password: ${PASSWORD}
-  namespace: nuvolaris
+  namespace: ${USERNAME}
+  auth: ${AUTH}

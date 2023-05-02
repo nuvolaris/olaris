@@ -17,15 +17,23 @@
 
 version: '3'
 vars:
-  DRY: false
+  DRY: true
 
 
 tasks:
   adduser:
     silent: true
     cmds:
-    - EMAIL={{._user_}} 
-      PASSWORD={{._password_}} 
+    - |
+      export USERNAME={{._username_}}
+      export EMAIL={{._email_}}
+      export PASSWORD={{._password_}} 
+      export AUTH="$(nuv -random -u):$(nuv -random --str 64)"
+      # check {{._username_}} is at least 5 chars long
+      if [ ${#USERNAME} -lt 5 ]
+      then echo "User name must be at least 5 chars long: $USERNAME"
+           exit 1
+      fi
       envsubst -i user-crd.yaml -o _user-crd.yaml
     - |
       if {{.DRY}}

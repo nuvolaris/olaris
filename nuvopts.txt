@@ -1,6 +1,7 @@
 Welcome to Nuv, the all-mighty Nuvolaris Build Tool
 
 Usage:
+  admin
   setup 
   status [--cluster] [--config]
   uninstall [--cluster|--server|--local]

@@ -1,4 +1,3 @@
-
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -17,17 +16,32 @@
 # under the License.
 
 version: '3'
+
 vars:
-  ETC: "-i"
+  D: ""
+  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
+  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+  RETRY: 100
+  TIMEOUT: 10
+  ETC: 
+    sh: if $WSK_INSECURE ; then echo "-i" ; else echo "" ; fi
+
+env:
+  KUBECONFIG: 
+    sh: | 
+        if test -e $NUV_TMP/kubeconfig
+        then echo  $NUV_TMP/kubeconfig
+        else echo ~/.kube/config
+        fi
 
 tasks:
 
   wait:
-    desc: wait for apihost available
+    #desc: wait for apihost available
     silent: true
     cmds:
     - |
-      N=1
+      N=0
       while true
       do
         APIHOST="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}')"
@@ -35,24 +49,20 @@ tasks:
         if [[ "$APIHOST" != "" ]] && [[ "$HOST" != "//pending" ]]
         then break
         fi
-        echo "$N... waiting for APIHOST ready"
-        N=$((N + 1))
+        echo "$((N++))... waiting for APIHOST ready"
         sleep 5
       done
       echo $APIHOST
 
   config:
-    desc: configuring nuvolaris
+    #desc: configuring nuvolaris
     silent: true
     cmds:
-    - retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "{{.APIHOST}}" --auth "{{.AUTH}}" namespace list
-    - >
-      wsk {{.ETC}} property set --apihost "{{.APIHOST}}"  --auth "{{.AUTH}}"
-    vars:
-      APIHOST:
-        sh: kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}'
-      AUTH:
-        sh: kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}'
+    - | 
+      APIHOST=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}')
+      AUTH=$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}')
+      retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "$APIHOST" --auth "$AUTH" namespace list
+      {{.RUN}} wsk  property set --apihost "$APIHOST"  --auth "$AUTH"
 
   login:
     silent: true
@@ -60,10 +70,11 @@ tasks:
     cmds:
     - task: wait
     - task: config
+    - task: hello
 
   hello:
     silent: true
-    desc: configuring nuvolaris
+    desc: executing an hello world action
     cmds:
     - wsk {{.ETC}} package update hello
     - wsk {{.ETC}} action update hello/hello hello.js
@@ -71,6 +82,9 @@ tasks:
 
   status:
     silent: true
-    desc: configuring nuvolaris
+    desc: showing the configuration status
     cmds:
-    - wsk property get --apihost
+    - wsk {{.ETC}} property get --apihost
+
+  delete:
+    desc: no-op delete command

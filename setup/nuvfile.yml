@@ -16,98 +16,103 @@
 # under the License.
 
 version: '3'
+
+vars:
+  D: ""
+  RUN: '{{if eq .D ""}}{{else}}echo{{end}}'
+  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+
 tasks:
   
-  default:
+  devcluster:
     silent: true
     cmds:
     - |
-      if {{.__devcluster}} 
-      then nuv setup local
+      if {{.__status}}
+      then  {{.RUN}} nuv setup docker status
+      elif  {{.__uninstall}}
+      then  {{.RUN}} nuv setup docker delete
+      else
+          {{.RUN}} nuv setup docker create
+          {{.RUN}} nuv setup kubernetes create
+          {{.RUN}} nuv setup nuvolaris login
+          config STATUS_LAST=devcluster
       fi
-
-
-  local:
-    silent: true
-    cmds:
-    - nuv setup docker create
-    - nuv setup kubernetes create
-    - nuv setup nuvolaris login
-
-  use-context:
-    silent: true
-    cmds: 
-    - |
-      if test -n "{{._context_}}"
-      then  if kubectl config use-context "{{._context_}}"
-            then kubectl config get-contexts
-            else false
-            fi
-      fi
-      kubectl config get-contexts 
 
   cluster:
     silent: true
     cmds:
-    - task: use-context
-    - nuv setup kubernetes create
-    - nuv setup nuvolaris login
+    - |
+      if {{.__status}}
+      then  {{.RUN}} nuv setup kubernetes status CONTEXT="{{._context_}}"
+      elif  {{.__uninstall}}
+      then  {{.RUN}} nuv setup kubernetes delete CONTEXT="{{._context_}}"
+      else
+            {{.RUN}} nuv setup kubernetes create CONTEXT="{{._context_}}"
+            {{.RUN}} nuv setup nuvolaris login
+            config STATUS_LAST=cluster 
+            if test -n "{{._context_}}" 
+            then config STATUS_CONTEXT="{{._context_}}"
+            fi
+      fi
 
   server:
     silent: true
     cmds:
-    - nuv setup apihost {{._server_}}
-    - nuv setup k3s create SERVER="{{._server_}}" USERNAME="{{._user_}}"
-    - nuv setup kubernetes create
-    - nuv setup nuvolaris login
-
-  configure:
-    silent: true
-    cmds:
     - |
-      if {{.__all}}
-      then cat <<EOF >_env
-      ENABLE_REDIS=true
-      ENABLE_MONGO=true
-      ENABLE_MINIO=true
-      ENABLE_CRON=true
-      ENABLE_STATIC=true      
-      EOF
-      else cat <<EOF >_env
-      ENABLE_REDIS={{.__redis}}
-      ENABLE_MONGO={{.__mongo}}
-      ENABLE_MINIO={{.__minio}}
-      ENABLE_CRON={{.__cron}}
-      ENABLE_STATIC={{.__static}}
-      EOF
-      fi
-
-  apihost:
-    silent: true
-    cmds:
-    - |
-      if test -n "{{._apihost_}}"
-      then echo APIHOST={{._apihost_}} >_apihost
+      if {{.__status}}
+      then {{.RUN}} nuv setup k3s status SERVER="{{._server_}}" USERNAME="{{._user_}}"
+      elif {{.__uninstall}}
+      then  {{.RUN}} nuv setup k3s delete SERVER="{{._server_}}" USERNAME="{{._user_}}"
+      else
+          {{.RUN}} nuv setup k3s create SERVER="{{._server_}}" USERNAME="{{._user_}}"
+          {{.RUN}} nuv setup kubernetes create
+          {{.RUN}} nuv setup nuvolaris login
+          config STATUS_LAST=server STATUS_SERVER="{{._server_}}"
+          if test -n "{{._user_}}"
+          then config STATUS_USERNAME="{{._user_}}"
+          fi   
       fi
 
   status:
     silent: true
-    cmds:
-    - |
-      echo "*** Configuration ***"
-      if test -e _env 
-      then cat _env  
-      fi
-      if test -e _apihost 
-      then cat _apihost
-      fi
+    cmds: 
+      - |
+        case "$STATUS_LAST" in 
+        (devcluster) {{.RUN}} nuv setup devcluster --status ;;
+        (cluster)    {{.RUN}} nuv setup cluster "$STATUS_CONTEXT" --status ;;
+        (server)     {{.RUN}} nuv setup server "$STATUS_SERVER" "$STATUS_USERNAME" --status ;; 
+        (*) echo nothing installed yet
+        esac
 
-  clean:
+  uninstall:
     silent: true
-    cmds:
-    - task: use-context
-    - |
-      if {{.__local}}
-      then nuv setup docker delete
-      else nuv setup kubernetes delete
-      fi
+    cmds: 
+      - |
+        case "$STATUS_LAST" in 
+        (devcluster) 
+                    {{.RUN}} nuv setup devcluster --uninstall
+                    config -r STATUS_LAST
+        ;;
+        (cluster)   
+                    if test -n "$STATUS_CONTEXT" 
+                    then 
+                        {{.RUN}} nuv setup cluster "$STATUS_CONTEXT" --uninstall
+                        config -r STATUS_CONTEXT
+                    else
+                        {{.RUN}} nuv setup cluster --uninstall
+                    fi
+                    config -r STATUS_LAST
+        ;;
+        (server)    
+                    if test -z "$STATUS_USERNAME"
+                    then 
+                          {{.RUN}} nuv setup server "$STATUS_SERVER" --uninstall
+                    else
+                          {{.RUN}} nuv setup server "$STATUS_SERVER" "$STATUS_USERNAME" --uninstall
+                          config -r STATUS_USERNAME
+                    fi
+                    config -r STATUS_LAST STATUS_SERVER 
+        ;; 
+        (*) echo nothing installed yet
+        esac

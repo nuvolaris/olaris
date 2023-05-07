@@ -1,21 +1,26 @@
 {
   "version": "0.3.0-morpheus.23031908",
-  "images": {
-    "operator": "",
-    "controller": "",
-    "invoker": ""
-  },
   "config": {
     "nuvolaris": {
       "apihost": "auto",
-      "email": "ask",
+      "tlsemail": "none",
+      "tls": false,
       "redis": false,
       "minio": false,
-      "mongodb": false
+      "mongo": false,
+      "cron": false,
+      "statics": false
+    },
+    "images": {
+      "operator": "ghcr.io/nuvolaris/nuvolaris-operator:0.3.0-dev.2305040912",
+      "controller": "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"
     },
     "server": {
-        "host": "localhost",
-        "username": "root" 
+      "host": "localhost",
+      "username": "root"
+    },
+    "wsk": {
+      "insecure": "false"
     }
   }
 }

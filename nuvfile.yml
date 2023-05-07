@@ -18,9 +18,6 @@
 version: '3'
 
 tasks:
-  admin:
-    desc: Admin tasks
-
   setup:
     desc: Install Nuvolaris
 

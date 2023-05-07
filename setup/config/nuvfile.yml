@@ -1,0 +1,91 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+version: '3'
+tasks:
+  
+  apihost:
+    silent: true
+    cmds:
+    - config NUVOLARIS_APIHOST="{{._apihost_}}"
+    - config -dump | grep NUVOLARIS_APIHOST
+
+  tls:
+    silent: true
+    cmds:
+    - |
+      if test "{{._email_}}" = "none"
+      then config NUVOLARIS_TLSEMAIL="none" NUVOLARIS_TLS=false
+      else config NUVOLARIS_TLSEMAIL="{{._email_}}" NUVOLARIS_TLS=true
+      fi
+    - config -dump | grep NUVOLARIS_TLS
+        
+  enable:
+    silent: true
+    cmds:
+    - |
+      if {{.__redis}} || {{.__all}}
+      then config NUVOLARIS_REDIS=true
+      fi
+      if {{.__mongo}} || {{.__all}}
+      then config NUVOLARIS_MONGO=true
+      fi
+      if {{.__minio}} || {{.__all}}
+      then config NUVOLARIS_MINIO=true
+      fi
+      if {{.__cron}} || {{.__all}}
+      then config NUVOLARIS_CRON=true
+      fi
+      if {{.__statics}} || {{.__all}}
+      then config NUVOLARIS_STATICS=true
+      fi
+    - task: status
+
+  disable:
+    silent: true
+    cmds:
+    - |
+      if {{.__redis}} || {{.__all}}
+      then config NUVOLARIS_REDIS=false
+      fi
+      if {{.__mongo}} || {{.__all}}
+      then config NUVOLARIS_MONGO=false
+      fi
+      if {{.__minio}} || {{.__all}}
+      then config NUVOLARIS_MINIO=false
+      fi
+      if {{.__cron}} || {{.__all}}
+      then config NUVOLARIS_CRON=false
+      fi
+      if {{.__statics}} || {{.__all}}
+      then config NUVOLARIS_STATICS=false
+      fi
+    - task: status
+
+  status:
+    silent: true
+    cmds:
+    - config -dump | grep NUVOLARIS_
+
+  reset:
+    silent: true
+    cmds:
+    - rm ~/.nuv/config.json
+    - config -dump
+
+
+

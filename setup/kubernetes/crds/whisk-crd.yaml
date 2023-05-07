@@ -112,4 +112,5 @@ spec:
           type: string
           priority: 0
           jsonPath: .status.whisk_create.minio
-          description: Minio                              
+          description: Minio
+                            

@@ -17,77 +17,81 @@
 
 version: '3'
 
+vars:
+  D: ""
+  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
+  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+  CERTMANAGER: "https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml"
+
 env:
   KUBECONFIG: 
     sh: |- 
         if test -e "$NUV_TMP/kubeconfig"
         then echo "$NUV_TMP/kubeconfig"
-        else echo ~/kube/config
+        else echo ~/.kube/config
         fi
-  SERVER: "{{or .SERVER  \"localhost\"}}"
-  USERNAME: "{{or .USERNAME \"root\"}}"
 
 tasks:
 
   get-cert-manager:
     cmds:
-    - curl -L https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
-
-  prepare:
-    silent: true
-    desc: prepare
-    cmds:
-    
+    - curl -L "{{.CERTMANAGER}}" >cert-manager.yaml
 
   install:
     silent: true
-    desc: install k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo
+    #desc: install k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo
     cmds:
+      - test -n "{{.SERVER}}" || die "use SERVER="
       - >
-        k3sup install
-        --host="$SERVER" --user="$USERNAME"
+        {{.RUN}} k3sup install
+        --host="{{.SERVER}}" --user="{{.USERNAME}}"
         --local-path=$NUV_TMP/kubeconfig
+      - |
+        if test "$NUVOLARIS_TLS" = true
+        then config NUVOLARIS_APIHOST={{.SERVER}}
+        else config NUVOLARIS_APIHOST=http://{{.SERVER}}
+        fi
+    vars:
+      USERNAME: '{{.USERNAME | default "root"}}'
   
   cert-manager:
     silent: true
-    desc: install cert-manager
+    #desc: install cert-manager
     cmds:
-      - kubectl --kubeconfig $NUV_TMP/kubeconfig apply -f cert-manager.yaml
+      - "{{.RUN}} kubectl --kubeconfig $NUV_TMP/kubeconfig apply -f cert-manager.yaml"
 
   create:
     silent: true
     desc: create a k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo
     cmds:
-    - task: configure
     - task: install
     - task: cert-manager
   
-  status:
-    silent: true
-    cmds:
-    - kubectl get nodes
-
   delete:
+    silent: true
     desc: uninstall with ssh in SERVER=<server> using USER=<user> with sudo
     cmds:
-    - ssh -o StrictHostKeyChecking=no "$USERNAME@$SERVER" sudo /usr/local/bin/k3s-uninstall.sh
+    - test -n "{{.SERVER}}" || die "please use SERVER="
+    - "{{.RUN}} ssh -o StrictHostKeyChecking=no '{{.USERNAME}}@{{.SERVER}}' sudo /usr/local/bin/k3s-uninstall.sh"
+    - config -r NUVOLARIS_APIHOST 2>/dev/null
     - rm $NUV_TMP/kubeconfig
-    - rm _server_
-    ignore_error: true
+    vars:
+      USERNAME: '{{.USERNAME | default "root"}}'
   
-  info:
+  status:
+    desc: status of the server
     silent: true
     cmds:
-    - echo KUBECONFIG="$KUBECONFIG"
-    - echo SERVER="$SERVER"
-    - echo USERNAME="$USERNAME"
-
-  configure:
-    desc: save configuration
-    cmds:
     - |
-      cat >_server_ <<EOF 
-      SERVER={{.SERVER}}
-      USERNAME={{.USERNAME}}
-      EOF
-    - nuv setup apihost "{{.SERVER}}"
+      if test -e $NUV_TMP/kubeconfig
+      then {{.RUN}} kubectl get nodes
+      else echo "No Cluster Installed"
+      fi
+
+  info:
+    silent: true
+    desc: info on the server
+    cmds:
+    - echo KUBECONFIG="$KUBECONFIG"
+    - echo SERVER_HOST="$SERVER_HOST"
+    - echo SERVER_USERNNAME="$SERVER_USERNAME"

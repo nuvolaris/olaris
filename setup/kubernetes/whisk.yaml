@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      apihost: ${APIHOST:-auto}
+      apihost: ${NUVOLARIS_APIHOST}
       #apiport: 80
       #protocol: http 
   components:
@@ -35,17 +35,17 @@ spec:
     # start kafka
     kafka: false
     # start mongodb
-    mongodb: ${ENABLE_MONGO:-false}
+    mongodb: ${NUVOLARIS_MONGODB}
     # start redis
-    redis: ${ENABLE_REDIS:-false}
+    redis: ${NUVOLARIS_REDIS}
     # start cron based action parser
-    cron: ${ENABLE_CRON:-false}
+    cron: ${NUVOLARIS_CRON}
     # enable TLS
     tls: true
     # minio enabled or not
-    minio: ${ENABLE_MINIO:-false}
+    minio: ${NUVOLARIS_MINIO}
     # minio static enabled or not
-    static: ${ENABLE_STATIC:-false}        
+    static: ${NUVOLARIS_STATIC}        
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -102,4 +102,5 @@ spec:
       javaOpts: "-Xmx2048M"
   redis:
     default:
-      password: s0meP@ass3               
+      password: s0meP@ass3
+             

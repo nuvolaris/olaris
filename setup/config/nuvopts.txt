@@ -1,0 +1,25 @@
+Section:
+  nuv setup configure
+
+Usage:
+  config apihost (<apihost>|auto)
+  config tls (<email>|none)
+  config (enable|disable) [--all] [--redis] [--mongo] [--minio] [--cron] [--statics]
+  config status
+  config reset
+ 
+Commands:
+  config apihost <apihost>    configure the apihost (auto: auto assign)
+  config tls <email>          configure the email to enable let's encrypyt (none: disable)
+  config enable               enable Nuvolaris services to install
+  config disable              disable Nuvolaris services to install
+  config reset                disable Nuvolaris services to install
+
+Options:
+  --all         select all services
+  --redis       select redis
+  --mongo       select mongo
+  --minio       select minio
+  --cron        select cron
+  --statics     select static
+ 

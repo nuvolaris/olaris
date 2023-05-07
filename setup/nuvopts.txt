@@ -1,31 +1,34 @@
-Subcommand: nuv setup 
+Section:
+  nuv setup 
 
 Usage:
-  setup configure [<apihost>] [--all] [--redis] [--mongo] [--minio] [--cron] [--static]
-  setup apihost [<apihost>]
-  setup [local|--devcluster]
-  setup cluster [<context>]
-  setup server <server> [<user>]
+  setup config
+  setup devcluster [--uninstall|--status] 
+  setup cluster [<context>] [--uninstall|--status]
+  setup server <server> [<user>] [--uninstall|--status]
   setup status
-
+  setup uninstall
+  
 Commands:
-  setup configure     configure Nuvolaris services to enable and the apihost name
   setup cluster       deploy Nuvolaris in the Kubernetes cluster using the <context>, default the current
-  setup local         create a local Kubernetes in docker and deploy Nuvolaris
-                      you need docker desktop installed in your system
+  setup devcluster    deploy Nuvolaris in a devcluster created locally
+                      you need Docker Desktop available with at least 6G of memory assigned
   setup server        create a Kubernetes in server <server> and deploy Nuvolaris
-                      the server must be accessible with ssh using the <user>, default root
-  setup delete        remove Nuvolaris from the cluster, then the kubernetes either --local or --server
+                      the server must be accessible with ssh using the <user> with sudo power, default root
+  setup config        configuration subcommand for fine tuning options
+  setup status        show the status of the last installation
+  setup uninstalll    uninstall the last installation
+
+Options:
+  --uninstall         execute an uninstall instead of an installation 
+  --status            show the status instead of an installation 
+
+Subcommands:
+  config              configuration subcommands
   nuvolaris           nuvolaris subcommands
   kubernetes          kubernetes subcommands
   docker              docker subcommands
   k3s                 k3s subcommands
+  eks                 k3s subcommands
 
-Options:
-  --all         enable all services
-  --redis       enable redis
-  --mongo       enable mongo
-  --minio       enable minio
-  --cron        enable cron
-  --static      enable static
-  --devcluster  (legacy) same as local
+ 

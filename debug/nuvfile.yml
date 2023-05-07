@@ -14,21 +14,36 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nuvolaris-operator
-  namespace: nuvolaris
-spec:
-  serviceAccount: nuvolaris-operator
-  containers:
-    - name: nuvolaris-operator
-      image: ${IMAGES_OPERATOR}
-      imagePullPolicy: Always
-      command: ["./run.sh"]
-      args: ["--verbose"]
-      securityContext:
-          capabilities:
-            drop:
-            - ALL  
+
+version: '3'
+
+tasks:
+
+  nodes:
+    desc: show nodes
+    cmds:
+    - kubectl get nodes
+
+  pods:
+    desc: show pods
+    cmds:
+    - |-
+      if test -z "{{._log_}}"
+      then kubectl -n nuvolaris get po,sts,jobs
+      else echo log '{{._log_}}'
+      fi
+
+  svcs:
+    desc: show services
+    cmds:
+    - kubectl -n nuvolaris get svc
+
+  wsk:
+    desc: show services
+    cmds:
+    - kubectl -n nuvolaris get wsk/controller -o yaml
+  
+  cm:
+    desc: show config
+    cmds:
+    - kubectl -n nuvolaris get cm/config -o yaml

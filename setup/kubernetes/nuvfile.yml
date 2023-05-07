@@ -16,16 +16,24 @@
 # under the License.
 
 version: '3'
+
 vars:
-  DRY: false
-  MAX: 100
-  TIMEOUT: 5
+  # if D=1 will not run and show commands
+  # otherwise will not cat anything but run commands
+  D: ""
+  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
+  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+  RETRY: 100
+  TIMEOUT: 10
+  CONTEXT: ""
 
-
-dotenv:
-- ../../env.src
-- ../_env
-- ../_apihost
+env:
+  KUBECONFIG: 
+    sh: | 
+        if test -e $NUV_TMP/kubeconfig
+        then echo  $NUV_TMP/kubeconfig
+        else echo ~/.kube/config
+        fi
 
 tasks:
 
@@ -33,98 +41,52 @@ tasks:
     desc: show nuvolaris cluster status 
     silent: true
     cmds:
-    - echo "*** Deployment ***"
-    - kubectl -n nuvolaris get no,sts,po,svc
+    - echo "=== Nuvolaris Deployment"
+    - "{{.RUN}} kubectl -n nuvolaris get sts,po,svc"
+
+  info:
+    desc: show nuvolaris cluster info 
+    silent: true
+    cmds: 
+      - |
+        echo "=== KUBECONFIG and Current Context "
+        echo $KUBECONFIG
+        {{.RUN}} kubectl config get-contexts
+        echo "=== Nodes"
+        {{.RUN}} kubectl -n nuvolaris get no
+        echo "=== kubectl version"
+        {{.RUN}} kubectl version --short 2>/dev/null
 
   watch:
-    desc: watch pod deployment
+    #desc: watch pod deployment
     silent: true
     cmds: 
     - watch kubectl -n nuvolaris get po
 
-  prepare:
-    desc: prepare the environment
-    silent: true
-    cmds:
-    - |
-      if {{.DRY}}
-      then cat common/*.yaml roles/*.yaml crds/*.yaml
-      else kubectl apply  -f common -f roles -f crds
-      fi
-
   wait:
-    desc: wait for cluster ready
+    #desc: wait for an object to reach a condition
     silent: true
     cmds:
+    - test -n "{{.OBJECT}}" || die "use OBJECT=<to-wait-for>"
     - |
       echo "Waiting for {{.OBJECT}}"
-      while ! kubectl -n nuvolaris get {{.OBJECT}} 2>/dev/null
+      while ! {{.RUN}} kubectl -n nuvolaris get {{.OBJECT}} 2>/dev/null
       do sleep {{.TIMEOUT}}
       done
     - |
       N=0
       RES=false
-      while [[ $N -lt {{.MAX}} ]]
+      while [[ $N -lt {{.RETRY}} ]]
       do 
-          N=$((N + 1))
-          echo "$N Waiting for {{.OBJECT}} ready"
-          if kubectl -n nuvolaris wait --for=condition=ready {{.OBJECT}} --timeout={{.TIMEOUT}}s 2>/dev/null
-          then 
-                RES=true
-                break
-          fi
+        echo "$((N++)) Waiting for {{.OBJECT}} ready"
+        if {{.RUN}} kubectl -n nuvolaris wait --for=condition=ready {{.OBJECT}} --timeout={{.TIMEOUT}}s 2>/dev/null
+        then RES=true ; break
+        fi
       done
       $RES
 
-  operator:
-    desc: deploy operator
-    silent: true
-    cmds:
-    - envsubst -i operator.yaml -o _operator.yaml
-    - |
-      if {{.DRY}}
-      then cat _operator.yaml
-      else kubectl apply -f _operator.yaml
-      fi
-    - task: wait 
-      vars:
-        OBJECT: pod/nuvolaris-operator
-
-  instance:
-    desc: deploy instance
-    silent: true
-    cmds:
-    - envsubst -i whisk.yaml -o _whisk.yaml
-    - |
-      if {{.DRY}}
-      then cat _whisk.yaml
-      else kubectl apply -f _whisk.yaml
-      fi
-    - task: wait 
-      vars:
-        OBJECT: pod/couchdb-0
-    - task: wait
-      vars:
-        OBJECT: pod/controller-0
-
-  create:
-    desc: prepare+operator+instance
-    silent: true
-    cmds:
-    - task: prepare
-    - task: operator
-    - task: instance
-  
-  delete:
-    desc: delete cluster
-    cmds:
-    - kubectl -n nuvolaris delete wsk/controller
-    - kubectl -n nuvolaris delete all --all
-    - kubectl -n nuvolaris delete pvc --all
-    - kubectl delete ns nuvolaris
-
   detect:
-    desc: detect kind
+    desc: detect the kind of kubernetes we are using
     silent: true
     cmds: 
     - |-
@@ -143,3 +105,69 @@ tasks:
       then echo "kind"
       else echo "generic"
       fi
+
+  context:
+    desc: select the context to use
+    silent: true
+    cmds: 
+    - |
+      if test -n "{{.CONTEXT}}"
+      then  if {{.RUN}} kubectl config use-context "{{.CONTEXT}}"
+            then {{.RUN}} kubectl config get-contexts
+            else false
+            fi
+      else echo Using current context
+          {{.RUN}} kubectl config get-contexts
+      fi
+
+  prepare:
+    #desc: prepare the environment
+    silent: true
+    cmds:
+    - "{{.CAT}} common/*.yaml roles/*.yaml crds/*.yaml"
+    - "{{.RUN}} kubectl apply  -f common -f roles -f crds"
+
+  operator:
+    #desc: deploy operator
+    silent: true
+    cmds:
+    - envsubst -i operator.yaml -o _operator.yaml
+    - "{{.CAT}} _operator.yaml"
+    - "{{.RUN}} kubectl apply -f _operator.yaml"
+    - task: wait 
+      vars:
+        OBJECT: pod/nuvolaris-operator
+
+  instance:
+    #desc: deploy instance
+    silent: true
+    cmds:
+    - envsubst -i whisk.yaml -o _whisk.yaml
+    - |
+      {{.CAT}} _whisk.yaml
+      {{.RUN}} kubectl apply -f _whisk.yaml
+    - task: wait 
+      vars:
+        OBJECT: pod/couchdb-0
+    - task: wait
+      vars:
+        OBJECT: pod/controller-0
+
+  create:
+    silent: true
+    desc: create all
+    cmds:
+    - task: context
+    - task: prepare
+    - task: operator
+    - task: instance
+  
+  delete:
+    silent: true
+    desc: delete cluster
+    cmds:
+    - "{{.RUN}} kubectl -n nuvolaris delete wsk/controller"
+    - "{{.RUN}} kubectl -n nuvolaris delete all --all"
+    - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"
+    - "{{.RUN}} kubectl delete ns nuvolaris"
+

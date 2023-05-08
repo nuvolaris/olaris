@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0-morpheus.23031908",
+  "version": "0.3.0-dev.2305061626",
   "config": {
     "nuvolaris": {
       "apihost": "auto",

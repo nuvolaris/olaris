@@ -17,22 +17,27 @@
 
 version: '3'
 
+vars:
+  D: ""
+  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
+  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+
+env:
+  LOCATION: westeurope
+  RG: nuvolaris
+  NAME: nuvolaris
+  NODES: 1
+  KUBECONFIG: |-
+    if test -e $NUV_TMP/kubeconfig
+    then echo $NUV_TMP/kubeconfig
+    else echo ~/.kube/config
+    fi
+
 tasks:
-
-  dotenv:
-  - env
-
-  
-  env:
-    KUBECONFIG: |-
-      if test -e $NUV_TMP/azure.kubeconfig
-      then echo $NUV_TMP/azure.kubeconfig
-      else echo ~/.kube/config
-      fi
 
   check:
     silent: true
-    desc: pleflight check
+    desc: prefligt check
     cmds:
     - |
       az version || {
@@ -44,9 +49,25 @@ tasks:
     desc: login
     cmds:
       - task: check
-      - az login
+      - az login >_login 2>_error
 
   create:
     desc: create aks cluster
+    env:
+      SUBSCRIPTION: 
+        sh: jq -r .[].id <_login
     cmds:
-    - echo az aks create -g MyResourceGroup -n MyManagedCluster
+    - "{{.RUN}} az account set --subscription $SUBSCRIPTION"
+    - "{{.RUN}} az group create --name $RG --location $LOCATION"
+    - "{{.RUN}} az aks create -g $RG -n $NAME --enable-managed-identity --node-count $NODES"
+    - "{{.RUN}} az aks get-credentials --name $NAME --resource-group $RG --overwrite-existing"
+
+  delete:
+    desc: delete aks cluster
+    env:
+      SUBSCRIPTION: 
+        sh: jq -r .[].id <_login
+    cmds:
+    - "{{.RUN}} az account set --subscription $SUBSCRIPTION"
+    - echo "*** Deting the $NAME cluster"
+    - "{{.RUN}} az aks delete --name $NAME --resource-group $RG"

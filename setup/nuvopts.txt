@@ -29,6 +29,7 @@ Subcommands:
   kubernetes          kubernetes subcommands
   docker              docker subcommands
   k3s                 k3s subcommands
-  eks                 k3s subcommands
+  aws                 aws subcommands
+  azure               azure subcommands
 
  

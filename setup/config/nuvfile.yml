@@ -91,6 +91,16 @@ tasks:
     - cmd: config -dump | grep EKS_
       ignore_error: true
 
+  export:
+    silent: true
+    cmds:
+    - config -dump | awk '{print "export "$0}'
+    - |
+      echo NUV_TMP=$NUV_TMP
+      echo 'DATA:() {' 
+      echo '  DATA="$(eval $@)"' 
+      echo '}'
+
   reset:
     silent: true
     cmds:
@@ -160,4 +170,4 @@ tasks:
 
 
 
-        
+

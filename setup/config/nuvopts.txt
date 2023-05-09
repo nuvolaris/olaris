@@ -6,9 +6,8 @@ Usage:
   config tls (<email>|none)
   config (enable|disable) [--all] [--redis] [--mongo] [--minio] [--cron] [--statics]
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>]
-  config status
-  config reset
- 
+  config (status|export|reset)
+
 Commands:
   config apihost <apihost>    configure the apihost (auto: auto assign)
   config tls <email>          configure the email to enable let's encrypyt (none: disable)
@@ -18,6 +17,7 @@ Commands:
   config eks                  configure Amazon EKS
   config reset                reset configuration
   config status               show current configuration
+  config export               export all the variables
  
 Options:
   --all         select all services

@@ -40,7 +40,7 @@ tasks:
     - "{{.RUN}} az account show --query 'id' -o tsv >_id"
     - "{{.RUN}} az account set --subscription $(cat _id)"
     - "{{.RUN}} az group create --name $AKS_NAME --location $AKS_REGION"
-    - "{{.RUN}} az aks create -g $AKS_NAME -n $AKS_NAME --enable-managed-identity --node-count $AKS_COUNT"
+    - "{{.RUN}} az aks create -g $AKS_NAME -n $AKS_NAME --enable-managed-identity --node-count $AKS_COUNT --node-osdisk-size=$AKS_DISK --node-vm-size=$AKS_VM"
     - "{{.RUN}} az aks get-credentials --name $AKS_NAME --resource-group $AKS_NAME --overwrite-existing"
 
   delete:

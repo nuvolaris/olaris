@@ -5,7 +5,7 @@ Usage:
   config apihost (<apihost>|auto)
   config tls (<email>|none)
   config (enable|disable) [--all] [--redis] [--mongo] [--minio] [--cron] [--statics]
-  config aks [--name=<name>] [--count=<count>] [--region=<region>] [--vm=<vm>] [--disk=<disk>]
+  config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>]
   config status
   config reset
  
@@ -16,7 +16,7 @@ Commands:
   config disable              disable Nuvolaris services to install
   config aks                  configure Azure AKS
   config eks                  configure Amazon EKS
-  config reset                disable Nuvolaris services to install
+  config reset                reset configuration
   config status               show current configuration
  
 Options:

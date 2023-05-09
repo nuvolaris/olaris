@@ -23,10 +23,6 @@ vars:
   CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
 
 env:
-  LOCATION: westeurope
-  RG: nuvolaris
-  NAME: nuvolaris
-  NODES: 1
   KUBECONFIG: |-
     if test -e $NUV_TMP/kubeconfig
     then echo $NUV_TMP/kubeconfig
@@ -35,39 +31,23 @@ env:
 
 tasks:
 
-  check:
-    silent: true
-    desc: prefligt check
-    cmds:
-    - |
-      az version || {
-        echo "You need to install and configure az cli tool before running this command."
-        false
-      }
-
-  login:
-    desc: login
-    cmds:
-      - task: check
-      - az login >_login 2>_error
-
   create:
+    silent: true
     desc: create aks cluster
-    env:
-      SUBSCRIPTION: 
-        sh: jq -r .[].id <_login
     cmds:
-    - "{{.RUN}} az account set --subscription $SUBSCRIPTION"
-    - "{{.RUN}} az group create --name $RG --location $LOCATION"
-    - "{{.RUN}} az aks create -g $RG -n $NAME --enable-managed-identity --node-count $NODES"
-    - "{{.RUN}} az aks get-credentials --name $NAME --resource-group $RG --overwrite-existing"
+    - test -n "$AKS_NAME" || die 'Please, first configure AKS with "nuv setup config aks"'
+    - "{{.RUN}} az version || die 'You need to install and configure az cli tool before running this command.'"
+    - "{{.RUN}} az account show --query 'id' -o tsv >_id"
+    - "{{.RUN}} az account set --subscription $(cat _id)"
+    - "{{.RUN}} az group create --name $AKS_NAME --location $AKS_REGION"
+    - "{{.RUN}} az aks create -g $AKS_NAME -n $AKS_NAME --enable-managed-identity --node-count $AKS_COUNT"
+    - "{{.RUN}} az aks get-credentials --name $AKS_NAME --resource-group $AKS_NAME --overwrite-existing"
 
   delete:
+    silent: true
     desc: delete aks cluster
-    env:
-      SUBSCRIPTION: 
-        sh: jq -r .[].id <_login
     cmds:
-    - "{{.RUN}} az account set --subscription $SUBSCRIPTION"
-    - echo "*** Deting the $NAME cluster"
-    - "{{.RUN}} az aks delete --name $NAME --resource-group $RG"
+    - "{{.RUN}} az account show --query 'id' -o tsv >_id"
+    - "{{.RUN}} az account set --subscription '$(cat _id)'"
+    - echo "*** Deleting the $AKS_NAME cluster"
+    - "{{.RUN}} az aks delete --name $AKS_NAME --resource-group $AKS_NAME"

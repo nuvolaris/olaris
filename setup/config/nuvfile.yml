@@ -100,6 +100,7 @@ tasks:
       echo 'DATA:() {' 
       echo '  DATA="$(eval $@)"' 
       echo '}'
+      echo alias RUN:=
 
   reset:
     silent: true
@@ -149,14 +150,19 @@ tasks:
     - task: read
       vars:
         MSG: "AKS location"
-        HINT: "Use 'az account list-locations -o table' to get a list of valid values"
+        HINT: >
+              To get a list of valid values use:
+                az account list-locations -o table
         VAR: "AKS_REGION"
         VAL: "{{.__region}}"
         DEF: "eastus"
     - task: read
       vars:
         MSG: "AKS virtual machine type"
-        HINT: "Use 'az vm list-sizes --location <location> -o table' to get a list of valid values"
+        HINT: > 
+              To get a list of valid values use:
+                az vm list-sizes --location <location> -o table
+              where <location> is your current location.
         VAR: "AKS_VM"
         VAL: "{{.__vm}}"
         DEF: "Standard_B4ms"
@@ -168,6 +174,62 @@ tasks:
         DEF: "100"
     - config -d | grep AKS_
 
-
-
+  eks:
+    silent: true
+    cmds:
+    - task: read
+      vars:
+        MSG: "EKS Name for Cluster and Node Group"
+        VAR: "EKS_NAME"
+        VAL: "{{.__name}}"
+        DEF: "nuvolaris"
+    - task: read
+      vars:
+        MSG: "EKS number of worker nodes"
+        VAR: "EKS_COUNT"
+        VAL: "{{.__count}}"
+        DEF: "3"
+    - task: read
+      vars:
+        MSG: "EKS Kubernetes Version"
+        VAR: "EKS_KUBERNETES_VERSION"
+        VAL: "{{.__kubever}}"
+        DEF: "1.25"
+    - task: read
+      vars:
+        MSG: "EKS region"
+        HINT: > 
+              To get a list of valid values use:
+                aws ec2 describe-regions --output table
+        VAR: "EKS_REGION"
+        VAL: "{{.__region}}"
+        DEF: "us-east-1"
+    - task: read
+      vars:
+        MSG: "EKS virtual machine type"
+        HINT: >
+              To get a list of valid values, use:
+                aws ec2 describe-instance-types --query 'InstanceTypes[].InstanceType' --output table 
+        VAR: "EKS_VM"
+        VAL: "{{.__vm}}"
+        DEF: "m5.xlarge"
+    - task: read
+      vars:
+        MSG: "EKS disk size in gigabyte"
+        VAR: "EKS_DISK"
+        VAL: "{{.__disk}}"
+        DEF: "100"
+    - task: read
+      vars:
+        MSG: "EKS public SSH key in AWS"
+        HINT: >
+              If you already have a public SSH key in AWS, provide its name here.
+              If you do not have it, generate a key pair with the following command:
+                ssh-keygen
+              The public key defaults to ~/.ssh/id_rsa.pub and you can import with:
+                aws ec2 import-key-pair --key-name nuvolaris-key --public-key-material fileb://~/.ssh/id_rsa.pub
+        VAR: "EKS_SSHKEY"
+        VAL: "{{.__key}}"
+        DEF: "nuvolaris-key"
+    - config -d | grep EKS_
 

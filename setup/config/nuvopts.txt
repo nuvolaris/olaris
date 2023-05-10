@@ -5,6 +5,7 @@ Usage:
   config apihost (<apihost>|auto)
   config tls (<email>|none)
   config (enable|disable) [--all] [--redis] [--mongo] [--minio] [--cron] [--statics]
+  config eks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>] [--<kubever>=<kubever>]
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>]
   config (status|export|reset)
 
@@ -31,4 +32,6 @@ Options:
   --count=<count>   specify node count
   --vm=<vm>         specify vm type
   --disk=<disk>     specify disk size
+  --key=<key>       specify key name
+  --kubever=<kubever>  specify kubernetes version
  

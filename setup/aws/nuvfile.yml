@@ -18,21 +18,37 @@
 version: '3'
 
 vars:
+  D: ""
+  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
+  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+  DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
+  _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
+  TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
   MAX: 100
   TIMEOUT: 5
 
-dotenv:
-  - .env
+env:
+  KUBECONFIG: 
+    sh: |-
+        if test -e $NUV_TMP/kubeconfig
+        then echo $NUV_TMP/kubeconfig
+        else echo ~/.kube/config
+        fi
 
 tasks:
 
+  update-yaml:
+    cmds:
+    - curl -L https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
+    - curl -L "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml" >ingress-deploy.yaml
+
   wait:
-    desc: wait for eks cluster ready
+    #desc: util wait for objects - user OBJECT= to specify what
     silent: true
     cmds:
     - |
       echo "Waiting for {{.OBJECT}}"
-      while ! kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get {{.OBJECT}} 2>/dev/null
+      while ! {{.RUN}} kubectl get {{.OBJECT}} 2>/dev/null
       do sleep {{.TIMEOUT}}
       done
     - |
@@ -40,19 +56,50 @@ tasks:
       RES=false
       while [[ $N -lt {{.MAX}} ]]
       do 
-          N=$((N + 1))
-          echo "$N Waiting for {{.OBJECT}} ready"
-          if kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get {{.OBJECT}} 2>/dev/null
+          echo "$((N++)) Waiting for {{.OBJECT}} ready"
+          if kubectl get {{.OBJECT}} 2>/dev/null
           then 
-                RES=true
-                break
+              RES=true
+              break
           else
-                sleep {{.TIMEOUT}}
+              sleep {{.TIMEOUT}}
           fi
       done
       $RES
-    vars:
-      OBJECT: nodes
+
+  status:
+    silent: true
+    cmds:
+    - kubectl get nodes
+
+  config:
+    silent: true
+    desc: extract kubeconfig
+    cmds:
+    - rm {{.TMP}}/kubeconfig
+    - eksctl utils write-kubeconfig --cluster=$EKS_NAME --kubeconfig {{.TMP}}/kubeconfig
+
+  prereq:
+    #desc: check prerequisites
+    silent: true
+    cmds:
+    - test -n "$EKS_NAME" || die 'Please, first configure EKS with "nuv setup config eks"'
+    - "{{.RUN}} aws --version || die 'You need to install and configure aws cli tool before running this command.'"
+    - "{{.RUN}} aws ec2 describe-key-pairs --key-names $EKS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' --output table || die 'Please generate or import the configured key  before continuing.'"
+
+  build:
+    silent: true
+    #desc: install EKS using eksctl CLI
+    cmds:
+      - "{{.RUN}} envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
+      - "{{.RUN}} eksctl create cluster -f _eks-cluster.yml --kubeconfig {{.TMP}}/kubeconfig"
+
+  ingress-and-cert:
+    silent: true
+    #desc: install cert-manager
+    cmds:
+      - kubectl apply -f cert-manager.yaml
+      - kubectl apply -f ingress-deploy.yaml 
 
   wait-ingress-lb:
     desc: wait for EKS managed LB hostname availability
@@ -62,22 +109,12 @@ tasks:
       while true
       do
           echo "waiting for EKS LB hostname assignment..."
-          EKS_LB_HOSTNAME=$(kubectl --kubeconfig $NUV_TMP/eks.kubeconfig -n ingress-nginx get service/ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}")
-          if [[ -z "$EKS_LB_HOSTNAME" ]]; 
-          then
-                sleep {{.TIMEOUT}}
-          else
-            break
+          {{.DATA}} kubectl -n ingress-nginx get service/ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"
+          if [[ -z "{{._DATA}}" ]]; 
+          then sleep {{.TIMEOUT}}
+          else break
           fi
       done
-
-  get-cert-manager:
-    cmds:
-    - curl -L https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
-
-  get-ingress:
-    cmds:
-    - curl -L "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml" >ingress-deploy.yaml
 
   apihost:
     cmds:
@@ -88,82 +125,33 @@ tasks:
           echo "Resolving EKS NLB ip addresses..."
           EKS_IP=$(dig +short $EKS_LB_HOSTNAME|awk '{ print ; exit}'|sed -e "s/\./-/g")
           if [[ -z "$EKS_IP" ]]; 
-          then
-                sleep {{.TIMEOUT}}
-          else
-            break
+          then sleep {{.TIMEOUT}}
+          else break
           fi
       done
     - nuv setup apihost api.$(dig +short $EKS_LB_HOSTNAME|awk '{ print ; exit}'|sed -e "s/\./-/g").nip.io
     env:
       EKS_LB_HOSTNAME:
         sh:
-          kubectl --kubeconfig $NUV_TMP/eks.kubeconfig -n ingress-nginx get service/ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"   
-
-  check:
-    silent: true
-    desc: preflight check
-    cmds:
-    - |
-      aws --version || {
-        echo "You need to install and configure aws cli tool before running this command."
-        false
-      }
-
-  kubeconfig:
-    desc: extract kubeconfig
-    cmds:
-    - rm $NUV_TMP/eks.kubeconfig
-    - eksctl utils write-kubeconfig --cluster=$EKS_CLUSTER_NAME --kubeconfig $NUV_TMP/eks.kubeconfig
-
-  cert-manager:
-    silent: true
-    desc: install cert-manager
-    cmds:
-      - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig apply -f cert-manager.yaml
-
-  ingress:
-    silent: true
-    desc: install nginx-ingress
-    cmds:
-      - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig apply -f ingress-deploy.yaml 
-      - task: wait-ingress-lb
-      - task: apihost
-  
-  prepare:
-    silent: True
-    desc: prepare required resources before deploying EKS
-    cmds:
-      - echo "$EKS_RSA_PUB_KEY" >id_rsa.pub
-      - envsubst -i eks-cluster.yml  -o _eks-cluster.yml 
-
-  eks-create:
-    silent: true
-    desc: install EKS using eksctl CLI
-    cmds:
-      - eksctl create cluster -f _eks-cluster.yml --kubeconfig $NUV_TMP/eks.kubeconfig
+          kubectl -n ingress-nginx get service/ingress-nginx-controller -o jsonpath="{.status.loadBalancer.ingress[0].hostname}"
 
   create:
     silent: true
     desc: create a EKS cluster
     cmds:
-    - task: prepare
-    - task: eks-create
-    - task: wait
-    - task: cert-manager
-    - task: ingress
+    - task: prereq
+    - task: build
+    - task: wait-nodes
+      vars:
+        OBJECT: nodes
+    - task: ingress-and-cert
 
   delete:
     desc: uninstall the EKS cluster
     cmds:
-    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig delete -f cert-manager.yaml
-    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig delete -f ingress-deploy.yaml 
+    - kubectl delete -f cert-manager.yaml
+    - kubectl delete -f ingress-deploy.yaml 
     - eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction 
-    - rm $NUV_TMP/eks.kubeconfig
+    - rm $NUV_TMP/kubeconfig
     ignore_error: true
-
-  status:
-    silent: true
-    cmds:
-    - kubectl --kubeconfig $NUV_TMP/eks.kubeconfig get nodes
 

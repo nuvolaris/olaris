@@ -25,7 +25,7 @@ vars:
   _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
   TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
   MAX: 100
-  TIMEOUT: 5
+  TIMEOUT: 1m
 
 env:
   KUBECONFIG: 
@@ -47,22 +47,19 @@ tasks:
     silent: true
     cmds:
     - |
+      N=0
       echo "Waiting for {{.OBJECT}}"
-      while ! {{.RUN}} kubectl get {{.OBJECT}} 2>/dev/null
-      do sleep {{.TIMEOUT}}
+      while ! {{.RUN}} kubectl get {{.OBJECT}} --request-timeout="{{.TIMEOUT}}" 2>/dev/null >/dev/null
+      do $((N++)) Still waiting for {{.OBJECT}}...
       done
     - |
       N=0
       RES=false
       while [[ $N -lt {{.MAX}} ]]
-      do 
-          echo "$((N++)) Waiting for {{.OBJECT}} ready"
-          if {{.RUN}} kubectl get {{.OBJECT}} 2>/dev/null
-          then 
-              RES=true
+      do  echo "$((N++)) Waiting for {{.OBJECT}} ready"
+          if {{.RUN}} kubectl get {{.OBJECT}} --request-timeout={{.TIMEOUT}} 2>/dev/null
+          then RES=true
               break
-          else
-              sleep {{.TIMEOUT}}
           fi
       done
       $RES
@@ -71,13 +68,6 @@ tasks:
     silent: true
     cmds:
     - kubectl get nodes
-
-  config:
-    silent: true
-    desc: extract kubeconfig
-    cmds:
-    - rm {{.TMP}}/kubeconfig
-    - eksctl utils write-kubeconfig --cluster=$EKS_NAME --kubeconfig {{.TMP}}/kubeconfig
 
   prereq:
     #desc: check prerequisites
@@ -101,8 +91,9 @@ tasks:
       - "{{.RUN}} kubectl apply -f cert-manager.yaml"
       - "{{.RUN}} kubectl apply -f ingress-deploy.yaml"
 
+
   wait-ingress-lb:
-    desc: wait for EKS managed LB hostname availability
+    #desc: wait for EKS managed LB hostname availability
     silent: true
     cmds:
     - |
@@ -148,7 +139,7 @@ tasks:
 
   delete:
     silent: true
-    desc: uninstall the EKS cluster
+    desc: delete the EKS cluster
     cmds:
     - echo "*** Deleting the Cluster"
     - "{{.RUN}} kubectl delete -f cert-manager.yaml"
@@ -157,4 +148,15 @@ tasks:
     - "{{.RUN}} rm $NUV_TMP/kubeconfig"
     ignore_error: true
 
+  config:
+    desc: configure an EKS cluster
+    silent: true
+    cmds:
+    - nuv setup config eks
 
+  extract:
+    silent: true
+    desc: extract kubeconfig for connecting to the cluster
+    cmds:
+    - "{{.RUN}} rm {{.TMP}}/kubeconfig"
+    - "{{.RUN}} eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $EKS_REGION --kubeconfig {{.TMP}}/kubeconfig"

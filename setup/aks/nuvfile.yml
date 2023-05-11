@@ -34,10 +34,17 @@ env:
 
 tasks:
 
-  config:
+  extract:
+    desc: extract kubeconfig to access
     silent: true
     cmds:
     - "{{.RUN}} az aks get-credentials --name $AKS_NAME --resource-group $AKS_NAME --overwrite-existing -f {{.TMP}}/kubeconfig"
+
+  config:
+    desc: configure an AKS cluster
+    silent: true
+    cmds:
+    - nuv setup config aks
 
   prereq:
     silent: true

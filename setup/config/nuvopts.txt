@@ -5,7 +5,7 @@ Usage:
   config apihost (<apihost>|auto)
   config tls (<email>|none)
   config (enable|disable) [--all] [--redis] [--mongo] [--minio] [--cron] [--statics]
-  config eks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>] [--<kubever>=<kubever>]
+  config eks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>] [--kubever=<kubever>]
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>]
   config (status|export|reset)
 
@@ -27,11 +27,11 @@ Options:
   --minio       select minio
   --cron        select cron
   --statics     select static
-  --name=<name>     specify name
-  --region=<region> specify location or region
-  --count=<count>   specify node count
-  --vm=<vm>         specify vm type
-  --disk=<disk>     specify disk size
-  --key=<key>       specify key name
-  --kubever=<kubever>  specify kubernetes version
+  --name=<name>         specify name
+  --region=<region>     specify location or region
+  --count=<count>       specify node count
+  --vm=<vm>             specify vm type
+  --disk=<disk>         specify disk size
+  --key=<key>           specify key name
+  --kubever=<kubever>   specify kubernetes version
  

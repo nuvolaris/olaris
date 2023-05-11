@@ -57,7 +57,7 @@ tasks:
       while [[ $N -lt {{.MAX}} ]]
       do 
           echo "$((N++)) Waiting for {{.OBJECT}} ready"
-          if kubectl get {{.OBJECT}} 2>/dev/null
+          if {{.RUN}} kubectl get {{.OBJECT}} 2>/dev/null
           then 
               RES=true
               break
@@ -98,8 +98,8 @@ tasks:
     silent: true
     #desc: install cert-manager
     cmds:
-      - kubectl apply -f cert-manager.yaml
-      - kubectl apply -f ingress-deploy.yaml 
+      - "{{.RUN}} kubectl apply -f cert-manager.yaml"
+      - "{{.RUN}} kubectl apply -f ingress-deploy.yaml"
 
   wait-ingress-lb:
     desc: wait for EKS managed LB hostname availability
@@ -141,17 +141,20 @@ tasks:
     cmds:
     - task: prereq
     - task: build
-    - task: wait-nodes
+    - task: wait
       vars:
         OBJECT: nodes
     - task: ingress-and-cert
 
   delete:
+    silent: true
     desc: uninstall the EKS cluster
     cmds:
-    - kubectl delete -f cert-manager.yaml
-    - kubectl delete -f ingress-deploy.yaml 
-    - eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction 
-    - rm $NUV_TMP/kubeconfig
+    - echo "*** Deleting the Cluster"
+    - "{{.RUN}} kubectl delete -f cert-manager.yaml"
+    - "{{.RUN}} kubectl delete -f ingress-deploy.yaml"
+    - "{{.RUN}} eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction"
+    - "{{.RUN}} rm $NUV_TMP/kubeconfig"
     ignore_error: true
+
 

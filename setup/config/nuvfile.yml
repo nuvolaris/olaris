@@ -46,8 +46,8 @@ tasks:
       if {{.__redis}} || {{.__all}}
       then config NUVOLARIS_REDIS=true
       fi
-      if {{.__mongo}} || {{.__all}}
-      then config NUVOLARIS_MONGO=true
+      if {{.__mongodb}} || {{.__all}}
+      then config NUVOLARIS_MONGODB=true
       fi
       if {{.__minio}} || {{.__all}}
       then config NUVOLARIS_MINIO=true
@@ -55,8 +55,8 @@ tasks:
       if {{.__cron}} || {{.__all}}
       then config NUVOLARIS_CRON=true
       fi
-      if {{.__statics}} || {{.__all}}
-      then config NUVOLARIS_STATICS=true
+      if {{.__static}} || {{.__all}}
+      then config NUVOLARIS_STATIC=true
       fi
     - task: status
 
@@ -67,8 +67,8 @@ tasks:
       if {{.__redis}} || {{.__all}}
       then config NUVOLARIS_REDIS=false
       fi
-      if {{.__mongo}} || {{.__all}}
-      then config NUVOLARIS_MONGO=false
+      if {{.__mongodb}} || {{.__all}}
+      then config NUVOLARIS_MONGODB=false
       fi
       if {{.__minio}} || {{.__all}}
       then config NUVOLARIS_MINIO=false
@@ -76,8 +76,8 @@ tasks:
       if {{.__cron}} || {{.__all}}
       then config NUVOLARIS_CRON=false
       fi
-      if {{.__statics}} || {{.__all}}
-      then config NUVOLARIS_STATICS=false
+      if {{.__static}} || {{.__all}}
+      then config NUVOLARIS_STATIC=false
       fi
     - task: status
 

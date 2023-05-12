@@ -76,9 +76,9 @@ tasks:
     silent: true
     desc: executing an hello world action
     cmds:
-    - wsk {{.ETC}} package update hello
-    - wsk {{.ETC}} action update hello/hello hello.js
-    - wsk {{.ETC}} action invoke hello/hello -p name Nuvolaris -r | grep Nuvolaris
+    - "{{.RUN}} wsk {{.ETC}} package update hello"
+    - "{{.RUN}} wsk {{.ETC}} action update hello/hello hello.js"
+    - "{{.RUN}} wsk {{.ETC}} action invoke hello/hello -p name Nuvolaris -r | grep Nuvolaris"
 
   status:
     silent: true

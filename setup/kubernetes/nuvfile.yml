@@ -63,6 +63,12 @@ tasks:
     cmds: 
     - watch kubectl -n nuvolaris get po
 
+  crd:
+    #desc get crd
+    silent: true
+    cmds:
+    - kubectl get wsk/controller -n nuvolaris -o yaml
+
   wait:
     #desc: wait for an object to reach a condition
     silent: true

@@ -6,7 +6,7 @@ Usage:
   config tls (<email>|none)
   config (enable|disable) [--all] [--redis] [--mongodb] [--minio] [--cron] [--static]
   config eks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>] [--kubever=<kubever>]
-  config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>]
+  config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>]
   config (status|export|reset)
 
 Commands:

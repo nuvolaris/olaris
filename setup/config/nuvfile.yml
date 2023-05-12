@@ -172,6 +172,17 @@ tasks:
         VAR: "AKS_DISK"
         VAL: "{{.__disk}}"
         DEF: "100"
+    - task: read
+      vars:
+          MSG: "AKS public SSH key in AWS"
+          HINT: >
+                If you already have a public SSH key provide its path here.
+                If you do not have it, generate a key pair with the following command:
+                  ssh-keygen
+                The public key defaults to ~/.ssh/id_rsa.pub.
+          VAR: "AKS_SSHKEY"
+          VAL: "{{.__key}}"
+          DEF: "~/.ssh/id_rsa.pub"          
     - config -d | grep AKS_
 
   eks:

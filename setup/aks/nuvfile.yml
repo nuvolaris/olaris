@@ -60,8 +60,8 @@ tasks:
     - "{{.DATA}} az account show --query 'id' -o tsv"
     - "{{.RUN}} az account set --subscription {{._DATA}}"
     - "{{.RUN}} az group create --name $AKS_NAME --location $AKS_REGION"
-    - "{{.RUN}} az aks create -g $AKS_NAME -n $AKS_NAME --enable-managed-identity --node-count $AKS_COUNT --node-osdisk-size=$AKS_DISK --node-vm-size=$AKS_VM"
-    - task: config
+    - "{{.RUN}} az aks create -g $AKS_NAME -n $AKS_NAME --enable-managed-identity --node-count $AKS_COUNT --node-osdisk-size=$AKS_DISK --node-vm-size=$AKS_VM --ssh-key-value=$AKS_SSHKEY"
+    - task: extract
 
   delete:
     silent: true

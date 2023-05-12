@@ -20,6 +20,7 @@ version: '3'
 vars:
   D: ""
   RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
+  DIE: '{{if eq .D ""}}{{else}}die RUN:{{end}}'
   CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
   DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
   _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
@@ -49,15 +50,15 @@ tasks:
     - |
       N=0
       echo "Waiting for {{.OBJECT}}"
-      while ! {{.RUN}} kubectl get {{.OBJECT}} --request-timeout="{{.TIMEOUT}}" 2>/dev/null >/dev/null
-      do $((N++)) Still waiting for {{.OBJECT}}...
+      while ! {{.RUN}} kubectl --kubeconfig=$NUV_TMP/kubeconfig get {{.OBJECT}}  --request-timeout="{{.TIMEOUT}}" 2>/dev/null >/dev/null
+      do echo "$((N++)) Still waiting for {{.OBJECT}}..."
       done
     - |
       N=0
       RES=false
       while [[ $N -lt {{.MAX}} ]]
       do  echo "$((N++)) Waiting for {{.OBJECT}} ready"
-          if {{.RUN}} kubectl get {{.OBJECT}} --request-timeout={{.TIMEOUT}} 2>/dev/null
+          if {{.RUN}} kubectl --kubeconfig=$NUV_TMP/kubeconfig get {{.OBJECT}} --request-timeout={{.TIMEOUT}} 2>/dev/null
           then RES=true
               break
           fi
@@ -82,7 +83,10 @@ tasks:
     #desc: install EKS using eksctl CLI
     cmds:
       - "{{.RUN}} envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
-      - "{{.RUN}} eksctl create cluster -f _eks-cluster.yml --kubeconfig {{.TMP}}/kubeconfig"
+      - |
+        if ! {{.DIE}} eksctl get cluster -n "$EKS_NAME"
+        then {{.RUN}} eksctl create cluster -f _eks-cluster.yml --kubeconfig {{.TMP}}/kubeconfig
+        fi
 
   ingress-and-cert:
     silent: true
@@ -90,7 +94,6 @@ tasks:
     cmds:
       - "{{.RUN}} kubectl apply -f cert-manager.yaml"
       - "{{.RUN}} kubectl apply -f ingress-deploy.yaml"
-
 
   wait-ingress-lb:
     #desc: wait for EKS managed LB hostname availability

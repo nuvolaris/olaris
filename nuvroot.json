@@ -7,9 +7,9 @@
       "tls": false,
       "redis": false,
       "minio": false,
-      "mongo": false,
+      "mongodb": false,
       "cron": false,
-      "statics": false
+      "static": false
     },
     "images": {
       "operator": "ghcr.io/nuvolaris/nuvolaris-operator:0.3.0-dev.2305040912",

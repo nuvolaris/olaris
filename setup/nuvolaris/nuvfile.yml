@@ -25,6 +25,7 @@ vars:
   TIMEOUT: 10
   ETC: 
     sh: if $WSK_INSECURE ; then echo "-i" ; else echo "" ; fi
+  CFG: "kubectl -n nuvolaris get wsk/controller"
 
 env:
   KUBECONFIG: 
@@ -79,6 +80,19 @@ tasks:
     - "{{.RUN}} wsk {{.ETC}} package update hello"
     - "{{.RUN}} wsk {{.ETC}} action update hello/hello hello.js"
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/hello -p name Nuvolaris -r | grep Nuvolaris"
+
+  mongodb:
+    desc: executing an hello mongo action
+    cmds:
+    - "{{.RUN}} wsk {{.ETC}} package update hello"
+    - "{{.RUN}} wsk {{.ETC}} action update hello/mongo mongo.js -p dburi {{.DBURI}}"
+    - "{{.RUN}} wsk {{.ETC}} action invoke hello/mongo -r"
+    vars:
+      USER: 
+        sh: "{{.CFG}} -o jsonpath='{.spec.mongodb.nuvolaris.user}'"
+      PASS: 
+        sh: "{{.CFG}} -o jsonpath='{.spec.mongodb.nuvolaris.password}'"
+      DBURI: "mongodb://{{.USER}}:{{.PASS}}@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
 
   status:
     silent: true

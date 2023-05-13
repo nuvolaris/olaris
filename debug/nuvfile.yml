@@ -17,6 +17,13 @@
 
 version: '3'
 
+env:
+  KUBECONFIG: |-
+    if test -e $NUV_TMP/kubeconfig
+    then echo $NUV_TMP/kubeconfig
+    else echo ~/.kube/config
+    fi   
+
 tasks:
 
   nodes:
@@ -47,3 +54,14 @@ tasks:
     desc: show config
     cmds:
     - kubectl -n nuvolaris get cm/config -o yaml
+
+  enter:
+    desc: enter pod
+    cmds:
+    - test -n "{{.P}}" || die "use P= for pod"
+    - kubectl -n nuvolaris exec -ti {{.P}} -- bash
+
+  poll:
+    desc: poll
+    cmds:
+    - wsk activation poll

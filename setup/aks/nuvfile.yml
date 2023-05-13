@@ -44,12 +44,12 @@ tasks:
     desc: configure an AKS cluster
     silent: true
     cmds:
-    - nuv setup config aks
+    - nuv config aks
 
   prereq:
     silent: true
     cmds:
-    - test -n "$AKS_NAME" || die 'Please, first configure AKS with "nuv setup config aks"'
+    - test -n "$AKS_NAME" || die 'Please, configure AKS with "nuv config aks"'
     - "{{.RUN}} az version || die 'You need to install and configure az cli tool before running this command.'"
 
   create:

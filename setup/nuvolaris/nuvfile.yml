@@ -84,15 +84,20 @@ tasks:
   mongodb:
     desc: executing an hello mongo action
     cmds:
-    - "{{.RUN}} wsk {{.ETC}} package update hello"
-    - "{{.RUN}} wsk {{.ETC}} action update hello/mongo mongo.js -p dburi {{.DBURI}}"
-    - "{{.RUN}} wsk {{.ETC}} action invoke hello/mongo -r"
+    - echo "{{.USER}} {{.PASS}} {{.DBURI}}"
+    - #"{{.RUN}} wsk {{.ETC}} package update hello"
+    - #"{{.RUN}} wsk {{.ETC}} action update hello/mongo mongo.js -p dburi {{.DBURI}}"
+    - #"{{.RUN}} wsk {{.ETC}} action invoke hello/mongo -r"
     vars:
       USER: 
         sh: "{{.CFG}} -o jsonpath='{.spec.mongodb.nuvolaris.user}'"
       PASS: 
         sh: "{{.CFG}} -o jsonpath='{.spec.mongodb.nuvolaris.password}'"
-      DBURI: "mongodb://{{.USER}}:{{.PASS}}@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
+      DBURI:  
+        sh: |
+            ENCUSER="$(echo "{{.USER}}" | urlenc)"
+            ENCPASS="$(echo "{{.PASS}}" | urlenc)"
+            echo "mongodb://$ENCUSER:$ENCPASS@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
 
   status:
     silent: true

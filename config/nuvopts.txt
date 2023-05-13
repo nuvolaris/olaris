@@ -1,5 +1,5 @@
 Section:
-  nuv setup configure
+  nuv config
 
 Usage:
   config apihost (<apihost>|auto)

@@ -2,7 +2,6 @@ Section:
   nuv setup 
 
 Usage:
-  setup config
   setup devcluster [--uninstall|--status] 
   setup cluster [<context>] [--uninstall|--status]
   setup server <server> [<user>] [--uninstall|--status]
@@ -31,5 +30,3 @@ Subcommands:
   k3s                 k3s subcommands
   eks                 AWS EKS subcommands
   aks                 Azure AKS subcommands
-
- 

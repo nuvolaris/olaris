@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0-dev.2305070734",
+  "version": "0.3.0-dev.2305131741",
   "config": {
     "nuvolaris": {
       "apihost": "auto",
@@ -12,7 +12,7 @@
       "static": false
     },
     "images": {
-      "operator": "ghcr.io/nuvolaris/nuvolaris-operator:0.3.0-dev.2305040912",
+      "operator": "ghcr.io/nuvolaris/nuvolaris-operator:0.3.0-dev.2305131752",
       "controller": "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"
     },
     "server": {

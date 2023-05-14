@@ -20,10 +20,12 @@
  */
 async function main(args) {
     // connnect to the redis database
-    const db = require("redis").createClient({"url":args.redis})
+    const db = require("redis").createClient({"url":args.redis_url})
     await db.connect()
+    let p = args.redis_prefix+":"
     // execute a ping command
-    return db.ping().then(r => ({
-        "body": r
+    await db.set(p+"hello", "world")
+    return db.get(p+"hello").then(r => ({
+        "hello": r
     }))
 }

@@ -46,6 +46,9 @@ spec:
     minio: ${NUVOLARIS_MINIO}
     # minio static enabled or not
     static: ${NUVOLARIS_STATIC}        
+  tls:
+    acme-registered-email: ${NUVOLARIS_TLSEMAIL}
+    acme-server-url: https://acme-staging-v02.api.letsencrypt.org/directory
   openwhisk:
     namespaces:
       whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
@@ -62,34 +65,11 @@ spec:
     invoker:
       user: controller_admin
       password: s0meP@ass2
-  mongodb:
-    host: mongodb
-    volume-size: 10
-    admin: 
-      user: whisk_admin
-      password: 0therPa55
-    nuvolaris:
-      user: nuvolaris
-      password: s0meP@ass3
-    useOperator: False
   kafka:
     host: kafka
     volume-size: 10
-  s3:
-    volume-size: 10
-    id: AKIAIOSFODNN7EXAMPLE
-    key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-    region: eu-central-1
   scheduler:
     schedule: "* * * * *"
-  tls:
-    acme-registered-email: francesco@nuvolaris.io
-    acme-server-url: https://acme-v02.api.letsencrypt.org/directory
-  minio:
-    volume-size: 2
-    nuvolaris:
-      root-user: minioadmin
-      root-password: minioadmin
   configs:
     limits:
       actions:
@@ -101,6 +81,28 @@ spec:
     controller:
       javaOpts: "-Xmx2048M"
   redis:
+    volume-size: 10
     default:
       password: s0meP@ass3
-             
+    nuvolaris:
+      prefix: nuv      
+      password: s0meP@ass3
+  mongodb:
+    host: mongodb
+    volume-size: 10
+    admin: 
+      user: whisk_admin
+      password: 0therPa55
+    nuvolaris:
+      user: nuvolaris
+      password: s0meP@ass3
+    exposedExternally: False
+    useOperator: False
+  minio:
+    volume-size: 2
+    admin:
+      user: minioadmin
+      password: minioadmin    
+    nuvolaris:
+      user: nuvolaris
+      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG              

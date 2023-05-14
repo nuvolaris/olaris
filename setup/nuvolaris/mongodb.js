@@ -17,15 +17,15 @@
  * under the License.
  */
 
-const {MongoClient} = require('mongodb');
+const { MongoClient } = require('mongodb');
 
 async function main(args) {
-    console.log(args.dburi)
-    const client = new MongoClient(args.dburi);
+    console.log(args.mongodb_url)
+    const client = new MongoClient(args.mongodb_url);
     await client.connect()
     console.log("client.connect() passed")
     const data = client.db().collection("data")
-    await data.insertOne({"hello":"world"})        
+    await data.insertOne({ "hello": "world" })
     let res = []
     await data.find().forEach(x => res.push(x))
     await data.deleteMany({})

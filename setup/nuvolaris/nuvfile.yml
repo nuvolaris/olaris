@@ -82,22 +82,52 @@ tasks:
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/hello -p name Nuvolaris -r | grep Nuvolaris"
 
   mongodb:
-    desc: executing an hello mongo action
+    silent: true
+    desc: mongodb test
     cmds:
-    - echo "{{.USER}} {{.PASS}} {{.DBURI}}"
-    - #"{{.RUN}} wsk {{.ETC}} package update hello"
-    - #"{{.RUN}} wsk {{.ETC}} action update hello/mongo mongo.js -p dburi {{.DBURI}}"
-    - #"{{.RUN}} wsk {{.ETC}} action invoke hello/mongo -r"
+    - echo {{.MONGODB_URL}}
+    - "{{.RUN}} wsk {{.ETC}} package update hello"
+    - "{{.RUN}} wsk {{.ETC}} action update hello/mongodb mongodb.js -p mongodb_url '{{.MONGODB_URL}}'"
+    - "{{.RUN}} wsk {{.ETC}} action invoke hello/mongodb -r | grep 'hello'"
     vars:
-      USER: 
-        sh: "{{.CFG}} -o jsonpath='{.spec.mongodb.nuvolaris.user}'"
-      PASS: 
-        sh: "{{.CFG}} -o jsonpath='{.spec.mongodb.nuvolaris.password}'"
-      DBURI:  
-        sh: |
-            ENCUSER="$(echo "{{.USER}}" | urlenc)"
-            ENCPASS="$(echo "{{.PASS}}" | urlenc)"
-            echo "mongodb://$ENCUSER:$ENCPASS@nuvolaris-mongodb-0.nuvolaris-mongodb-svc.nuvolaris.svc.cluster.local:27017/nuvolaris?connectTimeoutMS=60000"
+      MONGODB_URL:
+        sh:  kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.mongodb_url}'
+
+  redis:
+    silent: true
+    desc: redis test
+    cmds:
+    - echo pref={{.REDIS_PREFIX}} url={{.REDIS_URL}}
+    - "{{.RUN}} wsk {{.ETC}} package update hello"
+    - "{{.RUN}} wsk {{.ETC}} action update hello/redis redis.js -p redis_url '{{.REDIS_URL}}' -p redis_prefx '{{.REDIS_PREFIX}}'"
+    - "{{.RUN}} wsk {{.ETC}} action invoke hello/redis -r"
+    - #wsk -i action invoke redis/ping -r | grep "PONG"
+    vars:
+      REDIS_PREFIX:
+        sh:  kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.redis_prefix}'
+      REDIS_URL:
+        sh:  kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.redis_url}' | sed -e 's/nuvolaris/default/g'
+
+  minio:
+    silent: true
+    desc: minio test
+    cmds:
+    - echo "keys={{.MINIO_ACCESS_KEY}}:{{.MINIO_SECRET_KEY}}"
+    - echo "url={{.MINIO_URL}} port={{.MINIO_PORT}}"
+    - echo "data={{.MINIO_DATA_BUCKET}} static={{.MINIO_STATIC_BUCKET}}"
+    vars:
+      MINIO_ACCESS_KEY:
+        sh:  "kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_access_key}'"
+      MINIO_SECRET_KEY:
+        sh:  "kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_secret_key}'"
+      MINIO_URL:
+        sh:  "kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_url}'"
+      MINIO_PORT:
+        sh:  "kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_port}'"
+      MINIO_DATA_BUCKET:
+        sh:  "kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris_minio_data_bucket}'"
+      MINIO_STATIC_BUCKET:
+        sh:  "kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris_minio_static_bucket}'"
 
   status:
     silent: true

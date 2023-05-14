@@ -29,7 +29,7 @@ async function main(args) {
     });
 
     let response = {};
-    let bucketName = args.minio_data_bucket;
+    let bucketName = args.minio_data;
 
     let bucketExists = await minioClient.bucketExists(bucketName);
 

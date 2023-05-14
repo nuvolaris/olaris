@@ -144,5 +144,10 @@ tasks:
     cmds:
     - wsk {{.ETC}} property get --apihost
 
+  info:
+    - echo $KUBECONFIG
+    - ls -l $KUBECONFIG
+    - cat ~/.wskprops
+
   delete:
     desc: no-op delete command

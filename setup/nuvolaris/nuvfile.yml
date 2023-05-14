@@ -97,7 +97,7 @@ tasks:
     silent: true
     desc: redis test
     cmds:
-    - echo pref={{.REDIS_PREFIX}} url={{.REDIS_URL}}
+    - #echo pref={{.REDIS_PREFIX}} url={{.REDIS_URL}}
     - "{{.RUN}} wsk {{.ETC}} package update hello"
     - "{{.RUN}} wsk {{.ETC}} action update hello/redis redis.js -p redis_url '{{.REDIS_URL}}' -p redis_prefx '{{.REDIS_PREFIX}}'"
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/redis -r"
@@ -112,9 +112,18 @@ tasks:
     silent: true
     desc: minio test
     cmds:
-    - echo "keys={{.MINIO_ACCESS_KEY}}:{{.MINIO_SECRET_KEY}}"
-    - echo "url={{.MINIO_URL}} port={{.MINIO_PORT}}"
-    - echo "data={{.MINIO_DATA_BUCKET}} static={{.MINIO_STATIC_BUCKET}}"
+    - #echo "keys={{.MINIO_ACCESS_KEY}}:{{.MINIO_SECRET_KEY}}"
+    - #echo "url={{.MINIO_URL}} port={{.MINIO_PORT}}"
+    - #echo "data={{.MINIO_DATA_BUCKET}} static={{.MINIO_STATIC_BUCKET}}"
+    - "{{.RUN}} wsk {{.ETC}} package update hello"
+    - >
+      {{.RUN}} wsk {{.ETC}} action update hello/minio minio.js 
+      -p minio_access '{{.MINIO_ACCESS_KEY}}' 
+      -p minio_secret '{{.MINIO_SECRET_KEY}}'
+      -p minio_host '{{.MINIO_URL}}'
+      -p minio_port '{{.MINIO_PORT}}'
+      -p minio_data '{{.MINIO_DATA_BUCKET}}'
+    - "{{.RUN}} wsk {{.ETC}} action invoke hello/minio -r"
     vars:
       MINIO_ACCESS_KEY:
         sh:  "kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_access_key}'"

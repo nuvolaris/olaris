@@ -24,15 +24,14 @@ async function main(args) {
         endPoint: args.minio_host,
         port: args.minio_port,
         useSSL: false,
-        accessKey: args.minio_user,
-        secretKey: args.minio_pwd
+        accessKey: args.minio_access,
+        secretKey: args.minio_secret
     });
 
     let response = {};
-    let bucketName = 'test-bucket';
+    let bucketName = args.minio_data_bucket;
 
     let bucketExists = await minioClient.bucketExists(bucketName);
-    console.log(`${bucketName} exists ${bucketExists}`);
 
     if(!bucketExists) {       
         response.bucketOperation = await  minioClient.makeBucket(bucketName, 'us-east-1');

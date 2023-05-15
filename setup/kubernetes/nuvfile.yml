@@ -57,7 +57,7 @@ tasks:
         echo "=== kubectl version"
         {{.RUN}} kubectl version --short 2>/dev/null
 
- 
+
   crd:
     #desc get crd
     silent: true
@@ -86,6 +86,14 @@ tasks:
       done
       $RES
 
+  waitredis:
+    env:
+      ENABLE: true
+    cmds:
+    - echo $ENABLE
+    - task: wait
+      vars:
+        OBJECT: pod/redis-0
 
   context:
     desc: select the context to use
@@ -133,6 +141,24 @@ tasks:
     - task: wait
       vars:
         OBJECT: pod/controller-0
+
+  services:
+    silent: true
+    desc: wait for active services
+    cmds:
+    - |
+      if $NUVOLARIS_REDIS
+      then nuv setup kubernetes wait OBJECT=po/redis-0
+      fi
+    - |
+      if $NUVOLARIS_MONGODB
+      then nuv setup kubernetes wait OBJECT=po/nuvolaris-mongodb-0
+      fi
+    - |
+      if $NUVOLARIS_MINIO
+      then  POD="$(kubectl -n nuvolaris get po -l app=minio -o jsonpath='{.items[0].metadata.name}')"
+            nuv setup kubernetes wait OBJECT=pod/$POD
+      fi
 
   create:
     silent: true

@@ -41,7 +41,7 @@ spec:
     # start cron based action parser
     cron: ${NUVOLARIS_CRON}
     # enable TLS
-    tls: true
+    tls: ${NUVOLARIS_TLS}
     # minio enabled or not
     minio: ${NUVOLARIS_MINIO}
     # minio static enabled or not

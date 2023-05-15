@@ -47,10 +47,15 @@ tasks:
     - kubectl -n nuvolaris get svc
 
   
-  logs:
-    desc: show operator logs 
+  log:op:
+    desc: show nuvolaris operator logs
     cmds:
-    - kubectl -n nuvolaris logs po/nuvolaris-operator
+    - kubectl -n nuvolaris logs po/nuvolaris-operator -f
+
+  log:cert:
+    desc: show cert manager logs
+    cmds:
+    - kubectl -n cert-manager logs -l app=cert-manager -f
 
   config:
     desc: show deployment status 
@@ -73,6 +78,13 @@ tasks:
     silent: true
     cmds: 
     - watch kubectl -n nuvolaris get no,po
+
+  watch2:
+    desc: watch more stuff
+    silent: true
+    cmds: 
+    - watch kubectl -n nuvolaris get po,deploy,sts
+
 
   poll:
     desc: wsk poll

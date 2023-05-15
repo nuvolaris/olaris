@@ -144,7 +144,7 @@ tasks:
 
   services:
     silent: true
-    desc: wait for active services
+    #desc: wait for active services
     cmds:
     - |
       if $NUVOLARIS_REDIS
@@ -168,6 +168,7 @@ tasks:
     - task: prepare
     - task: operator
     - task: instance
+    - task: services
   
   delete:
     silent: true

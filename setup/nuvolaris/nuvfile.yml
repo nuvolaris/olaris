@@ -26,7 +26,6 @@ vars:
   ETC: 
     sh: if $WSK_INSECURE ; then echo "-i" ; else echo "" ; fi
   CFG: "kubectl -n nuvolaris get wsk/controller"
-  KUBECTL: "kubectl --kubeconfig $NUV_TMP/kubeconfig -n nuvolaris "
 
 env:
   KUBECONFIG: 
@@ -88,11 +87,13 @@ tasks:
     cmds:
     - #echo {{.MONGODB_URL}}
     - "{{.RUN}} wsk {{.ETC}} package update hello"
-    - "{{.RUN}} wsk {{.ETC}} action update hello/mongodb mongodb.js -p mongodb_url '{{.MONGODB_URL}}'"
+    - |
+      MONGODB_URL="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.mongodb_url}')"
+      {{.RUN}} wsk {{.ETC}} action update hello/mongodb mongodb.js -p mongodb_url "$MONGODB_URL"
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/mongodb -r | grep 'hello'"
     vars:
       MONGODB_URL:
-        sh:  "{{.KUBECTL}} get cm/config -o jsonpath='{.metadata.annotations.mongodb_url}'"
+        sh:  ""
 
   redis:
     silent: true
@@ -100,14 +101,11 @@ tasks:
     cmds:
     - #echo pref={{.REDIS_PREFIX}} url={{.REDIS_URL}}
     - "{{.RUN}} wsk {{.ETC}} package update hello"
-    - "{{.RUN}} wsk {{.ETC}} action update hello/redis redis.js -p redis_url '{{.REDIS_URL}}' -p redis_prefx '{{.REDIS_PREFIX}}'"
+    - |
+      REDIS_URL="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.redis_url}')"
+      REDIS_PREFIX="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.redis_prefix}')"
+      {{.RUN}} wsk {{.ETC}} action update hello/redis redis.js -p redis_url "$REDIS_URL" -p redis_prefix "$REDIS_PREFIX"
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/redis -r | grep 'hello'"
-    - #wsk -i action invoke redis/ping -r | grep "PONG"
-    vars:
-      REDIS_PREFIX:
-        sh: "{{.KUBECTL}} get cm/config -o jsonpath='{.metadata.annotations.redis_prefix}'"
-      REDIS_URL:
-        sh:  "{{.KUBECTL}} get cm/config -o jsonpath='{.metadata.annotations.redis_url}' | sed -e 's/nuvolaris/default/g'"
 
   minio:
     silent: true

@@ -54,7 +54,6 @@ tasks:
     - cp $KUBECONFIG ~/.kube/config
     - kubectl --kubeconfig ~/.kube/config get nodes
 
-
   log:op:
     desc: show nuvolaris operator logs
     cmds:
@@ -67,16 +66,25 @@ tasks:
 
   config:
     desc: show deployment status 
+    silent: true
     cmds:
     - kubectl -n nuvolaris get cm/config -o yaml
 
   runtimes:
     desc: show runtimes
+    silent: true
     cmds:
     - kubectl -n nuvolaris get cm/openwhisk-runtimes -o jsonpath='{.data.*}' 
 
+  apihost:
+    desc: show current apihost
+    silent: true
+    cmds:
+    - wsk property get | awk '/whisk API host/{print $4}'
+
   crd:
     desc: show deployed configuration
+    silent: true
     cmds:
     - kubectl -n nuvolaris get wsk/controller -o yaml
 
@@ -117,3 +125,8 @@ tasks:
       then echo "kind"
       else echo "generic"
       fi
+
+  info:
+    - wsk property get
+    - echo "KUBECONFIG=$KUBECONFIG"
+    - kubectl get nodes

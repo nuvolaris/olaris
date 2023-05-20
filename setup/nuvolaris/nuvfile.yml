@@ -123,7 +123,7 @@ tasks:
       -p minio_secret "$MINIO_SECRET_KEY" \
       -p minio_host "$MINIO_URL" \
       -p minio_port "$MINIO_PORT" \
-      -p minio_data "$MINIO_DATA_BUCKET" 
+      -p minio_data "$MINIO_BUCKET_DATA" 
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/minio -r"
 
   status:

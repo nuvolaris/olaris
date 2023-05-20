@@ -46,6 +46,15 @@ tasks:
     cmds:
     - kubectl -n nuvolaris get svc
 
+  k:export:
+    silent: true
+    desc: exporting kubeconfig to your ~/.kube/config
+    cmds:
+    - test -n "{{.OK}}" || die "please add OK=1 to confirm you know we are overwriting your default kubeconfig"
+    - cp $KUBECONFIG ~/.kube/config
+    - kubectl --kubeconfig ~/.kube/config get nodes
+
+
   
   log:op:
     desc: show nuvolaris operator logs

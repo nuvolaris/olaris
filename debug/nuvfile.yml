@@ -55,7 +55,6 @@ tasks:
     - kubectl --kubeconfig ~/.kube/config get nodes
 
 
-  
   log:op:
     desc: show nuvolaris operator logs
     cmds:
@@ -70,6 +69,11 @@ tasks:
     desc: show deployment status 
     cmds:
     - kubectl -n nuvolaris get cm/config -o yaml
+
+  runtimes:
+    desc: show runtimes
+    cmds:
+    - kubectl -n nuvolaris get cm/openwhisk-runtimes -o jsonpath='{.data.*}' 
 
   crd:
     desc: show deployed configuration

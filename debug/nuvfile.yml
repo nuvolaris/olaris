@@ -80,7 +80,7 @@ tasks:
     cmds:
     - kubectl -n nuvolaris get wsk/controller -o yaml
 
-  enter:
+  k:enter:
     desc: enter pod P=...
     cmds:
     - test -n "{{.P}}" || die "use P= for pod"
@@ -90,14 +90,7 @@ tasks:
     desc: watch nodes and pod deployment
     silent: true
     cmds: 
-    - watch kubectl -n nuvolaris get no,po
-
-  watch2:
-    desc: watch more stuff
-    silent: true
-    cmds: 
     - watch kubectl -n nuvolaris get po,deploy,sts
-
 
   poll:
     desc: wsk poll

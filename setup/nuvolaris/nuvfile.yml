@@ -99,7 +99,6 @@ tasks:
     silent: true
     desc: redis test
     cmds:
-    - #echo pref={{.REDIS_PREFIX}} url={{.REDIS_URL}}
     - "{{.RUN}} wsk {{.ETC}} package update hello"
     - |
       REDIS_URL="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.redis_url}')"
@@ -111,25 +110,22 @@ tasks:
     silent: true
     desc: minio test
     cmds:
-    - #echo "keys={{.MINIO_ACCESS_KEY}}:{{.MINIO_SECRET_KEY}}"
-    - #echo "url={{.MINIO_URL}} port={{.MINIO_PORT}}"
-    - #echo "data={{.MINIO_DATA_BUCKET}} static={{.MINIO_STATIC_BUCKET}}"
     - "{{.RUN}} wsk {{.ETC}} package update hello"
     - |
       MINIO_ACCESS_KEY=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_access_key}')
       MINIO_SECRET_KEY=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_secret_key}')
       MINIO_URL=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_url}')
       MINIO_PORT=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_port}')
-      MINIO_DATA_BUCKET=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_data_bucket}')
-      MINIO_STATIC_BUCKET=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_static_bucket}')
+      MINIO_BUCKET_DATA=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris_minio_data_bucket}')
+      MINIO_BUCKET_WEB=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris_minio_static_bucket}')
       {{.RUN}} wsk {{.ETC}} action update hello/minio minio.js \
-      -p minio_access '$MINIO_ACCESS_KEY' \
-      -p minio_secret '$MINIO_SECRET_KEY' \
-      -p minio_host '$MINIO_URL' \
-      -p minio_port '$MINIO_PORT' \
-      -p minio_data '$MINIO_DATA_BUCKET' 
+      -p minio_access "$MINIO_ACCESS_KEY" \
+      -p minio_secret "$MINIO_SECRET_KEY" \
+      -p minio_host "$MINIO_URL" \
+      -p minio_port "$MINIO_PORT" \
+      -p minio_data "$MINIO_DATA_BUCKET" 
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/minio -r"
- 
+
   status:
     silent: true
     desc: showing the configuration status

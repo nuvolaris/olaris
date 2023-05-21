@@ -21,6 +21,8 @@ vars:
   D: ""
   RUN: '{{if eq .D ""}}{{else}}echo{{end}}'
   CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+  OS: '{{OS}}'
+  ARCH: '{{ARCH}}'
 
 tasks:
   
@@ -116,3 +118,55 @@ tasks:
         ;; 
         (*) echo nothing installed yet
         esac
+
+  cli:
+    cmds:
+    - test -n "{{.EXT}}" || die "Sorry I cannot determine the environent. Please download from {{.BASE}}"
+    - |
+      SRC="{{.BASE}}/{{.VER}}/nuv_{{.VER}}_{{.ARCH}}.{{.EXT}}"
+      TGT="$NUV_TMP/nuv.{{.EXT}}"
+      if ht -o "$TGT" -d "$SRC"
+      then 
+        #echo $FILE
+        #echo {{.CMD}}
+        if {{.CMD}} "$TGT"
+        then  echo "Update successful"
+        else  echo "Someting went wrong, please download this file and install manually:"
+              echo "$SRC"
+        fi
+      else
+        echo "Cannot download the package, please download this file and install it manually:"
+        echo $SRC
+      fi
+    vars:
+      BASE: "https://github.com/nuvolaris/nuv/releases/download"
+      VER:
+        sh: jq .version -r $NUV_ROOT/nuvroot.json
+      EXT:
+        sh: |
+          case {{.OS}} in
+          (linux)  
+            if test -e /bin/dpkg
+            then echo deb 
+            elif test -e /bin/rpm
+            then echo rpm
+            else echo "unknown"
+            fi
+          ;;
+          (darwin) echo pkg ;;
+          (windows) echo msi ;;
+          esac
+      CMD:
+        sh: |
+          case {{.OS}} in
+          (linux)  
+            if test -e /bin/dpkg
+            then echo "sudo dpkg -i"
+            elif test -e /bin/rpm
+            then echo "sudo rpm -i"
+            else echo "unknown"
+            fi
+          ;;
+          (darwin) echo "installer -pkg" ;;
+          (windows) echo "msiexec /i" ;;
+          esac

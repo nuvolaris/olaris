@@ -5,6 +5,7 @@ Usage:
   setup devcluster [--uninstall|--status] 
   setup cluster [<context>] [--uninstall|--status]
   setup server <server> [<user>] [--uninstall|--status]
+  setup cli2
   setup status
   setup uninstall
   
@@ -16,6 +17,7 @@ Commands:
                       the server must be accessible with ssh using the <user> with sudo power, default root
   setup config        configuration subcommand for fine tuning options
   setup status        show the status of the last installation
+  setup cli           download and install the latest version of the CLI
   setup uninstalll    uninstall the last installation
 
 Options:

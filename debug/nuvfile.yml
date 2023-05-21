@@ -130,3 +130,4 @@ tasks:
     - wsk property get
     - echo "KUBECONFIG=$KUBECONFIG"
     - kubectl get nodes
+

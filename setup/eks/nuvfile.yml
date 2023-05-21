@@ -90,11 +90,19 @@ tasks:
 
   certman: 
     cmds:
-      - "{{.RUN}}  kubectl apply -f cert-manager.yaml"
+      - |
+        if test -z "{{.DEL}}"
+        then {{.RUN}}  kubectl apply -f cert-manager.yaml
+        else kubectl apply -f cert-manager.yaml
+        fi
 
   ingress:
     cmds:
-      - "{{.RUN}} retry kubectl apply -f ingress-deploy.yaml"
+      - |
+        if test -z "{{.DEL}}"
+        then {{.RUN}} retry -t 100 -m 600 kubectl apply -f ingress-deploy.yaml
+        else {{.RUN}} kubectl delete -f ingress-deploy.yaml
+        fi
   
   create:
     silent: true
@@ -106,15 +114,13 @@ tasks:
       vars:
         OBJECT: nodes
     - task: ingress
-    - task: cert
+    - task: certman
 
   delete:
     silent: true
     desc: delete the EKS cluster
     cmds:
     - echo "*** Deleting the Cluster"
-    - "{{.RUN}} kubectl delete -f cert-manager.yaml"
-    - "{{.RUN}} kubectl delete -f ingress-deploy.yaml"
     - "{{.RUN}} eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction"
     - "{{.RUN}} rm $NUV_TMP/kubeconfig"
     ignore_error: true

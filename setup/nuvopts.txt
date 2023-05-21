@@ -5,7 +5,7 @@ Usage:
   setup devcluster [--uninstall|--status] 
   setup cluster [<context>] [--uninstall|--status]
   setup server <server> [<user>] [--uninstall|--status]
-  setup cli2
+  setup cli
   setup status
   setup uninstall
   

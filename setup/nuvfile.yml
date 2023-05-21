@@ -125,8 +125,11 @@ tasks:
     - |
       SRC="{{.BASE}}/{{.VER}}/nuv_{{.VER}}_{{.ARCH}}.{{.EXT}}"
       TGT="$NUV_TMP/nuv.{{.EXT}}"
+      if test -e "$TGT"
+      then rm "$TGT"
+      fi
       if ht -o "$TGT" -d "$SRC"
-      then 
+      then
         #echo $FILE
         #echo {{.CMD}}
         if {{.CMD}} "$TGT"

@@ -80,7 +80,8 @@ tasks:
     desc: show current apihost
     silent: true
     cmds:
-    - wsk property get | awk '/whisk API host/{print $4}'
+    - echo NUVOLARIS_APIHOST=$NUVOLARIS_APIHOST
+    - wsk property get | awk '/whisk API host/{print}'
 
   crd:
     desc: show deployed configuration

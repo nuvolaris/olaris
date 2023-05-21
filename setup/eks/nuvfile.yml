@@ -100,7 +100,7 @@ tasks:
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 100 -m 600 kubectl apply -f ingress-deploy.yaml
+        then {{.RUN}} retry -t 1000 -m 1800 kubectl apply -f ingress-deploy.yaml
         else {{.RUN}} kubectl delete -f ingress-deploy.yaml
         fi
   
@@ -113,8 +113,19 @@ tasks:
     - task: wait
       vars:
         OBJECT: nodes
-    - task: ingress
     - task: certman
+    - task: ingress
+
+  lb:
+    silent: true
+    desc: show the load balacner
+    cmds:
+      - > 
+        kubectl -n ingress-nginx get svc/ingress-nginx-controller  
+        -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null
+        || die "load balancer not found"
+      - echo ""
+
 
   delete:
     silent: true

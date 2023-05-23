@@ -27,3 +27,5 @@ header:
     - '**/_*'
     - 'nuvroot.json'
     - 'LICENSE'
+    - 'cert-manager.yaml'
+    - 'ingress-deploy.yaml'

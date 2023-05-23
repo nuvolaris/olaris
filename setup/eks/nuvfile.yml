@@ -106,7 +106,7 @@ tasks:
   
   create:
     silent: true
-    desc: create a EKS cluster
+    desc: create an Amazon EKS cluster
     cmds:
     - task: prereq
     - task: build
@@ -118,7 +118,7 @@ tasks:
 
   lb:
     silent: true
-    desc: show the load balacner
+    desc: show the load balancer hostname
     cmds:
       - > 
         kubectl -n ingress-nginx get svc/ingress-nginx-controller  
@@ -126,10 +126,9 @@ tasks:
         || die "load balancer not found"
       - echo ""
 
-
   delete:
     silent: true
-    desc: delete the EKS cluster
+    desc: delete the current Amazon EKS cluster
     cmds:
     - echo "*** Deleting the Cluster"
     - "{{.RUN}} eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction"
@@ -137,14 +136,14 @@ tasks:
     ignore_error: true
 
   config:
-    desc: configure an EKS cluster
+    desc: configure an Amazon EKS cluster
     silent: true
     cmds:
     - nuv config eks
 
   extract:
     silent: true
-    desc: extract kubeconfig for connecting to the cluster
+    #desc: extract kubeconfig for connecting to the cluster
     cmds:
     - "{{.RUN}} rm {{.TMP}}/kubeconfig"
     - "{{.RUN}} eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $EKS_REGION --kubeconfig {{.TMP}}/kubeconfig"

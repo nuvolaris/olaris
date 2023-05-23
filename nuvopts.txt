@@ -1,10 +1,12 @@
 Welcome to Nuv, the all-mighty Nuvolaris Build Tool
 
+The top level commands all have subcommands.
+Just type nuv <command> to see its subcommands.
+
 Usage:
   setup
-  admin
   config
+  update
+  admin
   debug
 
-Note: many commands have subcommands,
-type the command to see help on the subcommands.

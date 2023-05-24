@@ -172,6 +172,7 @@ tasks:
   
   delete:
     silent: true
+    ignore_error: true
     desc: delete cluster
     cmds:
     - "{{.RUN}} kubectl -n nuvolaris delete wsk/controller"

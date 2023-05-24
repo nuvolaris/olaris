@@ -45,7 +45,9 @@ spec:
     # minio enabled or not
     minio: ${NUVOLARIS_MINIO}
     # minio static enabled or not
-    static: ${NUVOLARIS_STATIC}        
+    static: ${NUVOLARIS_STATIC} 
+    # postgres enabled or not
+    postgres: ${NUVOLARIS_POSTGRES}           
   tls:
     acme-registered-email: ${NUVOLARIS_TLSEMAIL}
     acme-server-url: https://acme-v02.api.letsencrypt.org/directory
@@ -105,4 +107,12 @@ spec:
       password: minioadmin    
     nuvolaris:
       user: nuvolaris
-      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG              
+      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+  postgres:    
+    volume-size: 5
+    replicas: 2
+    admin:      
+      password: 0therPa55
+      replica-password: 0therPa55RR
+    nuvolaris:
+      password: s0meP@ass3                   

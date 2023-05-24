@@ -58,6 +58,9 @@ tasks:
       if {{.__static}} || {{.__all}}
       then config NUVOLARIS_STATIC=true
       fi
+      if {{.__postgres}} || {{.__all}}
+      then config NUVOLARIS_POSTGRES=true
+      fi      
     - task: status
 
   disable:
@@ -79,6 +82,9 @@ tasks:
       if {{.__static}} || {{.__all}}
       then config NUVOLARIS_STATIC=false
       fi
+      if {{.__postgres}} || {{.__all}}
+      then config NUVOLARIS_POSTGRES=false
+      fi      
     - task: status
 
   status:

@@ -4,7 +4,7 @@ Section:
 Usage:
   config apihost (<apihost>|auto)
   config tls (<email>|none)
-  config (enable|disable) [--all] [--redis] [--mongodb] [--minio] [--cron] [--static]
+  config (enable|disable) [--all] [--redis] [--mongodb] [--minio] [--cron] [--static] [--postgres]
   config eks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>] [--kubever=<kubever>]
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>]
   config (status|export|reset)
@@ -27,6 +27,7 @@ Options:
   --minio       select minio
   --cron        select cron
   --static      select static
+  --postgres    select postgres  
   --name=<name>         specify name
   --region=<region>     specify location or region
   --count=<count>       specify node count

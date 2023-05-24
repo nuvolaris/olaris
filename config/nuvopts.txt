@@ -2,23 +2,22 @@ Section:
   nuv config
 
 Usage:
-  config apihost (<apihost>|auto)
-  config tls (<email>|none)
+  config apihost (<apihost>|auto) [--tls=<email>]
   config (enable|disable) [--all] [--redis] [--mongodb] [--minio] [--cron] [--static] [--postgres]
   config eks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>] [--kubever=<kubever>]
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>]
+  config gke [--name=<name>] [--project=<project>] [--region=<region>] [--count=<count>] [--vm=<vm>] [--disk=<disk>]
   config (status|export|reset)
-
+ 
 Commands:
-  config apihost <apihost>    configure the apihost (auto: auto assign)
-  config tls <email>          configure the email to enable let's encrypyt (none: disable)
-  config enable               enable Nuvolaris services to install
-  config disable              disable Nuvolaris services to install
-  config aks                  configure Azure AKS
-  config eks                  configure Amazon EKS
-  config reset                reset configuration
-  config status               show current configuration
-  config export               export all the variables
+  config apihost          configure the apihost (auto: auto assign) and enable tls
+  config enable           enable Nuvolaris services to install
+  config disable          disable Nuvolaris services to install
+  config aks              configure Azure AKS
+  config eks              configure Amazon EKS
+  config reset            reset configuration
+  config status           show current configuration
+  config export           export all the variables
  
 Options:
   --all         select all services
@@ -28,11 +27,12 @@ Options:
   --cron        select cron
   --static      select static
   --postgres    select postgres  
+  --tls=<email>         enable tls with let's encrypt, contact email required
   --name=<name>         specify name
-  --region=<region>     specify location or region
+  --region=<region>     specify region (AWS) location (Azure) or zone (GKE)
   --count=<count>       specify node count
   --vm=<vm>             specify vm type
   --disk=<disk>         specify disk size
   --key=<key>           specify key name
   --kubever=<kubever>   specify kubernetes version
- 
+

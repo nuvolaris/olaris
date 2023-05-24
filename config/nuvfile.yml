@@ -28,14 +28,10 @@ tasks:
     cmds:
     - config NUVOLARIS_APIHOST="{{._apihost_}}"
     - config -dump | grep NUVOLARIS_APIHOST
-
-  tls:
-    silent: true
-    cmds:
     - |
-      if test "{{._email_}}" = "none"
-      then config NUVOLARIS_TLSEMAIL="none" NUVOLARIS_TLS=false
-      else config NUVOLARIS_TLSEMAIL="{{._email_}}" NUVOLARIS_TLS=true
+      if test -n "{{.__tls}}" 
+      then config NUVOLARIS_TLSEMAIL="{{.__tls}}" NUVOLARIS_TLS=true
+      else config NUVOLARIS_TLSEMAIL="none" NUVOLARIS_TLS=false
       fi
     - config -dump | grep NUVOLARIS_TLS
         
@@ -96,6 +92,8 @@ tasks:
       ignore_error: true
     - cmd: config -dump | grep EKS_
       ignore_error: true
+    - cmd: config -dump | grep GKE_
+      ignore_error: true
 
   export:
     silent: true
@@ -114,12 +112,13 @@ tasks:
     - rm ~/.nuv/config.json
     - config -dump
 
+  # read a value, empty => use a default
   read:
     silent: true
     cmds:
     - test -n "{{.VAR}}" || die "specify variable VAR="
     - test -n "{{.MSG}}" || die "specify message MSG="
-    - test -n "{{.MSG}}" || die "specify default DEF="
+    - test -n "{{.DEF}}" || die "specify default DEF="
     - |
       if test -z "{{.VAL}}"
       then  
@@ -129,13 +128,29 @@ tasks:
         then def="{{.DEF}}"
         else def="${{.VAR}}"
         fi
-        echo "Just press enter for default ($def): "
+        echo "Just press enter for default [$def]: "
         read input
         if test -z "$input"
         then input="$def"
         fi
       else input="{{.VAL}}"
       fi
+      config {{.VAR}}="$input"
+
+  # read a value, empty is not accepted
+  readforce:
+    silent: true
+    cmds:
+    - test -n "{{.VAR}}" || die "specify variable VAR="
+    - test -n "{{.MSG}}" || die "specify message MSG="
+    - |
+      input="{{.VAL}}"
+      while test -z "$input"
+      do 
+        echo "*** Please, specify {{.MSG}} and press enter."
+        test -n "{{.HINT}}" && echo "{{.HINT}}"
+        read input
+      done
       config {{.VAR}}="$input"
 
   aks:
@@ -229,7 +244,7 @@ tasks:
         MSG: "EKS disk size in gigabyte"
         VAR: "EKS_DISK"
         VAL: "{{.__disk}}"
-        DEF: "100"
+        DEF: "30"
     - task: read
       vars:
         MSG: "EKS public SSH key in AWS"
@@ -249,4 +264,52 @@ tasks:
         VAL: "{{.__kubever}}"
         DEF: "1.25"
     - config -d | grep EKS_
+
+  gke:
+    silent: true
+    cmds:
+    - task: readforce
+      vars:
+        MSG: "GCloud Project Id"
+        VAR: "GKE_PROJECT"
+        VAL: "{{.__project}}"
+    - task: read
+      vars:
+        MSG: "GCloud Cluster Name"
+        HINT: >
+              The cluster name must be unique.
+        VAR: "GKE_NAME"
+        VAL: "{{.__name}}"
+        DEF: "nuvolaris"
+    - task: read
+      vars:
+        MSG: "GCloud Cluster Zone"
+        HINT: > 
+              To get a list of valid values use:
+                gcloud compute zones list
+        VAR: "GKE_REGION"
+        VAL: "{{.__region}}"
+        DEF: "us-east1"
+    - task: read
+      vars:
+        MSG: "GCloud number of worker nodes"
+        VAR: "GKE_COUNT"
+        VAL: "{{.__count}}"
+        DEF: "3"
+    - task: read
+      vars:
+        MSG: "GKE virtual machine type"
+        HINT: >
+              To get a list of valid values, use:
+                gcloud compute machine-types list
+        VAR: "GKE_VM"
+        VAL: "{{.__vm}}"
+        DEF: "e2-standard-2"
+    - task: read
+      vars:
+        MSG: "GKE disk size in gigabyte"
+        VAR: "GKE_DISK"
+        VAL: "{{.__disk}}"
+        DEF: "100"
+    - config -d | grep GKE_
 

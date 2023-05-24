@@ -32,3 +32,4 @@ Subcommands:
   k3s                 k3s subcommands
   eks                 AWS EKS subcommands
   aks                 Azure AKS subcommands
+  gke                 Google Kubernetes Engine subcommands

@@ -64,6 +64,11 @@ tasks:
     cmds:
     - kubectl -n cert-manager logs -l app=cert-manager -f
 
+  lb:
+    desc: show ingress load balancer
+    cmds:
+    - kubectl -n ingress-nginx get svc
+
   config:
     desc: show deployment status 
     silent: true

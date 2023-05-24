@@ -1,0 +1,115 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+version: '3'
+
+vars:
+  D: ""
+  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
+  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
+  DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
+  _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
+  TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
+
+env:
+  KUBECONFIG:
+    sh: |-
+      if test -e $NUV_TMP/kubeconfig
+      then echo $NUV_TMP/kubeconfig
+      else echo ~/.kube/config
+      fi
+
+tasks:
+
+  update-yaml:
+    cmds:
+    - curl -L https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
+    - curl -L "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml" >ingress-deploy.yaml
+
+  extract:
+    #desc: extract kubeconfig to access
+    silent: true
+    cmds:
+    - "{{.RUN}} gcloud container clusters get-credentials $GKE_NAME --zone=$GKE_REGION"
+    env:
+      KUBECONFIG: 
+        sh: echo $NUV_TMP/kubeconfig
+
+  config:
+    desc: configure a Google Kubernetes Engine cluster
+    silent: true
+    cmds:
+    - nuv config gke
+
+  prereq:
+    silent: true
+    cmds:
+    - test -n "$GKE_NAME" || die 'Please, configure GKE with "nuv config gke"'
+    - "{{.RUN}} gcloud --version || die 'You need to install and configure the gcloud tool before running this command.'"
+    - "{{.RUN}} gcloud auth login"
+
+  create:
+    silent: true
+    desc: create a Google Kubernetes Engine cluster
+    env:
+      KUBECONFIG: 
+        sh: echo $NUV_TMP/kubeconfig
+    cmds:
+    #- task: prereq
+    - "{{.RUN}} gcloud config set project $GKE_PROJECT"
+    - > 
+      {{.RUN}} gcloud container clusters create $GKE_NAME
+      --machine-type="$GKE_VM"
+      --disk-size="${GKE_DISK}GB"
+      --num-nodes="$GKE_COUNT"
+      --zone="$GKE_REGION"
+    - task: extract
+    - task: certman
+    - task: ingress
+
+  delete:
+    silent: true
+    desc: delete aks cluster
+    cmds:
+    - echo "*** Deleting the $GKE_NAME cluster"
+    - "{{.RUN}} gcloud container clusters delete $GKE_NAME --zone=$GKE_REGION"
+
+  certman: 
+    cmds:
+      - |
+        if test -z "{{.DEL}}"
+        then {{.RUN}}  kubectl apply -f cert-manager.yaml
+        else kubectl apply -f cert-manager.yaml
+        fi
+
+  ingress:
+    cmds:
+      - |
+        if test -z "{{.DEL}}"
+        then {{.RUN}} retry -t 1000 -m 1800 kubectl apply -f ingress-deploy.yaml
+        else {{.RUN}} kubectl delete -f ingress-deploy.yaml
+        fi
+
+  lb:
+    silent: true
+    desc: show the load balancer
+    cmds:
+      - > 
+        kubectl -n ingress-nginx get svc/ingress-nginx-controller  
+        -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null
+        || die "load balancer not found"
+      - echo ""

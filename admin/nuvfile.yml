@@ -19,7 +19,6 @@ version: '3'
 vars:
   DRY: false
 
-
 tasks:
   adduser:
     silent: true

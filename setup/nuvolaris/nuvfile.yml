@@ -114,14 +114,14 @@ tasks:
     - |
       MINIO_ACCESS_KEY=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_access_key}')
       MINIO_SECRET_KEY=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_secret_key}')
-      MINIO_URL=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_url}')
+      MINIO_HOST=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_host}')
       MINIO_PORT=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.minio_port}')
       MINIO_BUCKET_DATA=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris_minio_data_bucket}')
       MINIO_BUCKET_WEB=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris_minio_static_bucket}')
       {{.RUN}} wsk {{.ETC}} action update hello/minio minio.js \
       -p minio_access "$MINIO_ACCESS_KEY" \
       -p minio_secret "$MINIO_SECRET_KEY" \
-      -p minio_host "$MINIO_URL" \
+      -p minio_host "$MINIO_HOST" \
       -p minio_port "$MINIO_PORT" \
       -p minio_data "$MINIO_BUCKET_DATA" 
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/minio -r"

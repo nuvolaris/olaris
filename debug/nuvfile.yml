@@ -52,12 +52,12 @@ tasks:
     cmds:
     - test -n "{{.F}}" || die "please add F=<file> to specify the target, use - for ~/.kube/config"
     - |
-      if test "{{.F}}" == "-"
+      if test "{{.F}}" = "-"
       then FILE=~/.kube/config
       else FILE="{{.F}}"
       fi
       if test -e $NUV_TMP/kubeconfig
-      then  cp -v $NUV_TMP/kubeconfig $FILE
+      then  cp $NUV_TMP/kubeconfig $FILE
             kubectl --kubeconfig $FILE cluster-info
       else echo "No kubeconfig to export"
       fi

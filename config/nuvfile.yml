@@ -192,7 +192,7 @@ tasks:
         MSG: "AKS disk size in gigabyte"
         VAR: "AKS_DISK"
         VAL: "{{.__disk}}"
-        DEF: "100"
+        DEF: "50"
     - task: read
       vars:
           MSG: "AKS public SSH key in AWS"
@@ -244,7 +244,7 @@ tasks:
         MSG: "EKS disk size in gigabyte"
         VAR: "EKS_DISK"
         VAL: "{{.__disk}}"
-        DEF: "30"
+        DEF: "50"
     - task: read
       vars:
         MSG: "EKS public SSH key in AWS"
@@ -253,7 +253,7 @@ tasks:
               If you do not have it, generate a key pair with the following command:
                 ssh-keygen
               The public key defaults to ~/.ssh/id_rsa.pub and you can import with:
-                aws ec2 import-key-pair --key-name nuvolaris-key --public-key-material fileb://~/.ssh/id_rsa.pub
+                aws ec2 import-key-pair --key-name nuvolaris-key --public-key-material --region=<your-region> fileb://~/.ssh/id_rsa.pub
         VAR: "EKS_SSHKEY"
         VAL: "{{.__key}}"
         DEF: "nuvolaris-key"
@@ -310,6 +310,6 @@ tasks:
         MSG: "GKE disk size in gigabyte"
         VAR: "GKE_DISK"
         VAL: "{{.__disk}}"
-        DEF: "100"
+        DEF: "50"
     - config -d | grep GKE_
 

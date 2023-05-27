@@ -40,8 +40,8 @@ tasks:
     - curl -L https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml >cert-manager.yaml
     - curl -L "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/aws/deploy.yaml" >ingress-deploy.yaml
 
-  extract:
-    #desc: extract the kubeconfig to access
+  kubeconfig:
+    desc: extract the kubeconfig to access
     silent: true
     cmds:
     - "{{.RUN}} az aks get-credentials --name $AKS_NAME --resource-group $AKS_NAME --overwrite-existing -f {{.TMP}}/kubeconfig"
@@ -74,9 +74,9 @@ tasks:
       --node-osdisk-size=$AKS_DISK 
       --node-vm-size=$AKS_VM 
       --ssh-key-value=$AKS_SSHKEY"
-    - task: extract
-    - task: certman
+    - task: kubeconfig
     - task: ingress
+    - task: certman
 
   delete:
     silent: true
@@ -92,7 +92,7 @@ tasks:
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}}  kubectl apply -f cert-manager.yaml
+        then {{.RUN}} retry -t 1000 -m 1800 kubectl apply -f cert-manager.yaml
         else kubectl apply -f cert-manager.yaml
         fi
 

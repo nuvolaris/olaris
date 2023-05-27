@@ -92,7 +92,7 @@ tasks:
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}}  kubectl apply -f cert-manager.yaml
+        then {{.RUN}} retry -t 1000 -m 1800 kubectl --kubeconfig {{.TMP}}/kubeconfig apply -f cert-manager.yaml
         else kubectl apply -f cert-manager.yaml
         fi
 
@@ -100,7 +100,7 @@ tasks:
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 1000 -m 1800 kubectl apply -f ingress-deploy.yaml
+        then {{.RUN}} retry -t 1000 -m 1800 kubectl --kubeconfig {{.TMP}}/kubeconfig apply -f ingress-deploy.yaml
         else {{.RUN}} kubectl delete -f ingress-deploy.yaml
         fi
   
@@ -113,8 +113,8 @@ tasks:
     - task: wait
       vars:
         OBJECT: nodes
-    - task: certman
     - task: ingress
+    - task: certman
 
   lb:
     silent: true
@@ -141,9 +141,9 @@ tasks:
     cmds:
     - nuv config eks
 
-  extract:
+  kubeconfig:
     silent: true
-    #desc: extract kubeconfig for connecting to the cluster
+    desc: extract kubeconfig for connecting to the cluster
     cmds:
     - "{{.RUN}} rm {{.TMP}}/kubeconfig"
     - "{{.RUN}} eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $EKS_REGION --kubeconfig {{.TMP}}/kubeconfig"

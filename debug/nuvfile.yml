@@ -41,20 +41,28 @@ tasks:
       else echo log '{{._log_}}'
       fi
 
-  k:svc:
+  k:sv:
     desc: show services
     cmds:
     - kubectl -n nuvolaris get svc
 
-  k:export:
+  export:
     silent: true
-    desc: exporting kubeconfig to your ~/.kube/config
+    desc: exporting kubeconfig to the F=<file> (use - for ~/.kube/config)
     cmds:
-    - test -n "{{.OK}}" || die "please add OK=1 to confirm you know we are overwriting your default kubeconfig"
-    - cp $KUBECONFIG ~/.kube/config
-    - kubectl --kubeconfig ~/.kube/config get nodes
-
-  log:op:
+    - test -n "{{.F}}" || die "please add F=<file> to specify the target, use - for ~/.kube/config"
+    - |
+      if test "{{.F}}" == "-"
+      then FILE=~/.kube/config
+      else FILE="{{.F}}"
+      fi
+      if test -e $NUV_TMP/kubeconfig
+      then  cp -v $NUV_TMP/kubeconfig $FILE
+            kubectl --kubeconfig $FILE cluster-info
+      else echo "No kubeconfig to export"
+      fi
+  
+  log:oper:
     desc: show nuvolaris operator logs
     cmds:
     - kubectl -n nuvolaris logs po/nuvolaris-operator -f
@@ -94,8 +102,8 @@ tasks:
     cmds:
     - kubectl -n nuvolaris get wsk/controller -o yaml
 
-  k:enter:
-    desc: enter pod P=...
+  k:ex:
+    desc: exec bash in pod P=...
     cmds:
     - test -n "{{.P}}" || die "use P= for pod"
     - kubectl -n nuvolaris exec -ti {{.P}} -- bash

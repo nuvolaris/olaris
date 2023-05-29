@@ -1,0 +1,28 @@
+version: '3'
+
+tasks:
+
+  secrets:
+    desc: generate secrets
+    silent: true
+    cmds:
+    - config SECRET_OPENWHISK_SYSTEM="$(random --uuid):$(random --str 64)" SECRET_OPENWHISK_NUVOLARIS="$(random --uuid):$(random --str 64)"
+    - config SECRET_COUCHDB_ADMIN="$(random --str 12)" SECRET_COUCHDB_CONTROLLER="$(random --str 12)"  SECRET_COUCHDB_INVOKER="$(random --str 12)"
+    - config SECRET_REDIS_DEFAULT="$(random --str 12)" SECRET_REDIS_NUVOLARIS="$(random --str 12)"
+    - config SECRET_MONGODB_ADMIN="$(random --str 12)" SECRET_MONGODB_NUVOLARIS="$(random --str 12)"
+    - config SECRET_MINIO_ADMIN="$(random --str 12)" SECRET_MINIO_NUVOLARIS="$(random --str 40)"
+    - config SECRET_POSTGRES_ADMIN="$(random --str 12)" SECRET_POSTGRES_REPLICA="$(random --str 12)" SECRET_POSTGRES_NUVOLARIS="$(random --str 12)"
+    - echo "Generated $(config -d | grep SECRET_ | wc -l) secrets."
+
+  nosecrets:
+    desc: remove secrets
+    ignore_error: true
+    cmds:
+    - config -r SECRET_OPENWHISK_SYSTEM SECRET_OPENWHISK_NUVOLARIS
+    - config -r SECRET_COUCHDB_ADMIN SECRET_COUCHDB_CONTROLLER  SECRET_COUCHDB_INVOKER
+    - config -r SECRET_REDIS_DEFAULT SECRET_REDIS_NUVOLARIS
+    - config -r SECRET_MONGODB_ADMIN SECRET_MONGODB_NUVOLARIS
+    - config -r SECRET_MINIO_ADMIN SECRET_MINIO_NUVOLARIS
+    - config -r SECRET_POSTGRES_ADMIN SECRET_POSTGRES_REPLICA SECRET_POSTGRES_NUVOLARIS
+    - config -d | grep SECRET_ 
+

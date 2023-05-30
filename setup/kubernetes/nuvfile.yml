@@ -126,13 +126,16 @@ tasks:
       vars:
         OBJECT: pod/nuvolaris-operator
 
+  whiskcrd:
+    - envsubst -i whisk.yaml -o _whisk.yaml
+    - cat _whisk.yaml
 
   instance:
     #desc: deploy instance
     silent: true
     cmds:
     - nuv util secrets
-    - envsubst -i whisk.yaml -o _whisk.yaml
+    - nuv setup kubernetes whiskcrd
     - |
       {{.CAT}} _whisk.yaml
       {{.RUN}} kubectl apply -f _whisk.yaml

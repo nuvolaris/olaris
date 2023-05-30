@@ -127,6 +127,9 @@ tasks:
         OBJECT: pod/nuvolaris-operator
 
   whiskcrd:
+    silent: true
+    #desc: generate configuration
+    cmds:
     - envsubst -i whisk.yaml -o _whisk.yaml
     - cat _whisk.yaml
 

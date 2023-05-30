@@ -81,3 +81,8 @@ tasks:
           (darwin) echo "installer -pkg" ;;
           (windows) echo "msiexec /i" ;;
           esac
+
+  apply:
+    desc: apply updated config
+    cmds:
+    - nuv setup kubernetes instance

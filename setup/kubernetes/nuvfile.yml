@@ -57,7 +57,6 @@ tasks:
         echo "=== kubectl version"
         {{.RUN}} kubectl version --short 2>/dev/null
 
-
   crd:
     #desc get crd
     silent: true
@@ -127,10 +126,12 @@ tasks:
       vars:
         OBJECT: pod/nuvolaris-operator
 
+
   instance:
     #desc: deploy instance
     silent: true
     cmds:
+    - nuv util secrets
     - envsubst -i whisk.yaml -o _whisk.yaml
     - |
       {{.CAT}} _whisk.yaml

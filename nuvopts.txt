@@ -8,5 +8,3 @@ Usage:
   config
   update
   admin
-  debug
-

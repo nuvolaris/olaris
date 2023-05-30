@@ -22,6 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
+      kube: ${NUVOLARIS_KUBE:-detect}
       apihost: ${NUVOLARIS_APIHOST}
       #apiport: 80
       #protocol: http 
@@ -53,20 +54,20 @@ spec:
     acme-server-url: https://acme-v02.api.letsencrypt.org/directory
   openwhisk:
     namespaces:
-      whisk-system: 789c46b1-71f6-4ed5-8c54-816aa4f8c502:abcfO3xZCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
-      nuvolaris: cbd68075-dac2-475e-8c07-d62a30c7e683:123zO3xKCLrMN6v2BKK1dXYFpXlPkccOFqm12CdAsMgRU4VrNZ9lyGVCGuMDGIwP
+      whisk-system: $SECRET_OPENWHISK_SYSTEM
+      nuvolaris: $SECRET_OPENWHISK_NUVOLARIS
   couchdb:
     host: couchdb
     volume-size: 10
     admin:
       user: whisk_admin
-      password: some_passw0rd
+      password: $SECRET_COUCHDB_ADMIN
     controller:
       user: invoker_admin
-      password: s0meP@ass1
+      password: $SECRET_COUCHDB_INVOKER
     invoker:
       user: controller_admin
-      password: s0meP@ass2
+      password: $SECRET_COUCHDB_CONTROLLER
   kafka:
     host: kafka
     volume-size: 10
@@ -85,34 +86,34 @@ spec:
   redis:
     volume-size: 10
     default:
-      password: s0meP@ass3
+      password: $SECRET_REDIS_DEFAULT
     nuvolaris:
-      prefix: nuv      
-      password: s0meP@ass3
+      prefix: nuvolaris
+      password: $SECRET_REDIS_NUVOLARIS
   mongodb:
     host: mongodb
     volume-size: 10
     admin: 
       user: whisk_admin
-      password: 0therPa55
+      password: $SECRET_MONGODB_ADMIN
     nuvolaris:
       user: nuvolaris
-      password: s0meP@ass3
+      password: $SECRET_MONGODB_NUVOLARIS
     exposedExternally: False
     useOperator: False
   minio:
     volume-size: 2
     admin:
       user: minioadmin
-      password: minioadmin    
+      password: $SECRET_MINIO_ADMIN    
     nuvolaris:
       user: nuvolaris
-      password: zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG
+      password: $SECRET_MINIO_NUVOLARIS
   postgres:    
     volume-size: 5
     replicas: 2
     admin:      
-      password: 0therPa55
-      replica-password: 0therPa55RR
+      password: $SECRET_POSTGRES_ADMIN
+      replica-password: $SECRET_POSTGRES_REPLICA
     nuvolaris:
-      password: s0meP@ass3                   
+      password: $SECRET_POSTGRES_NUVOLARIS                   

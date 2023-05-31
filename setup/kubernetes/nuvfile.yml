@@ -110,6 +110,7 @@ tasks:
 
   prepare:
     #desc: prepare the environment
+    ignore_error: true
     silent: true
     cmds:
     - "{{.CAT}} common/*.yaml roles/*.yaml crds/*.yaml"

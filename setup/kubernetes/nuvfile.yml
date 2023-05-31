@@ -131,13 +131,21 @@ tasks:
     #desc: generate configuration
     cmds:
     - envsubst -i whisk.yaml -o _whisk.yaml
-    - cat _whisk.yaml
+    #- cat _whisk.yaml
 
+  secrets:
+    silent: true
+    cmds:
+    - |
+      if test -z "$SECRET_OPENWHISK_NUVOLARIS"
+      then nuv util secret
+      else echo Reusing current secrets.
+      fi
+      
   instance:
     #desc: deploy instance
     silent: true
     cmds:
-    - nuv util secrets
     - nuv setup kubernetes whiskcrd
     - |
       {{.CAT}} _whisk.yaml
@@ -173,6 +181,7 @@ tasks:
     cmds:
     - task: context
     - task: prepare
+    - task: secrets
     - task: operator
     - task: instance
     - task: services

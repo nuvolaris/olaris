@@ -62,9 +62,9 @@ tasks:
     - | 
       APIHOST=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}')
       AUTH=$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}')
-      retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "$APIHOST" --auth "$AUTH" namespace list
-      {{.RUN}} wsk  property set --apihost "$APIHOST"  --auth "$AUTH"
-
+      {{.RUN}} retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "$APIHOST" --auth "$AUTH" namespace list
+      {{.RUN}} wsk property set --apihost "$APIHOST"  --auth "$AUTH"
+      
   login:
     silent: true
     desc: configuring nuvolaris

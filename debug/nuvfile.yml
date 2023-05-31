@@ -51,14 +51,18 @@ tasks:
     cmds:
     - kubectl -n nuvolaris get svc
 
+  k:in:
+    desc: show ingress
+    cmds:
+    - kubectl -n nuvolaris get ingress
+
   images:
     desc: show services
     silent: true
     cmds:
     - kubectl -n nuvolaris get po nuvolaris-operator -o jsonpath='{.spec.containers[0].image}{"\n"}'
-    - kubectl -n nuvolaris get po couchdb-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
     - kubectl -n nuvolaris get po controller-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
-
+    - kubectl -n nuvolaris get po couchdb-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
 
   export:
     silent: true

@@ -1,0 +1,4 @@
+Imoprting OpenShift configuration
+
+Usage:
+    osh import <kubeconfig>

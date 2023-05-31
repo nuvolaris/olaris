@@ -32,3 +32,4 @@ Subcommands:
   eks                 AWS EKS subcommands
   aks                 Azure AKS subcommands
   gke                 Google Kubernetes Engine subcommands
+  osh                 RedHat OpenShift subcommands

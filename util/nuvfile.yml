@@ -48,7 +48,6 @@ tasks:
     cmds:
     - wsk activation poll
 
-
   detect:
     desc: detect the kind of kubernetes we are using
     silent: true

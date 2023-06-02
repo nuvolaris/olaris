@@ -178,15 +178,26 @@ tasks:
 
   create:
     silent: true
-    desc: create all
+    desc: create cluster
+    cmds:
+    - task: permission
+    - task: deploy
+  
+  permission:
+    desc: assign permissions (required cluster-admin)
     cmds:
     - task: context
     - task: prepare
+
+  deploy:
+    desc: deploy in namespace (use namespace admin)
+    cmds:
+    - task: context
     - task: secrets
     - task: operator
     - task: instance
     - task: services
-  
+
   delete:
     silent: true
     ignore_error: true

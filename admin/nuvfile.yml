@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: '3'
+version: "3"
 vars:
   DRY: false
 
@@ -23,30 +23,38 @@ tasks:
   adduser:
     silent: true
     cmds:
-    - |
-      export USERNAME={{._username_}}
-      export EMAIL={{._email_}}
-      export PASSWORD={{._password_}} 
-      export AUTH="$(nuv -random -u):$(nuv -random --str 64)"
-      # check {{._username_}} is at least 5 chars long
-      if [ ${#USERNAME} -lt 5 ]
-      then 
-        nuv -die "User name must be at least 5 chars long: $USERNAME"
-      fi
-      # check that {{.email}} is a valid email
-      if ! [[ "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]
-      then 
-        nuv -die "Invalid email: $EMAIL"
-      fi
-      # check that password is not empty
-      if [ -z "$PASSWORD" ]
-      then 
-        nuv -die "Password cannot be empty"
-      fi
-      envsubst -i user-crd.yaml -o _user-crd.yaml
-    - |
-      if {{.DRY}}
-      then cat _user-crd.yaml
-      else kubectl apply -f _user-crd.yaml
-      fi
+      - |
+        export USERNAME={{._username_}}
+        export EMAIL={{._email_}}
+        export PASSWORD={{._password_}} 
+        export AUTH="$(nuv -random -u):$(nuv -random --str 64)"
 
+        # check {{._username_}} is at least 5 chars long
+        if [ ${#USERNAME} -lt 5 ]
+        then 
+          nuv -die "User name must be at least 5 chars long: $USERNAME"
+        fi
+        username_match="$(nuv -validate -r '^api(\..*)?$' $USERNAME)"
+        check_result="'$USERNAME' matches the regex."
+        if [ "$username_match" = "$check_result" ]; then
+          nuv -die "api and any api.* are reserved names."
+        fi
+
+        # check that {{.email}} is a valid email
+        if ! [[ "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]
+        then 
+          nuv -die "Invalid email: $EMAIL"
+        fi
+
+        # check that password is not empty
+        if [ -z "$PASSWORD" ]
+        then 
+          nuv -die "Password cannot be empty"
+        fi
+
+        envsubst -i user-crd.yaml -o _user-crd.yaml
+      - |
+        if {{.DRY}}
+        then cat _user-crd.yaml
+        else kubectl apply -f _user-crd.yaml
+        fi

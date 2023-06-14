@@ -58,7 +58,7 @@ tasks:
     vars:
       APIHOST:
         sh: >
-            kubectl config view -o jsonpath='{.clusters[0].cluster.server}'
+            kubectl --kubeconfig $NUV_TMP/kubeconfig config view -o jsonpath='{.clusters[0].cluster.server}'
             | awk -F: '{gsub("//api.", "api.apps.", $2); print $2}'
 
   import:

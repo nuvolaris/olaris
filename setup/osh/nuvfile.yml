@@ -38,7 +38,7 @@ tasks:
     silent: true
     desc: prerequisites
     cmds:
-    - oc version || die "I need the oc command available in the PATH"
+    - oc version --client=true || die "I need the oc command available in the PATH"
 
   copy:
     silent: true

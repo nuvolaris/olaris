@@ -26,6 +26,7 @@ vars:
   ETC: 
     sh: if $WSK_INSECURE ; then echo "-i" ; else echo "" ; fi
   CFG: "kubectl -n nuvolaris get wsk/controller"
+  SLEEP: "500"
 
 env:
   KUBECONFIG: 
@@ -125,6 +126,14 @@ tasks:
       -p minio_port "$MINIO_PORT" \
       -p minio_data "$MINIO_BUCKET_DATA" 
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/minio -r"
+
+  sleep:
+    desc: sleep 
+    silent: false
+    cmds:
+    - "{{.RUN}} wsk action update sleep sleep.js --web=true --timeout 300000"
+    #- "{{.RUN}}wsk action invoke sleep -p sleep {{.SLEEP}} -r"
+    - curl "$(nuv -wsk action get sleep --url)?sleep={{.SLEEP}}"
 
   status:
     silent: true

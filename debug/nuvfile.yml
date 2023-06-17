@@ -96,6 +96,11 @@ tasks:
     cmds:
     - kubectl -n cert-manager logs -l app=cert-manager -f
 
+  log:ctl:
+    desc: show controller logs
+    cmds:
+    - kubectl -n nuvolaris logs controller-0 -f
+
   lb:
     desc: show ingress load balancer
     cmds:

@@ -81,6 +81,10 @@ spec:
         invokes-concurrent: 250
       triggers: 
         fires-perMinute: 999
+      time:
+        limit-min: "${OPENWHISK_TIME_LIMIT_MIN:-100ms}"
+        limit-std: "${OPENWHISK_TIME_LIMIT_STD:-1min}"
+        limit-max: "${OPENWHISK_TIME_LIMIT_STD:-5min}"
     controller:
       javaOpts: "-Xmx2048M"
   redis:

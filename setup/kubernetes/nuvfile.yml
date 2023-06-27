@@ -84,16 +84,7 @@ tasks:
         fi
       done
       $RES
-
-  waitredis:
-    env:
-      ENABLE: true
-    cmds:
-    - echo $ENABLE
-    - task: wait
-      vars:
-        OBJECT: pod/redis-0
-
+  
   context:
     desc: select the context to use
     silent: true

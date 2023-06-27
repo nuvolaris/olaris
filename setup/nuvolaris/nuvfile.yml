@@ -92,10 +92,7 @@ tasks:
       MONGODB_URL="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.mongodb_url}')"
       {{.RUN}} wsk {{.ETC}} action update hello/mongodb mongodb.js -p mongodb_url "$MONGODB_URL"
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/mongodb -r | grep 'hello'"
-    vars:
-      MONGODB_URL:
-        sh:  ""
-
+  
   redis:
     silent: true
     desc: redis test

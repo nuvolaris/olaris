@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: '3'
+version: "3"
 
 vars:
   # if D=1 will not run and show commands
@@ -28,26 +28,25 @@ vars:
   CONTEXT: ""
 
 env:
-  KUBECONFIG: 
-    sh: | 
-        if test -e $NUV_TMP/kubeconfig
-        then echo  $NUV_TMP/kubeconfig
-        else echo ~/.kube/config
-        fi
+  KUBECONFIG:
+    sh: |
+      if test -e $NUV_TMP/kubeconfig
+      then echo  $NUV_TMP/kubeconfig
+      else echo ~/.kube/config
+      fi
 
 tasks:
-
   status:
-    desc: show nuvolaris cluster status 
+    desc: show nuvolaris cluster status
     silent: true
     cmds:
-    - echo "=== Nuvolaris Deployment"
-    - "{{.RUN}} kubectl -n nuvolaris get sts,po,svc"
+      - echo "=== Nuvolaris Deployment"
+      - "{{.RUN}} kubectl -n nuvolaris get sts,po,svc"
 
   info:
-    desc: show nuvolaris cluster info 
+    desc: show nuvolaris cluster info
     silent: true
-    cmds: 
+    cmds:
       - |
         echo "=== KUBECONFIG and Current Context "
         echo $KUBECONFIG
@@ -61,141 +60,140 @@ tasks:
     #desc get crd
     silent: true
     cmds:
-    - kubectl get wsk/controller -n nuvolaris -o yaml
+      - kubectl get wsk/controller -n nuvolaris -o yaml
 
   wait:
     #desc: wait for an object to reach a condition
     silent: true
     cmds:
-    - test -n "{{.OBJECT}}" || die "use OBJECT=<to-wait-for>"
-    - |
-      echo "Waiting for {{.OBJECT}}"
-      while ! {{.RUN}} kubectl -n nuvolaris get {{.OBJECT}} 2>/dev/null
-      do sleep {{.TIMEOUT}}
-      done
-    - |
-      N=0
-      RES=false
-      while [[ $N -lt {{.RETRY}} ]]
-      do 
-        echo "$((N++)) Waiting for {{.OBJECT}} ready"
-        if {{.RUN}} kubectl -n nuvolaris wait --for=condition=ready {{.OBJECT}} --timeout={{.TIMEOUT}}s 2>/dev/null
-        then RES=true ; break
-        fi
-      done
-      $RES
-  
+      - test -n "{{.OBJECT}}" || die "use OBJECT=<to-wait-for>"
+      - |
+        echo "Waiting for {{.OBJECT}}"
+        while ! {{.RUN}} kubectl -n nuvolaris wait --for=condition=Ready --timeout=30s {{.OBJECT}} 2>/dev/null
+        do sleep {{.TIMEOUT}}
+        done
+      - |
+        N=0
+        RES=false
+        while [[ $N -lt {{.RETRY}} ]]
+        do 
+          echo "$((N++)) Waiting for {{.OBJECT}} ready"
+          if {{.RUN}} kubectl -n nuvolaris wait --for=condition=Ready {{.OBJECT}} --timeout={{.TIMEOUT}}s 2>/dev/null
+          then RES=true ; break
+          fi
+        done
+        $RES
+
   context:
     desc: select the context to use
     silent: true
-    cmds: 
-    - |
-      if test -n "{{.CONTEXT}}"
-      then  if {{.RUN}} kubectl config use-context "{{.CONTEXT}}"
-            then {{.RUN}} kubectl config get-contexts
-            else false
-            fi
-      else echo Using current context
-          {{.RUN}} kubectl config get-contexts
-      fi
+    cmds:
+      - |
+        if test -n "{{.CONTEXT}}"
+        then  if {{.RUN}} kubectl config use-context "{{.CONTEXT}}"
+              then {{.RUN}} kubectl config get-contexts
+              else false
+              fi
+        else echo Using current context
+            {{.RUN}} kubectl config get-contexts
+        fi
 
   prepare:
     #desc: prepare the environment
     ignore_error: true
     silent: true
     cmds:
-    - "{{.CAT}} common/*.yaml roles/*.yaml crds/*.yaml"
-    - "{{.RUN}} kubectl apply  -f common -f roles -f crds"
+      - "{{.CAT}} common/*.yaml roles/*.yaml crds/*.yaml"
+      - "{{.RUN}} kubectl apply  -f common -f roles -f crds"
 
   operator:
     #desc: deploy operator
     silent: true
     cmds:
-    - envsubst -i operator.yaml -o _operator.yaml
-    - "{{.CAT}} _operator.yaml"
-    - "{{.RUN}} kubectl apply -f _operator.yaml"
-    - task: wait 
-      vars:
-        OBJECT: pod/nuvolaris-operator
+      - envsubst -i operator.yaml -o _operator.yaml
+      - "{{.CAT}} _operator.yaml"
+      - "{{.RUN}} kubectl apply -f _operator.yaml"
+      - task: wait
+        vars:
+          OBJECT: pod/nuvolaris-operator
 
   whiskcrd:
     silent: true
     #desc: generate configuration
     cmds:
-    - envsubst -i whisk.yaml -o _whisk.yaml
+      - envsubst -i whisk.yaml -o _whisk.yaml
     #- cat _whisk.yaml
 
   secrets:
     silent: true
     cmds:
-    - |
-      if test -z "$SECRET_OPENWHISK_NUVOLARIS"
-      then nuv util secret
-      else echo Reusing current secrets.
-      fi
-      
+      - |
+        if test -z "$SECRET_OPENWHISK_NUVOLARIS"
+        then nuv util secret
+        else echo Reusing current secrets.
+        fi
+
   instance:
     #desc: deploy instance
     silent: true
     cmds:
-    - nuv setup kubernetes whiskcrd
-    - |
-      {{.CAT}} _whisk.yaml
-      {{.RUN}} kubectl apply -f _whisk.yaml
-    - task: wait 
-      vars:
-        OBJECT: pod/couchdb-0
-    - task: wait
-      vars:
-        OBJECT: pod/controller-0
+      - nuv setup kubernetes whiskcrd
+      - |
+        {{.CAT}} _whisk.yaml
+        {{.RUN}} kubectl apply -f _whisk.yaml
+      - task: wait
+        vars:
+          OBJECT: pod/couchdb-0
+      - task: wait
+        vars:
+          OBJECT: pod/controller-0
 
   services:
     silent: true
     #desc: wait for active services
     cmds:
-    - |
-      if $NUVOLARIS_REDIS
-      then nuv setup kubernetes wait OBJECT=po/redis-0
-      fi
-    - |
-      if $NUVOLARIS_MONGODB
-      then nuv setup kubernetes wait OBJECT=po/nuvolaris-mongodb-0
-      fi
-    - |
-      if $NUVOLARIS_MINIO
-      then  POD="$(kubectl -n nuvolaris get po -l app=minio -o jsonpath='{.items[0].metadata.name}')"
-            nuv setup kubernetes wait OBJECT=pod/$POD
-      fi
+      - |
+        if $NUVOLARIS_REDIS
+        then nuv setup kubernetes wait OBJECT=po/redis-0
+        fi
+      - |
+        if $NUVOLARIS_MONGODB
+        then nuv setup kubernetes wait OBJECT=po/nuvolaris-mongodb-0
+        fi
+      - |
+        if $NUVOLARIS_MINIO
+        then  POD="$(kubectl -n nuvolaris get po -l app=minio -o jsonpath='{.items[0].metadata.name}')"
+              nuv setup kubernetes wait OBJECT=pod/$POD
+        fi
 
   create:
     silent: true
     desc: create cluster
     cmds:
-    - task: permission
-    - task: deploy
-  
+      - task: permission
+      - task: deploy
+
   permission:
     desc: assign permissions (required cluster-admin)
     cmds:
-    - task: context
-    - task: prepare
+      - task: context
+      - task: prepare
 
   deploy:
     desc: deploy in namespace (use namespace admin)
     cmds:
-    - task: context
-    - task: secrets
-    - task: operator
-    - task: instance
-    - task: services
+      - task: context
+      - task: secrets
+      - task: operator
+      - task: instance
+      - task: services
 
   delete:
     silent: true
     ignore_error: true
     desc: delete cluster
     cmds:
-    - "{{.RUN}} kubectl -n nuvolaris delete wsk/controller"
-    - "{{.RUN}} kubectl -n nuvolaris delete all --all"
-    - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"
-    - "{{.RUN}} kubectl delete ns nuvolaris"
-
+      - "{{.RUN}} kubectl -n nuvolaris delete wsk/controller"
+      - "{{.RUN}} kubectl -n nuvolaris delete all --all"
+      - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"
+      - "{{.RUN}} kubectl delete ns nuvolaris"

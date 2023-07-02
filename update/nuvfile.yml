@@ -90,8 +90,6 @@ tasks:
           (windows) echo "msiexec /i" ;;
           esac
 
-
-
   secrets:
     silent: true
     desc: retrieve secrets from the kubernetes cluster
@@ -112,10 +110,10 @@ tasks:
     - config SECRET_POSTGRES_REPLICA="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.replica-password}')"
     - config SECRET_POSTGRES_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.postgres.nuvolaris.password}')"
 
-
   apply:
     desc: apply updated config
     cmds:
     - nuv update secrets
+    - nuv setup kubernetes runtimes
     - nuv setup kubernetes instance
     - nuv setup nuvolaris login

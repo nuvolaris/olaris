@@ -98,6 +98,29 @@ tasks:
             {{.RUN}} kubectl config get-contexts
         fi
 
+  runtimes:
+    silent: true
+    cmds:
+    - |-
+      cat <<EOF >_runtimes.yaml
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: openwhisk-runtimes
+        namespace: nuvolaris
+      data:
+        runtimes.json: |-
+      EOF
+    - awk '{ print "        " $0}' <"{{.RUNTIMES}}" >>_runtimes.yaml
+    - kubectl -n nuvolaris apply -f _runtimes.yaml
+    vars:
+      RUNTIMES: 
+        sh: |
+            if test -e "$NUV_TMP/runtimes.json"
+            then echo "$NUV_TMP/runtimes.json"
+            else echo "runtimes.json"
+            fi
+
   prepare:
     #desc: prepare the environment
     ignore_error: true
@@ -184,6 +207,7 @@ tasks:
     cmds:
       - task: context
       - task: secrets
+      - task: runtimes
       - task: operator
       - task: instance
       - task: services

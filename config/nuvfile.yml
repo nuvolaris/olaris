@@ -110,6 +110,7 @@ tasks:
     silent: true
     cmds:
     - rm ~/.nuv/config.json
+    - rm "$NUV_TMP/runtimes.json"
     - config -dump
 
   # read a value, empty => use a default
@@ -312,4 +313,25 @@ tasks:
         VAL: "{{.__disk}}"
         DEF: "50"
     - config -d | grep GKE_
+
+  runtimes:
+    silent: true
+    cmds:
+    - |
+      if test -z "{{._runtimesjson_}}"
+      then cat "{{.RUNTIMES}}"
+      else  if test -e "{{._runtimesjson_}}"
+            then cp "{{._runtimesjson_}}" $NUV_TMP/runtimes.json
+                 echo "Imported runtimes.json from {{._runtimesjson_}}"
+            else echo "not found {{._runtimesjson_}}"
+            fi
+      fi
+    vars:
+      RUNTIMES:
+       sh: |
+           if test -e "$NUV_TMP/runtimes.json"
+           then echo "$NUV_TMP/runtimes.json"
+           else echo ../setup/kubernetes/runtimes.json
+           fi
+
 

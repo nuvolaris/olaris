@@ -29,3 +29,4 @@ header:
     - 'LICENSE'
     - 'cert-manager.yaml'
     - 'ingress-deploy.yaml'
+    - 'setup/kubernetes/runtimes.json'

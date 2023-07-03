@@ -1,0 +1,18 @@
+Section:
+  nuv util 
+
+Usage:
+  util secrets
+  util nosecrets
+  util user-secrets <username>
+  util no-user-secrets <username>
+  util detect
+  util poll
+  
+Commands:
+  util secrets              generate system secrets 
+  util nosecrets            remove system secrets
+  util user-secrets         generate user secrets for the given user
+  util no-user-secrets      remove user secrets for the given user
+  util detect               detect the current kubernetes cluster
+  util poll                 run wsk poll

@@ -34,13 +34,13 @@ tasks:
     desc: generate user secrets (auth, couchdb, redis, mongodb, minio, postgres)
     silent: true
     cmds:
-      - config USER_SECRET_OPENWHISK="$(random --uuid):$(random --str 64)"
-      - config USER_SECRET_COUCHDB="$(random --str 12)"
-      - config USER_SECRET_REDIS="$(random --str 12)"
-      - config USER_SECRET_MONGODB="$(random --str 12)"
-      - config USER_SECRET_MINIO="$(random --str 40)"
-      - config USER_SECRET_POSTGRES="$(random --str 12)"
-      - echo "Generated $(config -d | grep USER_SECRET_ | wc -l) secrets."
+      - config {{._username_}}_SECRET_OPENWHISK="$(random --uuid):$(random --str 64)"
+      - config {{._username_}}_SECRET_COUCHDB="$(random --str 12)"
+      - config {{._username_}}_SECRET_REDIS="$(random --str 12)"
+      - config {{._username_}}_SECRET_MONGODB="$(random --str 12)"
+      - config {{._username_}}_SECRET_MINIO="$(random --str 40)"
+      - config {{._username_}}_SECRET_POSTGRES="$(random --str 12)"
+      - echo "Generated {{._username_}} user secrets."
 
   nosecrets:
     desc: remove secrets
@@ -56,15 +56,16 @@ tasks:
 
   no-user-secrets:
     desc: remove user secrets
+    silent: true
     ignore_error: true
     cmds:
-      - config -r USER_SECRET_OPENWHISK
-      - config -r USER_SECRET_COUCHDB
-      - config -r USER_SECRET_REDIS
-      - config -r USER_SECRET_MONGODB
-      - config -r USER_SECRET_MINIO
-      - config -r USER_SECRET_POSTGRES
-      - config -d | grep USER_SECRET_
+      - config -r {{._username_}}_SECRET_OPENWHISK
+      - config -r {{._username_}}_SECRET_COUCHDB
+      - config -r {{._username_}}_SECRET_REDIS
+      - config -r {{._username_}}_SECRET_MONGODB
+      - config -r {{._username_}}_SECRET_MINIO
+      - config -r {{._username_}}_SECRET_POSTGRES
+      - echo "Removed {{._username_}} user secrets."
 
   poll:
     desc: wsk poll

@@ -52,6 +52,60 @@ tasks:
           nuv -die "Password cannot be empty"
         fi
 
+        # uppercase user to create the secrets in the right format (USERNAME_SECRET_XXX)
+        upperCaseUser="$(echo $USERNAME | nuv -awk '{print toupper($0)}')"
+        nuv util user-secrets $upperCaseUser
+
+        export USER_SECRET_REDIS=$(nuv -config "${upperCaseUser}_SECRET_REDIS")
+        export USER_SECRET_POSTGRES=$(nuv -config "${upperCaseUser}_SECRET_POSTGRES")
+        export USER_SECRET_MONGODB=$(nuv -config "${upperCaseUser}_SECRET_MONGODB")
+
+        export REDIS_ENABLED=false
+        export MONGODB_ENABLED=false
+        export MINIO_ENABLED=false
+        export POSTGRES_ENABLED=false
+
+        if {{.__redis}} || {{.__all}}
+        then 
+          if $NUVOLARIS_REDIS
+          then 
+            REDIS_ENABLED=true
+          else 
+            nuv -die "Error! Redis is not enabled in Nuvolaris"
+          fi
+        fi
+
+
+        if {{.__mongodb}} || {{.__all}}
+        then 
+          if $NUVOLARIS_MONGODB
+          then 
+            MONGODB_ENABLED=true
+          else 
+            nuv -die "Error! MongoDB is not enabled in Nuvolaris"
+          fi
+        fi
+
+        if {{.__minio}} || {{.__all}}
+        then 
+          if $NUVOLARIS_MINIO
+          then 
+            MINIO_ENABLED=true
+          else 
+            nuv -die "Error! Minio is not enabled in Nuvolaris"
+          fi
+        fi
+
+        if {{.__postgres}} || {{.__all}}
+        then 
+          if $NUVOLARIS_POSTGRES
+          then 
+            POSTGRES_ENABLED=true
+          else
+            nuv -die "Error! Postgres is not enabled in Nuvolaris"
+          fi
+        fi      
+
         envsubst -i user-crd.yaml -o _user-crd.yaml
       - |
         if {{.DRY}}

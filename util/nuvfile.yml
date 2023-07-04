@@ -15,57 +15,80 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: '3'
+version: "3"
 
 tasks:
-
   secrets:
     desc: generate secrets
     silent: true
     cmds:
-    - config SECRET_OPENWHISK_SYSTEM="$(random --uuid):$(random --str 64)" SECRET_OPENWHISK_NUVOLARIS="$(random --uuid):$(random --str 64)"
-    - config SECRET_COUCHDB_ADMIN="$(random --str 12)" SECRET_COUCHDB_CONTROLLER="$(random --str 12)"  SECRET_COUCHDB_INVOKER="$(random --str 12)"
-    - config SECRET_REDIS_DEFAULT="$(random --str 12)" SECRET_REDIS_NUVOLARIS="$(random --str 12)"
-    - config SECRET_MONGODB_ADMIN="$(random --str 12)" SECRET_MONGODB_NUVOLARIS="$(random --str 12)"
-    - config SECRET_MINIO_ADMIN="$(random --str 40)" SECRET_MINIO_NUVOLARIS="$(random --str 40)"
-    - config SECRET_POSTGRES_ADMIN="$(random --str 12)" SECRET_POSTGRES_REPLICA="$(random --str 12)" SECRET_POSTGRES_NUVOLARIS="$(random --str 12)"
-    - echo "Generated $(config -d | grep SECRET_ | wc -l) secrets."
+      - config SECRET_OPENWHISK_SYSTEM="$(random --uuid):$(random --str 64)" SECRET_OPENWHISK_NUVOLARIS="$(random --uuid):$(random --str 64)"
+      - config SECRET_COUCHDB_ADMIN="$(random --str 12)" SECRET_COUCHDB_CONTROLLER="$(random --str 12)"  SECRET_COUCHDB_INVOKER="$(random --str 12)"
+      - config SECRET_REDIS_DEFAULT="$(random --str 12)" SECRET_REDIS_NUVOLARIS="$(random --str 12)"
+      - config SECRET_MONGODB_ADMIN="$(random --str 12)" SECRET_MONGODB_NUVOLARIS="$(random --str 12)"
+      - config SECRET_MINIO_ADMIN="$(random --str 40)" SECRET_MINIO_NUVOLARIS="$(random --str 40)"
+      - config SECRET_POSTGRES_ADMIN="$(random --str 12)" SECRET_POSTGRES_REPLICA="$(random --str 12)" SECRET_POSTGRES_NUVOLARIS="$(random --str 12)"
+      - echo "Generated $(config -d | grep SECRET_ | wc -l) secrets."
+
+  user-secrets:
+    desc: generate user secrets (auth, couchdb, redis, mongodb, minio, postgres)
+    silent: true
+    cmds:
+      - config {{._username_}}_SECRET_OPENWHISK="$(random --uuid):$(random --str 64)"
+      - config {{._username_}}_SECRET_COUCHDB="$(random --str 12)"
+      - config {{._username_}}_SECRET_REDIS="$(random --str 12)"
+      - config {{._username_}}_SECRET_MONGODB="$(random --str 12)"
+      - config {{._username_}}_SECRET_MINIO="$(random --str 40)"
+      - config {{._username_}}_SECRET_POSTGRES="$(random --str 12)"
+      - echo "Generated {{._username_}} user secrets."
 
   nosecrets:
     desc: remove secrets
     ignore_error: true
     cmds:
-    - config -r SECRET_OPENWHISK_SYSTEM SECRET_OPENWHISK_NUVOLARIS
-    - config -r SECRET_COUCHDB_ADMIN SECRET_COUCHDB_CONTROLLER  SECRET_COUCHDB_INVOKER
-    - config -r SECRET_REDIS_DEFAULT SECRET_REDIS_NUVOLARIS
-    - config -r SECRET_MONGODB_ADMIN SECRET_MONGODB_NUVOLARIS
-    - config -r SECRET_MINIO_ADMIN SECRET_MINIO_NUVOLARIS
-    - config -r SECRET_POSTGRES_ADMIN SECRET_POSTGRES_REPLICA SECRET_POSTGRES_NUVOLARIS
-    - config -d | grep SECRET_ 
+      - config -r SECRET_OPENWHISK_SYSTEM SECRET_OPENWHISK_NUVOLARIS
+      - config -r SECRET_COUCHDB_ADMIN SECRET_COUCHDB_CONTROLLER  SECRET_COUCHDB_INVOKER
+      - config -r SECRET_REDIS_DEFAULT SECRET_REDIS_NUVOLARIS
+      - config -r SECRET_MONGODB_ADMIN SECRET_MONGODB_NUVOLARIS
+      - config -r SECRET_MINIO_ADMIN SECRET_MINIO_NUVOLARIS
+      - config -r SECRET_POSTGRES_ADMIN SECRET_POSTGRES_REPLICA SECRET_POSTGRES_NUVOLARIS
+      - config -d | grep SECRET_
+
+  no-user-secrets:
+    desc: remove user secrets
+    silent: true
+    ignore_error: true
+    cmds:
+      - config -r {{._username_}}_SECRET_OPENWHISK
+      - config -r {{._username_}}_SECRET_COUCHDB
+      - config -r {{._username_}}_SECRET_REDIS
+      - config -r {{._username_}}_SECRET_MONGODB
+      - config -r {{._username_}}_SECRET_MINIO
+      - config -r {{._username_}}_SECRET_POSTGRES
+      - echo "Removed {{._username_}} user secrets."
 
   poll:
     desc: wsk poll
     cmds:
-    - wsk activation poll
+      - wsk activation poll
 
   detect:
     desc: detect the kind of kubernetes we are using
     silent: true
-    cmds: 
-    - |-
-      LABELS="$(kubectl get nodes -ojsonpath='{.items[].metadata.labels}' 2>/dev/null)"
-      if echo "$LABELS" | jq . | grep eksctl.io >/dev/null
-      then echo "eks"
-      elif echo "$LABELS" | jq . | grep microk8s.io >/dev/null
-      then echo "microk8s"
-      elif echo "$LABELS" | jq . | grep lke.linode.com >/dev/null
-      then echo "lks"
-      elif echo "$LABELS" | jq . | grep openshift.io >/dev/null
-      then echo "openshift"
-      elif echo "$LABELS" | jq . | grep 'instance-type.*k3s' >/dev/null
-      then echo "k3s"
-      elif echo "$LABELS" | jq . | awk '/nuvolaris.io\/kube/ {print $2}' | grep kind >/dev/null
-      then echo "kind"
-      else echo "generic"
-      fi
-
+    cmds:
+      - |-
+        LABELS="$(kubectl get nodes -ojsonpath='{.items[].metadata.labels}' 2>/dev/null)"
+        if echo "$LABELS" | jq . | grep eksctl.io >/dev/null
+        then echo "eks"
+        elif echo "$LABELS" | jq . | grep microk8s.io >/dev/null
+        then echo "microk8s"
+        elif echo "$LABELS" | jq . | grep lke.linode.com >/dev/null
+        then echo "lks"
+        elif echo "$LABELS" | jq . | grep openshift.io >/dev/null
+        then echo "openshift"
+        elif echo "$LABELS" | jq . | grep 'instance-type.*k3s' >/dev/null
+        then echo "k3s"
+        elif echo "$LABELS" | jq . | awk '/nuvolaris.io\/kube/ {print $2}' | grep kind >/dev/null
+        then echo "kind"
+        else echo "generic"
+        fi

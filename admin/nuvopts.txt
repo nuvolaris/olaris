@@ -1,7 +1,14 @@
 Subcommand: nuv admin
 
 Usage:
-  admin adduser <username> <email> <password>
+  admin adduser <username> <email> <password> [--all] [--redis] [--mongodb] [--minio] [--postgres]
 
 Commands:
   admin adduser       create a new user in Nuvolaris with the username, email and password provided
+
+Options:
+  --all         enable all services
+  --redis       enable redis
+  --mongodb     enable mongodb
+  --minio       enable minio
+  --postgres    enable postgres  

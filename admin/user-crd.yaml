@@ -21,8 +21,20 @@ kind: WhiskUser
 metadata:
   name: ${USERNAME}
   namespace: nuvolaris
-spec: 
+spec:
   email: ${EMAIL}
   password: ${PASSWORD}
   namespace: ${USERNAME}
   auth: ${AUTH}
+  redis:
+    enabled: ${REDIS_ENABLED}
+    prefix: ${USERNAME}
+    password: ${USER_SECRET_REDIS}
+  mongodb:
+    enabled: ${MONGODB_ENABLED}
+    database: ${USERNAME}
+    password: ${USER_SECRET_MONGODB}
+  postgres:
+    enabled: ${POSTGRES_ENABLED}
+    database: ${USERNAME}
+    password: ${USER_SECRET_POSTGRES}

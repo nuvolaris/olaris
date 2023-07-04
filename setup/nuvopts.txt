@@ -17,7 +17,7 @@ Commands:
   setup config        configuration subcommand for fine tuning options
   setup status        show the status of the last installation
   setup cli           download and install the latest version of the CLI
-  setup uninstalll    uninstall the last installation
+  setup uninstall     uninstall the last installation
 
 Options:
   --uninstall         execute an uninstall instead of an installation 

@@ -83,7 +83,6 @@ tasks:
           fi
         fi
 
-
         if {{.__mongodb}} || {{.__all}}
         then 
           if $NUVOLARIS_MONGODB

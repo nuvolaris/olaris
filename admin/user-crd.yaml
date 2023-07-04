@@ -37,4 +37,4 @@ spec:
   postgres:
     enabled: ${POSTGRES_ENABLED}
     database: ${USERNAME}
-    password: ${USER_SECRET_POSTGRES}
+    password: ${USER_SECRET_POSTGRES}  

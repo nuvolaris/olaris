@@ -19,6 +19,14 @@ version: "3"
 vars:
   DRY: false
 
+env:
+  KUBECONFIG:
+    sh: |
+        if test -e $NUV_TMP/kubeconfig
+        then echo  $NUV_TMP/kubeconfig
+        else echo ~/.kube/config
+        fi  
+
 tasks:
   adduser:
     silent: true
@@ -74,7 +82,6 @@ tasks:
             nuv -die "Error! Redis is not enabled in Nuvolaris"
           fi
         fi
-
 
         if {{.__mongodb}} || {{.__all}}
         then 

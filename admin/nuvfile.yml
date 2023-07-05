@@ -67,10 +67,12 @@ tasks:
         export USER_SECRET_REDIS=$(nuv -config "${upperCaseUser}_SECRET_REDIS")
         export USER_SECRET_POSTGRES=$(nuv -config "${upperCaseUser}_SECRET_POSTGRES")
         export USER_SECRET_MONGODB=$(nuv -config "${upperCaseUser}_SECRET_MONGODB")
+        export USER_SECRET_MINIO=$(nuv -config "${upperCaseUser}_SECRET_MINIO")
 
         export REDIS_ENABLED=false
         export MONGODB_ENABLED=false
-        export MINIO_ENABLED=false
+        export MINIO_DATA_ENABLED=false
+        export MINIO_STATIC_ENABLED=false
         export POSTGRES_ENABLED=false
 
         if {{.__redis}} || {{.__all}}
@@ -97,7 +99,8 @@ tasks:
         then 
           if $NUVOLARIS_MINIO
           then 
-            MINIO_ENABLED=true
+            MINIO_DATA_ENABLED=true
+            MINIO_STATIC_ENABLED=true
           else 
             nuv -die "Error! Minio is not enabled in Nuvolaris"
           fi

@@ -37,4 +37,12 @@ spec:
   postgres:
     enabled: ${POSTGRES_ENABLED}
     database: ${USERNAME}
-    password: ${USER_SECRET_POSTGRES}  
+    password: ${USER_SECRET_POSTGRES}
+  object-storage:        
+    password: ${USER_SECRET_MINIO}
+    data:
+      enabled: ${MINIO_DATA_ENABLED}
+      bucket: ${USERNAME}-data
+    route:
+      enabled: ${MINIO_STATIC_ENABLED}
+      bucket: ${USERNAME}-web      

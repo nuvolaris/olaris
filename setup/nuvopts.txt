@@ -28,8 +28,5 @@ Subcommands:
   nuvolaris           nuvolaris subcommands
   kubernetes          kubernetes subcommands
   docker              docker subcommands
-  k3s                 k3s subcommands
-  eks                 AWS EKS subcommands
-  aks                 Azure AKS subcommands
-  gke                 Google Kubernetes Engine subcommands
+  k3s                 Rancher K3S subcommands
   osh                 RedHat OpenShift subcommands

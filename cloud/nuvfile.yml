@@ -1,0 +1,15 @@
+version: '3'
+
+tasks:
+
+  aws: 
+    desc: Amazon Web Services subcommands
+
+  eks: 
+    desc: AWS EKS subcommands
+
+  aks:
+    desc: Azure AKS subcommands
+
+  gke:
+    desc: Google Cloud GKE subcommands

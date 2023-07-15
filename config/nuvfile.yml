@@ -34,7 +34,7 @@ tasks:
       else config NUVOLARIS_TLSEMAIL="none" NUVOLARIS_TLS=false
       fi
     - config -dump | grep NUVOLARIS_TLS
-        
+
   enable:
     silent: true
     cmds:
@@ -154,6 +154,74 @@ tasks:
       done
       config {{.VAR}}="$input"
 
+  aws:
+    silent: true
+    cmds:
+    - task: readforce
+      vars:
+        MSG: "AWS Access Id"
+        VAR: "AWS_ACCESS_KEY_ID"
+        VAL: "{{.__access}}"
+    - task: readforce
+      vars:
+        MSG: "AWS Secret Key"
+        VAR: "AWS_SECRET_ACCESS_KEY"
+        VAL: "{{.__secret}}"
+    - task: read
+      vars:
+        MSG: "AWS Region to use"
+        VAR: "AWS_DEFAULT_REGION"
+        HINT: | 
+              To get a list of valid values use:
+                aws ec2 describe-regions --output table
+        VAL: "{{.__region}}"
+        DEF: "us-east-1"
+    - task: read
+      vars:
+        MSG: "AWS Image to use for VMs"
+        VAR: "AWS_VM_IMAGE_ID"
+        HINT: | 
+              The suggested image is an Ubuntu 22 valid only for us-east-1
+              Please check AWS website for alternative images in other zones
+        VAL: "{{.__image}}"
+        DEF: "ami-052efd3df9dad4825"
+    - task: read
+      vars:
+        MSG: "AWS Default user for image to use for VMs"
+        VAR: "AWS_VM_IMAGE_USER"
+        HINT: | 
+              Default user to access the selected image.
+        VAL: "{{.__vmuser}}"
+        DEF: "ubuntu"
+    - task: read
+      vars:
+          MSG: "AWS Instance type to use for VMs"
+          VAR: "AWS_VM_INSTANCE_TYPE"
+          HINT: | 
+                The suggested instance type has 8GB and 2vcp
+                To get a list of valid values, use:
+                aws ec2 describe-instance-types --query 'InstanceTypes[].InstanceType' --output table
+          VAL: "{{.__vm}}"
+          DEF: "t3a.large"
+    - task: read
+      vars:
+          MSG: "AWS Disk Size to use for VMs"
+          VAR: "AWS_VM_DISK_SIZE"
+          VAL: "{{.__disk}}"
+          DEF: "100"
+    - task: read
+      vars:
+        MSG: "AWS public SSH key "
+        HINT: |
+              If you already have a public SSH key in AWS, provide its name here.
+              If you do not have it, generate a key pair with the following command:
+                ssh-keygen
+              The public key defaults to ~/.ssh/id_rsa.pub and you can import with:
+                aws ec2 import-key-pair --key-name nuvolaris-key --public-key-material --region=<your-region> fileb://~/.ssh/id_rsa.pub
+        VAR: "AWS_SSHKEY"
+        VAL: "{{.__key}}"
+        DEF: "nuvolaris-key"
+
   aks:
     silent: true
     cmds:
@@ -210,6 +278,7 @@ tasks:
   eks:
     silent: true
     cmds:
+    - test -n "$AWS_SECRET_ACCESS_KEY" || die "Please, configure first AWS with nuv config aws"
     - task: read
       vars:
         MSG: "EKS Name for Cluster and Node Group"
@@ -246,18 +315,6 @@ tasks:
         VAR: "EKS_DISK"
         VAL: "{{.__disk}}"
         DEF: "50"
-    - task: read
-      vars:
-        MSG: "EKS public SSH key in AWS"
-        HINT: >
-              If you already have a public SSH key in AWS, provide its name here.
-              If you do not have it, generate a key pair with the following command:
-                ssh-keygen
-              The public key defaults to ~/.ssh/id_rsa.pub and you can import with:
-                aws ec2 import-key-pair --key-name nuvolaris-key --public-key-material --region=<your-region> fileb://~/.ssh/id_rsa.pub
-        VAR: "EKS_SSHKEY"
-        VAL: "{{.__key}}"
-        DEF: "nuvolaris-key"
     - task: read
       vars:
         MSG: "EKS Kubernetes Version"

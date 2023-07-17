@@ -67,6 +67,7 @@ tasks:
         | jq -r '.Reservations[].Instances[].PublicIpAddress' >_vm-ip
         test -n "$(cat _vm-ip)" || die "Error: VM {{.__vm}} not found"
       fi
+    - cat _vm-ip
 
   vm-delete:
     cmds:
@@ -128,10 +129,10 @@ tasks:
                export VAL=$(cat _vm-ip)
           elif test -n "{{.__ip}}"
           then export REC=A
-              export VAL="{{.__ip}}"
+               export VAL="{{.__ip}}"
           elif test -n "{{.__cname}}"
           then export REC=CNAME
-              export VAL="{{.__cname}}"
+               export VAL="{{.__cname}}"
           fi
           if test -n "{{.__host}}"
           then export HOST="{{.__host}}"

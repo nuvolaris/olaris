@@ -5,10 +5,11 @@ Usage:
   aws vm-list
   aws vm-create <name> [--microk8s]
   aws vm-delete <name>
+  aws vm-getip --vm=<vm>
   aws zone-create <zone>
   aws zone-delete <zone>
   aws zone-list [<zone>]
-  aws zone-update <zone> (--host=<host>|--wildcard) (--vm=<name>|--ip=<ip>|--cname=<cname>)
+  aws zone-update <zone> (--host=<host>|--wildcard) (--vm=<vm>|--ip=<ip>|--cname=<cname>)
 
 Commands:
   vm-list     lists the vm and their ips

@@ -29,7 +29,7 @@ Commands:
 Options:
   --all         select all services
   --redis       select redis
-  --mongodb     select mongodb
+  --mongodb     select mongodb (FerretDB Proxy)
   --minio       select minio
   --cron        select cron
   --static      select static

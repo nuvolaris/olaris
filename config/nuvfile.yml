@@ -43,7 +43,13 @@ tasks:
       then config NUVOLARIS_REDIS=true
       fi
       if {{.__mongodb}} || {{.__all}}
-      then config NUVOLARIS_MONGODB=true
+      then 
+        config NUVOLARIS_MONGODB=true
+
+        if {{.__mongodb}}
+        then echo 'MongoDB (FerretDB) deployment requires PosgresSQL. Enabling it.'
+             config NUVOLARIS_POSTGRES=true
+        fi    
       fi
       if {{.__minio}} || {{.__all}}
       then config NUVOLARIS_MINIO=true
@@ -80,6 +86,10 @@ tasks:
       fi
       if {{.__postgres}} || {{.__all}}
       then config NUVOLARIS_POSTGRES=false
+        if {{.__postgres}}
+          then echo 'Disabling PosgresSQL forces deactivation of MongoDB (FerretDB)'
+               config NUVOLARIS_MONGODB=false
+        fi
       fi      
     - task: status
 

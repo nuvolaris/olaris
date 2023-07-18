@@ -13,3 +13,9 @@ tasks:
 
   gke:
     desc: Google Cloud GKE subcommands
+
+  k3s:                 
+    desc: Rancher K3S subcommands
+  
+  osh:
+    desc: RedHat OpenShift subcommands

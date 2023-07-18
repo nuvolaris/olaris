@@ -63,11 +63,11 @@ tasks:
     cmds:
     - |
       if {{.__status}}
-      then {{.RUN}} nuv setup k3s status SERVER="{{._server_}}" USERNAME="{{._user_}}"
+      then {{.RUN}} nuv cloud k3s status SERVER="{{._server_}}" USERNAME="{{._user_}}"
       elif {{.__uninstall}}
-      then  {{.RUN}} nuv setup k3s delete SERVER="{{._server_}}" USERNAME="{{._user_}}"
+      then  {{.RUN}} nuv cloud k3s delete SERVER="{{._server_}}" USERNAME="{{._user_}}"
       else
-          {{.RUN}} nuv setup k3s create SERVER="{{._server_}}" USERNAME="{{._user_}}"
+          {{.RUN}} nuv cloud k3s create SERVER="{{._server_}}" USERNAME="{{._user_}}"
           {{.RUN}} nuv setup kubernetes create
           {{.RUN}} nuv setup nuvolaris login
           config STATUS_LAST=server STATUS_SERVER="{{._server_}}"

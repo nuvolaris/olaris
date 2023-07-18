@@ -145,3 +145,10 @@ tasks:
     - wsk property get
     - echo "KUBECONFIG=$KUBECONFIG"
     - kubectl get nodes
+
+  boh:
+    cmds:
+    - /usr/bin/ssh -V || die "no ssh"
+    - config AWS_PREREQ_OK="true"
+    status:
+    - config AWS_PREREQ_OK 

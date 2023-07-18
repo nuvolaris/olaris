@@ -392,3 +392,33 @@ tasks:
            fi
 
 
+  use:
+    silent: true
+    desc: select a different kubeconfig among those you created
+    cmds:
+    - ls "$NUV_TMP/*.kubeconfig"  >/dev/null || die "no available kubeconfig to use"
+    - |
+      if test -z "{{._n_}}"
+      then N=1
+          echo "Available Kubeconfig - select one by name or number"
+          for i in $NUV_TMP/*.kubeconfig
+          do  K=$(basename $i)
+              echo "$((N++))" "${K%%.kubeconfig}"
+          done
+      else 
+        N=1
+        for i in $NUV_TMP/*.kubeconfig
+        do  K=$(basename $i)
+            KK="${K%%.kubeconfig}"
+            if [[ "$((N++))" = "{{._n_}}" || "$KK" = "{{._n_}}" ]]
+            then  cp "$i" "$NUV_TMP/kubeconfig"
+                  echo now using kubeconfig "${KK}"
+                  N=0
+                  break
+            fi
+        done
+        if test "$N" != "0"
+        then echo not found kubeconfig "{{._n_}}"
+        fi
+      fi
+ 

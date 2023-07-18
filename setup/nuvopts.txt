@@ -14,9 +14,7 @@ Commands:
                       you need Docker Desktop available with at least 6G of memory assigned
   setup server        create a Kubernetes in server <server> and deploy Nuvolaris
                       the server must be accessible with ssh using the <user> with sudo power, default root
-  setup config        configuration subcommand for fine tuning options
   setup status        show the status of the last installation
-  setup cli           download and install the latest version of the CLI
   setup uninstall     uninstall the last installation
 
 Options:
@@ -24,9 +22,6 @@ Options:
   --status            show the status instead of an installation 
 
 Subcommands:
-  config              configuration subcommands
   nuvolaris           nuvolaris subcommands
   kubernetes          kubernetes subcommands
   docker              docker subcommands
-  k3s                 Rancher K3S subcommands
-  osh                 RedHat OpenShift subcommands

@@ -7,6 +7,7 @@ vars:
   DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
   _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
   TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
+  SSH: "/usr/bin/ssh -oStrictHostKeyChecking=no"
 
 tasks:
   prereq:
@@ -17,23 +18,22 @@ tasks:
       - >
         aws ec2 describe-key-pairs --key-names $AWS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' >/dev/null
         || die 'Please generate or import the configured key  before continuing.'
+      - "{{.SSH}} -V || die 'you need an ssh client in your PATH'"
+      - config AWS_PREREQ_OK="true"
+    status:
+    - config AWS_PREREQ_OK
 
   vm-list:
     silent: true
     cmds:
       - task: prereq
       - echo "*** List of created vms:"
-      #- >
-      #  aws ec2 describe-instances --output json 
-      #  --query 'Reservations[*].Instances[*].[PublicIpAddress,State.Name,Tags[?Key==`Name`].Value]' 
-      #  | jq -r '.[][] | "\(.[0]) \(.[1]) \(.[2][0])"'
-      #  | awk '{ printf "%-20s%-10s%-15s\n", $1, $2, $3 }'
-      - >
+      - > 
         aws ec2 describe-instances 
-        --query 'Reservations[].Instances[].[PublicIpAddress, Tags[?Key==`Name`].Value | [0], State.Name, Tags[?Key==`nuv`].Value | [0]]' 
-        --output json
-        | jq -r '.[] | "\(.[0]) \(.[1]) \(.[2]) \(.[3])"'
-        | awk '$4 != "null" { printf "%-16s%-20s%-15s\n", $1, $2, $3 }'
+        --filters "Name=tag:Nuv,Values=true" 
+        --query 'Reservations[].Instances[].[Tags[?Key==`NuvName`].Value | [0], Tags[?Key==`NuvType`].Value | [0], PublicIpAddress, State.Name]' 
+        --output text
+        | awk '{printf "%-15s %-10s %-15s %s\n", $1, $2, $3, $4}'
 
   vm-create:
     silent: true
@@ -42,37 +42,40 @@ tasks:
       - |
         export NAME={{._name_}}
         if {{.__microk8s}}
-        then envsubst -i mk8s.cf -o _vm-create.cf
-        else envsubst -i plain.cf -o _vm-create.cf
+        then envsubst -i microk8s.cf -o _vm-create.cf
+        else envsubst -i ubuntu.cf -o _vm-create.cf
         fi
-      - echo "*** Waiting until the vm is ready..."
+      - echo "*** Creating the VM."
       - >
         aws cloudformation create-stack 
         --stack-name nuv-{{._name_}} 
         --template-body file://_vm-create.cf 
         || true 
+      - echo "*** Waiting until the VM is started..."
       - >
         aws cloudformation wait 
         stack-create-complete --stack-name nuv-{{._name_}}
-      - echo "Ready."
+      - task: vm-getip
+      - >
+        echo "*** Waiting until the VM is ready..." ;
+        retry -t 1000 -m 1800 {{.SSH}} 
+        "$AWS_VM_IMAGE_USER@$(cat _vm-ip)" 
+        sudo cloud-init status --wait
 
   vm-getip:
     silent: true
     cmds:
     - |
-      if test -n "{{.__vm}}" ;
-      then 
-        aws ec2 describe-instances --output json \
-        --filters Name=tag:Name,Values={{.__vm}} Name=instance-state-name,Values=running \
-        | jq -r '.Reservations[].Instances[].PublicIpAddress' >_vm-ip
-        test -n "$(cat _vm-ip)" || die "Error: VM {{.__vm}} not found"
-      fi
+      aws ec2 describe-instances --output json \
+      --filters Name=tag:Nuv,Values=true Name=tag:NuvName,Values={{._name_}} Name=instance-state-name,Values=running \
+      | jq -r '.Reservations[].Instances[].PublicIpAddress' >_vm-ip
+      test -n "$(cat _vm-ip)" || die "Error: VM {{._name_}} not found"
     - cat _vm-ip
 
   vm-delete:
     cmds:
-      - aws cloudformation delete-stack --stack-name stack-{{._name_}}
-      - aws cloudformation wait stack-delete-complete --stack-name stack-{{._name_}}
+      - aws cloudformation delete-stack --stack-name nuv-{{._name_}}
+      - aws cloudformation wait stack-delete-complete --stack-name nuv-{{._name_}}
 
   zone-create:
     silent: true

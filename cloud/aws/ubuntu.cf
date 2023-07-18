@@ -16,14 +16,14 @@
 # under the License.
 
 Resources:
-  ${NAME}Instance:
+  Instance:
     Type: AWS::EC2::Instance
     Properties:
       ImageId: $AWS_VM_IMAGE_ID
       InstanceType: $AWS_VM_INSTANCE_TYPE
       KeyName: $AWS_SSHKEY
       SecurityGroupIds:
-        - !Ref ${NAME}SecurityGroup
+        - !Ref SecurityGroup
       BlockDeviceMappings:
         - DeviceName: /dev/sda1
           Ebs:
@@ -32,10 +32,14 @@ Resources:
       Tags:
         - Key: Name
           Value: ${NAME}
-        - Key: nuv
-          Value: plain
+        - Key: Nuv
+          Value: true
+        - Key: NuvName
+          Value: ${NAME}
+        - Key: NuvType
+          Value: ubuntu
 
-  ${NAME}SecurityGroup:
+  SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupName: ${NAME}-k3s

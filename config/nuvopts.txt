@@ -10,6 +10,7 @@ Usage:
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>]
   config gke [--name=<name>] [--project=<project>] [--region=<region>] [--count=<count>] [--vm=<vm>] [--disk=<disk>]
   config (status|export|reset)
+  config use [<n>]
  
 Commands:
   config apihost          configure the apihost (auto: auto assign) and enable tls
@@ -23,7 +24,8 @@ Commands:
   config reset            reset configuration
   config status           show current configuration
   config export           export all the variables
- 
+  config use              use a different kubernetes cluster among those you created
+
 Options:
   --all         select all services
   --redis       select redis
@@ -42,4 +44,3 @@ Options:
   --disk=<disk>         specify disk size
   --key=<key>           specify ssh key name
   --kubever=<kubever>   specify kubernetes version
-

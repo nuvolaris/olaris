@@ -5,7 +5,8 @@ Usage:
   aws vm-list
   aws vm-create <name> [--microk8s]
   aws vm-delete <name>
-  aws vm-getip --vm=<vm>
+  aws vm-getip  <name>
+  aws vm-exec   <name> <command>
   aws zone-create <zone>
   aws zone-delete <zone>
   aws zone-list [<zone>]

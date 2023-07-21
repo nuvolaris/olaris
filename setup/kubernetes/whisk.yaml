@@ -25,7 +25,11 @@ spec:
       kube: ${NUVOLARIS_KUBE:-detect}
       apihost: ${NUVOLARIS_APIHOST}
       #apiport: 80
-      #protocol: http 
+      #protocol: http
+      storageclass: ${NUVOLARIS_STORAGECLASS:-auto}
+      provisioner: ${NUVOLARIS_PROVISIONER:-auto}
+      ingressclass: ${NUVOLARIS_INGRESSCLASS:-auto}
+      ingresslb: ${NUVOLARIS_INGRESSLB:-auto}
   components:
     # start openwhisk controller
     openwhisk: true

@@ -15,48 +15,47 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: '3'
+version: "3"
 
 vars:
   D: ""
   RUN: '{{if eq .D ""}}{{else}}echo{{end}}'
   CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
-  OS: '{{OS}}'
-  ARCH: '{{ARCH}}'
+  OS: "{{OS}}"
+  ARCH: "{{ARCH}}"
 
 env:
-  KUBECONFIG: 
-    sh: | 
-        if test -e $NUV_TMP/kubeconfig
-        then echo  $NUV_TMP/kubeconfig
-        else echo ~/.kube/config
-        fi
+  KUBECONFIG:
+    sh: |
+      if test -e $NUV_TMP/kubeconfig
+      then echo  $NUV_TMP/kubeconfig
+      else echo ~/.kube/config
+      fi
 
 tasks:
-  
   cli:
-    desc: update the cli 
+    desc: update the cli
     cmds:
-    - test -n "{{.EXT}}" || die "Sorry I cannot determine the environent. Please download from {{.BASE}}"
-    - |
-      SRC="{{.BASE}}/{{.VER}}/nuv_{{.VER}}_{{.ARCH}}.{{.EXT}}"
-      TGT="$NUV_TMP/nuv.{{.EXT}}"
-      if test -e "$TGT"
-      then rm "$TGT"
-      fi
-      if ht -o "$TGT" -d "$SRC"
-      then
-        #echo $FILE
-        #echo {{.CMD}}
-        if {{.CMD}} "$TGT"
-        then  echo "Update successful"
-        else  echo "Someting went wrong, please download this file and install manually:"
-              echo "$SRC"
+      - test -n "{{.EXT}}" || die "Sorry I cannot determine the environent. Please download from {{.BASE}}"
+      - |
+        SRC="{{.BASE}}/{{.VER}}/nuv_{{.VER}}_{{.ARCH}}.{{.EXT}}"
+        TGT="$NUV_TMP/nuv.{{.EXT}}"
+        if test -e "$TGT"
+        then rm "$TGT"
         fi
-      else
-        echo "Cannot download the package, please download this file and install it manually:"
-        echo $SRC
-      fi
+        if curl -o "$TGT" -d "$SRC"
+        then
+          #echo $FILE
+          #echo {{.CMD}}
+          if {{.CMD}} "$TGT"
+          then  echo "Update successful"
+          else  echo "Someting went wrong, please download this file and install manually:"
+                echo "$SRC"
+          fi
+        else
+          echo "Cannot download the package, please download this file and install it manually:"
+          echo $SRC
+        fi
     vars:
       BASE: "https://github.com/nuvolaris/nuv/releases/download"
       VER:
@@ -94,26 +93,26 @@ tasks:
     silent: true
     desc: retrieve secrets from the kubernetes cluster
     cmds:
-    - echo "Retrieving secrets..."
-    - config SECRET_OPENWHISK_SYSTEM="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.whisk-system}')"
-    - config SECRET_OPENWHISK_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.nuvolaris}')"
-    - config SECRET_COUCHDB_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.admin.password}')"
-    - config SECRET_COUCHDB_INVOKER="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.controller.password}')"
-    - config SECRET_COUCHDB_CONTROLLER="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.invoker.password}')"
-    - config SECRET_REDIS_DEFAULT="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.redis.default.password}')"
-    - config SECRET_REDIS_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.redis.nuvolaris.password}')"
-    - config SECRET_MONGODB_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.mongodb.admin.password}')"
-    - config SECRET_MONGODB_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.mongodb.nuvolaris.password}')"
-    - config SECRET_MINIO_ADMIN="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.minio.admin.password}')"
-    - config SECRET_MINIO_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.minio.nuvolaris.password}')"
-    - config SECRET_POSTGRES_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.password}')"
-    - config SECRET_POSTGRES_REPLICA="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.replica-password}')"
-    - config SECRET_POSTGRES_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.postgres.nuvolaris.password}')"
+      - echo "Retrieving secrets..."
+      - config SECRET_OPENWHISK_SYSTEM="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.whisk-system}')"
+      - config SECRET_OPENWHISK_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.openwhisk.namespaces.nuvolaris}')"
+      - config SECRET_COUCHDB_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.admin.password}')"
+      - config SECRET_COUCHDB_INVOKER="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.controller.password}')"
+      - config SECRET_COUCHDB_CONTROLLER="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.couchdb.invoker.password}')"
+      - config SECRET_REDIS_DEFAULT="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.redis.default.password}')"
+      - config SECRET_REDIS_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.redis.nuvolaris.password}')"
+      - config SECRET_MONGODB_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.mongodb.admin.password}')"
+      - config SECRET_MONGODB_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.mongodb.nuvolaris.password}')"
+      - config SECRET_MINIO_ADMIN="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.minio.admin.password}')"
+      - config SECRET_MINIO_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.minio.nuvolaris.password}')"
+      - config SECRET_POSTGRES_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.password}')"
+      - config SECRET_POSTGRES_REPLICA="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.replica-password}')"
+      - config SECRET_POSTGRES_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.postgres.nuvolaris.password}')"
 
   apply:
     desc: apply updated config
     cmds:
-    - nuv update secrets
-    - nuv setup kubernetes runtimes
-    - nuv setup kubernetes instance
-    - nuv setup nuvolaris login
+      - nuv update secrets
+      - nuv setup kubernetes runtimes
+      - nuv setup kubernetes instance
+      - nuv setup nuvolaris login

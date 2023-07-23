@@ -17,5 +17,8 @@ tasks:
   k3s:                 
     desc: Rancher K3S subcommands
   
+  mk8s:                 
+    desc: Ubuntu MicroK8s subcommands
+  
   osh:
     desc: RedHat OpenShift subcommands

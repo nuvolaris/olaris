@@ -3,9 +3,10 @@ Section:
 
 Usage:
   aws vm-list
-  aws vm-create <name> [--microk8s]
+  aws vm-create <name>
   aws vm-delete <name>
   aws vm-getip  <name>
+  aws vm-kubeconfig <name>
   aws vm-exec   <name> <command>
   aws zone-create <zone>
   aws zone-delete <zone>
@@ -15,6 +16,7 @@ Usage:
 Commands:
   vm-list     lists the vm and their ips
   vm-create   create a vm, if --microk8s, also installing microk8s
+  vm-getip    get ip
   vm-delete   delete the vm
   zone-create create a zone - you will have to delegate the zone 
               from the parent zone assigning the nameservers
@@ -22,4 +24,3 @@ Commands:
   zone-list   list zones
   zone-update update a zone with an ip or a cname
 
- 

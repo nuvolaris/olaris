@@ -1,0 +1,74 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+version: "3"
+
+env:
+  KUBECONFIG:
+    sh: |-
+      if test -e $NUV_TMP/kubeconfig
+      then echo $NUV_TMP/kubeconfig
+      else echo ~/.kube/config
+      fi
+
+tasks:
+
+  info:
+   silent: true
+   desc: show info
+   cmds:
+    - kubectl cluster-info
+
+  ctl:
+    silent: true
+    desc: "execute a kubectl command, specify with CMD=<command>"
+    cmds:
+      - test -n "{{.CMD}}" || die "use CMD=..."
+      - kubectl {{.CMD}}
+  
+  nodes:
+    silent: true
+    desc: show nodes
+    cmds:
+    - kubectl get nodes
+
+  ns:
+    silent: true
+    desc: show namespaces
+    cmds:
+    - kubectl get ns
+
+  pod:
+    silent: true
+    desc: show pods and related
+    cmds:
+    - kubectl -n nuvolaris get po,sts,jobs --no-headers
+
+  svc:
+    silent: true
+    desc: show services
+    ignore_error: true
+    cmds:
+    - kubectl -n nuvolaris get svc 
+    - kubectl -n nuvolaris get route  2>/dev/null
+    - kubectl -n nuvolaris get ingress 2>/dev/null
+
+  exec:
+    desc: exec bash in pod P=...
+    cmds:
+      - test -n "{{.P}}" || die "use P= for pod"
+      - kubectl -n nuvolaris exec -ti {{.P}} -- bash

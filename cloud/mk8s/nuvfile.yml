@@ -14,12 +14,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
 version: '3'
 
 vars:
   SSH: "/usr/bin/ssh -oStrictHostKeyChecking=no"
-  CERTMANAGER: "https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml"
 
 env:
   KUBECONFIG: 
@@ -31,47 +29,36 @@ env:
 
 tasks:
 
-  get-cert-manager:
-    cmds:
-    - curl -L "{{.CERTMANAGER}}" >cert-manager.yaml
-
   install:
     silent: true
     #desc: install k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo
     cmds:
       - test -n "{{.SERVER}}" || die "required SERVER=<ip or host>"
       - >
-        k3sup install
-        --host="{{.SERVER}}" --user="{{.USERNAME}}"
-        --local-path=$NUV_TMP/kubeconfig
+        cat mk8s.sh | {{.SSH}} {{.USERNAME}}@{{.SERVER}} 
+        tee mk8s.sh >/dev/null
+      - "{{.SSH}} {{.USERNAME}}@{{.SERVER}} sudo bash mk8s.sh"
     vars:
       USERNAME: '{{.USERNAME | default "root"}}'
   
-  cert-manager:
-    silent: true
-    #desc: install cert-manager
-    cmds:
-      - kubectl --kubeconfig $NUV_TMP/kubeconfig apply -f cert-manager.yaml
-
   create:
     silent: true
-    desc: create a k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo
+    desc: create a mk8s with ssh in SERVER=<server> using USERNAME=<user> with sudo
     cmds:
-    - config NUVOLARIS_KUBE=k3s
+    - config NUVOLARIS_KUBE=microk8s
     - task: install
-    - task: cert-manager
-    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/ks3-{{.SERVER}}.kubeconfig"
+    - task: kubeconfig
   
   delete:
     silent: true
-    desc: uninstall with ssh in SERVER=<server> using USER=<user> with sudo
+    desc: uninstall microk8s with ssh in SERVER=<server> using USERNAME=<user> with sudo
     cmds:
     - test -n "{{.SERVER}}" || die "please use SERVER="
-    - "{{.SSH}} '{{.USERNAME}}@{{.SERVER}}' sudo /usr/local/bin/k3s-uninstall.sh"
-    - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/ks3-{{.SERVER}}.kubeconfig"
+    - "{{.SSH}} {{.USERNAME}}@{{.SERVER}} sudo snap remove microk8s"
+    - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/mk8s-{{.SERVER}}.kubeconfig"
     vars:
       USERNAME: '{{.USERNAME | default "root"}}'
-  
+        
   status:
     desc: status of the server
     silent: true
@@ -88,18 +75,18 @@ tasks:
     cmds:
     - echo KUBECONFIG="$KUBECONFIG"
     - echo SERVER_HOST="$SERVER_HOST"
-    - echo SERVER_USERNAME="$SERVER_USERNAME"
+    - echo SERVER_USERNNAME="$SERVER_USERNAME"
   
   kubeconfig:
-    desc: recover the kubeconfig from a server with k3s
+    silent: true
+    desc: recover the kubeconfig from a server with microk8s
     cmds:
     - test -n "{{.SERVER}}" || die "please use SERVER="
     - >
       {{.SSH}} '{{.USERNAME}}@{{.SERVER}}' 
-      sudo cat /etc/rancher/k3s/k3s.yaml 
+      sudo microk8s config      
       | replace --stdin -s '127.0.0.1' -r '{{.SERVER}}'
       >"$NUV_TMP/kubeconfig"
-    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/ks3-{{.SERVER}}.kubeconfig"
+    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/mk8s-{{.SERVER}}.kubeconfig"
     vars:
       USERNAME: '{{.USERNAME | default "root"}}'
-

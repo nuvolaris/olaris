@@ -121,6 +121,7 @@ tasks:
     cmds:
     - rm ~/.nuv/config.json
     - rm "$NUV_TMP/runtimes.json"
+    - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/*.kubeconfig"
     - config -dump
 
   # read a value, empty => use a default
@@ -406,29 +407,43 @@ tasks:
     silent: true
     desc: select a different kubeconfig among those you created
     cmds:
-    - ls "$NUV_TMP/*.kubeconfig"  >/dev/null || die "no available kubeconfig to use"
     - |
-      if test -z "{{._n_}}"
-      then N=1
-          echo "Available Kubeconfig - select one by name or number"
+      if ls "$NUV_TMP/*.kubeconfig" >/dev/null  2>/dev/null
+      then
+        if test -z "{{._n_}}"
+        then N=1
+            echo "*** Available kubeconfig (select by name or number):"
+            for i in $NUV_TMP/*.kubeconfig
+            do  K=$(basename $i)
+                echo "$((N++))" "${K%%.kubeconfig}"
+            done
+        else 
+          N=1
           for i in $NUV_TMP/*.kubeconfig
           do  K=$(basename $i)
-              echo "$((N++))" "${K%%.kubeconfig}"
+              KK="${K%%.kubeconfig}"
+              if [[ "$((N++))" = "{{._n_}}" || "$KK" = "{{._n_}}" ]]
+              then  N=0
+                    if {{.__delete}}
+                    then echo removing kubeconfig "${KK}"
+                         rm "$i"
+                    else
+                      cp "$i" "$NUV_TMP/kubeconfig"
+                      echo now using kubeconfig "${KK}"  
+                      if kubectl --kubeconfig "$NUV_TMP/kubeconfig" cluster-info
+                      then echo now using kubeconfig "${KK}" 
+                      else echo "problems using this kubeconfig - removed"
+                           rm "$NUV_TMP/kubeconfig"
+                           echo please remove it with "nuv config use {{._n_}} --delete"
+                      fi
+                    fi
+                    break
+              fi
           done
-      else 
-        N=1
-        for i in $NUV_TMP/*.kubeconfig
-        do  K=$(basename $i)
-            KK="${K%%.kubeconfig}"
-            if [[ "$((N++))" = "{{._n_}}" || "$KK" = "{{._n_}}" ]]
-            then  cp "$i" "$NUV_TMP/kubeconfig"
-                  echo now using kubeconfig "${KK}"
-                  N=0
-                  break
-            fi
-        done
-        if test "$N" != "0"
-        then echo not found kubeconfig "{{._n_}}"
+          if test "$N" != "0"
+          then echo not found kubeconfig "{{._n_}}"
+          fi
         fi
+      else echo "no available kubeconfig to use"
       fi
- 
+

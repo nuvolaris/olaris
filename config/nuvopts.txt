@@ -10,7 +10,7 @@ Usage:
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>]
   config gke [--name=<name>] [--project=<project>] [--region=<region>] [--count=<count>] [--vm=<vm>] [--disk=<disk>]
   config (status|export|reset)
-  config use [<n>]
+  config use [<n>] [--delete]
  
 Commands:
   config apihost          configure the apihost (auto: auto assign) and enable tls
@@ -44,3 +44,4 @@ Options:
   --disk=<disk>         specify disk size
   --key=<key>           specify ssh key name
   --kubever=<kubever>   specify kubernetes version
+  --delete              delete the selected kubeconfig

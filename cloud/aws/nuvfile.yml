@@ -1,12 +1,6 @@
 version: "3"
 
 vars:
-  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
-  DIE: '{{if eq .D ""}}{{else}}die RUN:{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
-  DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
-  _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
-  TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
   SSH: "/usr/bin/ssh -oStrictHostKeyChecking=no"
 
 tasks:
@@ -18,7 +12,7 @@ tasks:
       - >
         aws ec2 describe-key-pairs --key-names $AWS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' >/dev/null
         || die 'Please generate or import the configured key  before continuing.'
-      - "{{.SSH}} -V || die 'you need an ssh client in your PATH'"
+      - "{{.SSH}} -V 2>/dev/null || die 'you need an ssh client in your PATH'"
       - config AWS_PREREQ_OK="true"
     status:
     - config AWS_PREREQ_OK
@@ -27,13 +21,15 @@ tasks:
     silent: true
     cmds:
       - task: prereq
-      - echo "*** List of created vms:"
+      - echo "*** Created VM:"
       - > 
-        aws ec2 describe-instances 
+        if ! aws ec2 describe-instances 
         --filters "Name=tag:Nuv,Values=true" 
         --query 'Reservations[].Instances[].[Tags[?Key==`NuvName`].Value | [0], Tags[?Key==`NuvType`].Value | [0], PublicIpAddress, State.Name]' 
         --output text
-        | awk '{printf "%-15s %-10s %-15s %s\n", $1, $2, $3, $4}'
+        | awk '{printf "%-15s %-10s %-15s %s\n", $1, $2, $3, $4}' ;
+        then echo "no vm found" ;
+        fi
 
   vm-create:
     silent: true
@@ -41,10 +37,7 @@ tasks:
       - task: prereq
       - |
         export NAME={{._name_}}
-        if {{.__microk8s}}
-        then envsubst -i microk8s.cf -o _vm-create.cf
-        else envsubst -i ubuntu.cf -o _vm-create.cf
-        fi
+        envsubst -i ubuntu.cf -o _vm-create.cf
       - echo "*** Creating the VM."
       - >
         aws cloudformation create-stack 
@@ -72,10 +65,21 @@ tasks:
       test -n "$(cat _vm-ip)" || die "Error: VM {{._name_}} not found"
     - cat _vm-ip
 
+  vm-kubeconfig:
+    silent: false
+    cmds:
+    - echo "*** Getting kubeconfig (if available) for:"
+    - task: vm-getip
+    - >
+      {{.SSH}} "$AWS_VM_IMAGE_USER@$(cat _vm-ip)" 
+      sudo cat /etc/kubeconfig >_kubeconfig
+    - cp _kubeconfig "$NUV_TMP/kubeconfig" "$NUV_TMP/aws-{{._name_}}.kubeconfig"
+
   vm-delete:
     cmds:
       - aws cloudformation delete-stack --stack-name nuv-{{._name_}}
       - aws cloudformation wait stack-delete-complete --stack-name nuv-{{._name_}}
+      - if test -e "$NUV_TMP/aws-{{._name_}}" ; then rm "$NUV_TMP/aws-{{._name_}}" ; fi
 
   zone-create:
     silent: true
@@ -119,17 +123,15 @@ tasks:
           aws route53 list-resource-record-sets --hosted-zone-id "$ID" --output table
         fi
 
-
   zone-update:
     silent: true
     cmds:
-      - task: vm-getip
       - task: zone-getid
       - cmd: |
           export DOMAIN={{._zone_}}
           if test -n "{{.__vm}}"
           then export REC=A
-               export VAL=$(cat _vm-ip)
+               export VAL=$(nuv cloud aws vm-getip "{{.__vm}}")
           elif test -n "{{.__ip}}"
           then export REC=A
                export VAL="{{.__ip}}"

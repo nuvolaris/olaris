@@ -17,14 +17,6 @@
 
 version: '3'
 
-vars:
-  D: ""
-  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
-  DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
-  _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
-  TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
-
 env:
   KUBECONFIG:
     sh: |-
@@ -44,7 +36,13 @@ tasks:
     desc: extract the kubeconfig to access
     silent: true
     cmds:
-    - "{{.RUN}} az aks get-credentials --name $AKS_NAME --resource-group $AKS_NAME --overwrite-existing -f {{.TMP}}/kubeconfig"
+    - >
+      az aks get-credentials 
+      --name $AKS_NAME 
+      --resource-group $AKS_NAME 
+      --overwrite-existing 
+      -f "$NUV_TMP/kubeconfig"
+    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/aks-$AKS_NAME.kubeconfig"
 
   config:
     desc: configure an Azure AKS kubernetes cluster
@@ -56,43 +54,43 @@ tasks:
     silent: true
     cmds:
     - test -n "$AKS_NAME" || die 'Please, configure AKS with "nuv config aks"'
-    - "{{.RUN}} az version || die 'You need to install and configure az cli tool before running this command.'"
+    - az version || die 'You need to install and configure az cli tool before running this command.'
 
   create:
     silent: true
     desc: create an Azure AKS kubernetes cluster
     cmds:
     - task: prereq
-    - "{{.DATA}} az account show --query 'id' -o tsv"
-    - "{{.RUN}} az account set --subscription {{._DATA}}"
-    - "{{.RUN}} az group create --name $AKS_NAME --location $AKS_REGION"
+    - az account set --subscription "$(az account show --query 'id' -o tsv)"
+    - az group create --name "$AKS_NAME" --location "$AKS_REGION"
     - > 
-      {{.RUN}} az aks create 
-      -g $AKS_NAME -n $AKS_NAME 
+      az aks create 
+      -g "$AKS_NAME" -n "$AKS_NAME"
       --enable-managed-identity 
-      --node-count $AKS_COUNT 
-      --node-osdisk-size=$AKS_DISK 
-      --node-vm-size=$AKS_VM 
-      --ssh-key-value=$AKS_SSHKEY"
+      --node-count "$AKS_COUNT"
+      --node-osdisk-size="$AKS_DISK" 
+      --node-vm-size="$AKS_VM" 
+      --ssh-key-value="$AKS_SSHKEY"
     - task: kubeconfig
     - task: ingress
     - task: certman
+    - config NUVOLARIS_KUBE=auto
 
   delete:
     silent: true
     desc: delete the current Azure AKS cluster
     cmds:
     - echo "*** Deleting the $AKS_NAME cluster"
-    - "{{.DATA}} az account show --query 'id' -o tsv"
-    - "{{.RUN}} az account set --subscription {{._DATA}}"
-    - "{{.RUN}} az aks delete --name $AKS_NAME --resource-group $AKS_NAME"
-    - "{{.RUN}} rm {{.TMP}}/kubeconfig"
+    - az account show --query 'id' -o tsv
+    - az account set --subscription {{._DATA}}
+    - az aks delete --name $AKS_NAME --resource-group $AKS_NAME
+    - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/aks-$AKS_NAME.kubeconfig"
 
   certman: 
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 1000 -m 1800 kubectl --kubeconfig {{.TMP}}/kubeconfig apply -f cert-manager.yaml
+        then retry -t 1000 -m 1800 kubectl --kubeconfig "$NUV_TMP/kubeconfig" apply -f cert-manager.yaml
         else kubectl apply -f cert-manager.yaml
         fi
 
@@ -100,8 +98,8 @@ tasks:
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 1000 -m 1800 kubectl --kubeconfig {{.TMP}}/kubeconfig apply -f ingress-deploy.yaml
-        else {{.RUN}} kubectl delete -f ingress-deploy.yaml
+        then retry -t 1000 -m 1800 kubectl --kubeconfig "$NUV_TMP/kubeconfig" apply -f ingress-deploy.yaml
+        else kubectl delete -f ingress-deploy.yaml
         fi
 
   lb:

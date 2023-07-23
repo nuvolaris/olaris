@@ -17,17 +17,17 @@
 version: '3'
 
 vars:
-  # set this to enable RUN run and DMP of info
-  D: ""
-  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
   INGRESS: "https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml"
 
 env:
   DATADIR:
     sh: echo $NUV_TMP/kind
   KUBECONFIG: 
-    sh: echo $NUV_TMP/kubeconfig
+    sh: |- 
+        if test -e "$NUV_TMP/kubeconfig"
+        then echo "$NUV_TMP/kubeconfig"
+        else echo ~/.kube/config
+        fi
 
 tasks:
 
@@ -36,7 +36,7 @@ tasks:
     desc: status of the Nuvolaris cluster in Docker
     cmds:
     - |
-      if {{.RUN}} kind get clusters | grep nuvolaris
+      if kind get clusters | grep nuvolaris
       then echo Cluster Nuvolaris up and running
       else echo Cluster Nuvolaris not found
       fi
@@ -62,14 +62,18 @@ tasks:
     cmds:
     - mkdir -p $DATADIR
     - envsubst -i kind.yaml -o _kind.yaml
-    - '{{.CAT}} _kind.yaml'
-    - '{{.RUN}} kind create cluster --wait=1m --name=nuvolaris --config=_kind.yaml --kubeconfig="$KUBECONFIG"'
-
+    - > 
+      kind create cluster 
+      --kubeconfig="$NUV_TMP/kubeconfig" 
+      --wait=1m --name=nuvolaris 
+      --config=_kind.yaml
 
   ingress:
     silent: true
     cmds:
-    - '{{.RUN}} kubectl apply -f ingress-deploy.yaml'
+    - > 
+      kubectl --kubeconfig="$NUV_TMP/kubeconfig" 
+      apply -f ingress-deploy.yaml
 
   create:
     silent: true
@@ -77,7 +81,7 @@ tasks:
     cmds:
     - task: cluster
     - task: ingress
-    - cp "$KUBECONFIG" "$NUV_TMP/kind.kubeconfig"
+    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/kind.kubeconfig"
     status:
     - kind get clusters | grep nuvolaris
 
@@ -85,5 +89,12 @@ tasks:
     silent: true
     desc: destroy the Nuvolaris cluster in Docker
     cmds:
-    - "{{.RUN}} kind delete clusters nuvolaris"
+    - kind delete clusters nuvolaris
     - rm "$KUBECONFIG" "$NUV_TMP/kind.kubeconfig"
+
+  kubeconfig:
+    desc: export kubeconfig
+    silent: true
+    cmds:
+    - kind export kubeconfig --name=nuvolaris --kubeconfig "$NUV_TMP/kubeconfig"
+    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/kind.kubeconfig"

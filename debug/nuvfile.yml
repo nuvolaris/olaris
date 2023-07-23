@@ -26,42 +26,15 @@ env:
       fi
 
 tasks:
-  k:info:
-    desc: show cluster info
-    cmds:
-      - kubectl cluster-info
 
-  k:no:
-    desc: show nodes
-    cmds:
-      - kubectl get nodes
+  kube:
+    desc: kubernetes support subcommand prefix
 
-  k:ns:
-    desc: show namespaces
-    cmds:
-      - kubectl get ns
-
-  k:po:
-    desc: show pods
-    cmds:
-      - |-
-        if test -z "{{._log_}}"
-        then kubectl -n nuvolaris get po,sts,jobs
-        else echo log '{{._log_}}'
-        fi
-
-  k:sv:
-    desc: show services
-    cmds:
-      - kubectl -n nuvolaris get svc
-
-  k:in:
-    desc: show ingress
-    cmds:
-      - kubectl -n nuvolaris get ingress
+  log:
+    desc: show logs
 
   images:
-    desc: show services
+    desc: show current images
     silent: true
     cmds:
       - kubectl -n nuvolaris get po nuvolaris-operator -o jsonpath='{.spec.containers[0].image}{"\n"}'
@@ -76,35 +49,21 @@ tasks:
       - |
         if test "{{.F}}" = "-"
         then FILE=~/.kube/config
-        else FILE="{{.F}}"
+        else FILE="$(realpath {{.F}})"
         fi
         if test -e $NUV_TMP/kubeconfig
         then  cp $NUV_TMP/kubeconfig $FILE
-              kubectl --kubeconfig $FILE cluster-info
+              echo exported current kubeconfig to $FILE
         else echo "No kubeconfig to export"
         fi
 
-  log:oper:
-    desc: show nuvolaris operator logs
-    cmds:
-      - kubectl -n nuvolaris logs po/nuvolaris-operator -f
-
-  log:cert:
-    desc: show cert manager logs
-    cmds:
-      - kubectl -n cert-manager logs -l app=cert-manager -f
-
-  log:ctl:
-    desc: show controller logs
-    cmds:
-      - kubectl -n nuvolaris logs controller-0 -f
 
   lb:
     desc: show ingress load balancer
     cmds:
       - kubectl -n ingress-nginx get svc
 
-  config:
+  status:
     desc: show deployment status
     silent: true
     cmds:
@@ -123,32 +82,20 @@ tasks:
       - echo NUVOLARIS_APIHOST=$NUVOLARIS_APIHOST
       - wsk property get | awk '/whisk API host/{print}'
 
-  crd:
+  config:
     desc: show deployed configuration
     silent: true
     cmds:
       - kubectl -n nuvolaris get wsk/controller -o yaml
 
-  k:ex:
-    desc: exec bash in pod P=...
-    cmds:
-      - test -n "{{.P}}" || die "use P= for pod"
-      - kubectl -n nuvolaris exec -ti {{.P}} -- bash
-
   watch:
-    desc: watch nodes and pod deployment
     silent: true
+    desc: watch nodes and pod deployment
     cmds:
       - watch kubectl -n nuvolaris get po,deploy,sts
 
   info:
     - wsk property get
-    - echo "KUBECONFIG=$KUBECONFIG"
-    - kubectl get nodes
 
-  boh:
-    cmds:
-    - /usr/bin/ssh -V || die "no ssh"
-    - config AWS_PREREQ_OK="true"
-    status:
-    - config AWS_PREREQ_OK 
+  rollout:
+  - kubectl -n nuvolaris rollout restart sts/controller

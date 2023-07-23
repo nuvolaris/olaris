@@ -99,3 +99,6 @@ tasks:
 
   rollout:
   - kubectl -n nuvolaris rollout restart sts/controller
+
+  test:
+    desc: "misc test tasks (totally transient do not rely on those of no reasons at all!)"

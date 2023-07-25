@@ -68,6 +68,7 @@ tasks:
   vm-kubeconfig:
     silent: false
     cmds:
+    - task: prereq
     - echo "*** Getting kubeconfig (if available) for:"
     - task: vm-getip
     - >

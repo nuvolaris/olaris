@@ -36,6 +36,7 @@ tasks:
     desc: extract the kubeconfig to access
     silent: true
     cmds:
+    - task: prereq
     - >
       az aks get-credentials 
       --name $AKS_NAME 
@@ -81,8 +82,7 @@ tasks:
     desc: delete the current Azure AKS cluster
     cmds:
     - echo "*** Deleting the $AKS_NAME cluster"
-    - az account show --query 'id' -o tsv
-    - az account set --subscription {{._DATA}}
+    - az account set --subscription $(az account show --query 'id' -o tsv)
     - az aks delete --name $AKS_NAME --resource-group $AKS_NAME
     - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/aks-$AKS_NAME.kubeconfig"
 
@@ -111,3 +111,9 @@ tasks:
         -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null
         || die "load balancer not found"
       - echo ""
+
+  status:
+    silent: true
+    desc: show the cluster status
+    cmds:
+    - az aks show -n $AKS_NAME -g $AKS_NAME -o table

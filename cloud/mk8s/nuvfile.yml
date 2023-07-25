@@ -81,6 +81,7 @@ tasks:
     silent: true
     desc: recover the kubeconfig from a server with microk8s
     cmds:
+    - task: prereq
     - test -n "{{.SERVER}}" || die "please use SERVER="
     - >
       {{.SSH}} '{{.USERNAME}}@{{.SERVER}}' 

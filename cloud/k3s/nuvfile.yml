@@ -93,6 +93,7 @@ tasks:
   kubeconfig:
     desc: recover the kubeconfig from a server with k3s
     cmds:
+    - task: prereq
     - test -n "{{.SERVER}}" || die "please use SERVER="
     - >
       {{.SSH}} '{{.USERNAME}}@{{.SERVER}}' 

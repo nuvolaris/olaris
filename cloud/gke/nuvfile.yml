@@ -44,6 +44,7 @@ tasks:
     desc: extract kubeconfig to access
     silent: true
     cmds:
+    - task: prereq
     - "{{.RUN}} gcloud container clusters get-credentials $GKE_NAME --zone=$GKE_REGION"
     env:
       KUBECONFIG: 

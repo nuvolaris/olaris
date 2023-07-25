@@ -145,5 +145,6 @@ tasks:
     silent: true
     desc: extract kubeconfig for connecting to the cluster
     cmds:
+    - task: prereq
     - "{{.RUN}} rm {{.TMP}}/kubeconfig"
     - "{{.RUN}} eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $EKS_REGION --kubeconfig {{.TMP}}/kubeconfig"

@@ -22,7 +22,7 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
-      kube: ${NUVOLARIS_KUBE:-detect}
+      kube: ${NUVOLARIS_KUBE:-auto}
       apihost: ${NUVOLARIS_APIHOST}
       #apiport: 80
       #protocol: http

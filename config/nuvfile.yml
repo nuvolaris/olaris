@@ -121,7 +121,6 @@ tasks:
     cmds:
     - rm ~/.nuv/config.json
     - rm "$NUV_TMP/runtimes.json"
-    - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/*.kubeconfig"
     - config -dump
 
   # read a value, empty => use a default

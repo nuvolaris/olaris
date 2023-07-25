@@ -56,6 +56,27 @@ tasks:
       done
       echo $APIHOST
 
+  wait-cm:
+    desc: wait for an annotation in nuvolaris cm/config 
+    silent: true
+    cmds:
+      - test -n "{{.JSONPATH}}" || die "use JSONPATH=<cm/config-jsonpath-lookup>"
+      - |
+        N=0
+        RES=false
+        while [[ $N -lt {{.RETRY}} ]]
+        do           
+          ANNOT_VALUE="$(kubectl -n nuvolaris get cm/config -o jsonpath='{{.JSONPATH}}')"
+          if [[ -z "$ANNOT_VALUE" ]]
+          then 
+            echo "$((N++)) Waiting for annotations {{.JSONPATH}} to be set"
+            sleep 5
+          else  
+            RES=true; break
+          fi
+        done
+        $RES      
+
   config:
     #desc: configuring nuvolaris
     silent: true
@@ -123,6 +144,16 @@ tasks:
       -p minio_port "$MINIO_PORT" \
       -p minio_data "$MINIO_BUCKET_DATA" 
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/minio -r"
+
+  postgres:
+    silent: true
+    desc: postgres test
+    cmds:    
+    - "{{.RUN}} wsk {{.ETC}} package update hello"
+    - |
+      POSTGRES_URL="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.postgres_url}')"
+      {{.RUN}} wsk {{.ETC}} action update hello/postgres postgres.js -p dburi "$POSTGRES_URL"
+    - "{{.RUN}} wsk {{.ETC}} action invoke hello/postgres -r"
 
   sleep:
     desc: sleep 

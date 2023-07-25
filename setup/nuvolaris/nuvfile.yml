@@ -56,6 +56,27 @@ tasks:
       done
       echo $APIHOST
 
+  wait-cm:
+    desc: wait for an annotation in nuvolaris cm/config 
+    silent: true
+    cmds:
+      - test -n "{{.JSONPATH}}" || die "use JSONPATH=<cm/config-jsonpath-lookup>"
+      - |
+        N=0
+        RES=false
+        while [[ $N -lt {{.RETRY}} ]]
+        do           
+          ANNOT_VALUE="$(kubectl -n nuvolaris get cm/config -o jsonpath='{{.JSONPATH}}')"
+          if [[ -z "$ANNOT_VALUE" ]]
+          then 
+            echo "$((N++)) Waiting for annotations {{.JSONPATH}} to be set"
+            sleep 5
+          else  
+            RES=true; break
+          fi
+        done
+        $RES      
+
   config:
     #desc: configuring nuvolaris
     silent: true

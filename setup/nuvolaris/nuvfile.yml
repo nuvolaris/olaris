@@ -145,6 +145,16 @@ tasks:
       -p minio_data "$MINIO_BUCKET_DATA" 
     - "{{.RUN}} wsk {{.ETC}} action invoke hello/minio -r"
 
+  postgres:
+    silent: true
+    desc: postgres test
+    cmds:    
+    - "{{.RUN}} wsk {{.ETC}} package update hello"
+    - |
+      POSTGRES_URL="$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.postgres_url}')"
+      {{.RUN}} wsk {{.ETC}} action update hello/postgres postgres.js -p dburi "$POSTGRES_URL"
+    - "{{.RUN}} wsk {{.ETC}} action invoke hello/postgres -r"
+
   sleep:
     desc: sleep 
     silent: false

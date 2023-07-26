@@ -72,3 +72,10 @@ tasks:
     cmds:
       - test -n "{{.P}}" || die "use P= for pod"
       - kubectl -n nuvolaris exec -ti {{.P}} -- bash
+
+  users:
+    silent: true
+    desc: show nuvolaris users custom resources
+    ignore_error: true
+    cmds:
+    - kubectl -n nuvolaris get wsku

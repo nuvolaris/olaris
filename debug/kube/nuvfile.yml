@@ -17,6 +17,10 @@
 
 version: "3"
 
+vars:
+  RETRY: 100
+  TIMEOUT: 10
+
 env:
   KUBECONFIG:
     sh: |-
@@ -26,6 +30,28 @@ env:
       fi
 
 tasks:
+
+  wait:
+    desc: wait for a value matching the given jsonpath on the specific resources under the namespace nuvolaris
+    silent: true
+    cmds:
+      - test -n "{{.OBJECT}}" || die "use OBJECT=<pod/pod-name>"
+      - test -n "{{.JSONPATH}}" || die "use JSONPATH=<cm/config-jsonpath-lookup>"
+      - |
+        N=0
+        RES=false
+        while [[ $N -lt {{.RETRY}} ]]
+        do           
+          MATCHING_VALUE="$(kubectl -n nuvolaris get {{.OBJECT}} -o jsonpath='{{.JSONPATH}}')"
+          if [[ -z "$MATCHING_VALUE" ]]
+          then 
+            echo "$((N++)) Waiting for {{.JSONPATH}} to be non empty value"
+            sleep 5
+          else  
+            RES=true; break
+          fi
+        done
+        $RES 
 
   info:
    silent: true
@@ -60,7 +86,7 @@ tasks:
 
   svc:
     silent: true
-    desc: show services
+    desc: show services, routes and ingresses
     ignore_error: true
     cmds:
     - kubectl -n nuvolaris get svc 

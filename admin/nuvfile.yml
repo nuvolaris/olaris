@@ -28,6 +28,17 @@ env:
       fi
 
 tasks:
+  deleteuser:
+    silent: true
+    cmds:
+      - |
+        if {{.DRY}}
+        then echo "User {{._username_}} deleted"
+        else 
+          kubectl -n nuvolaris delete wsku/{{._username_}}
+          nuv -config -r {{._username_}}
+        fi
+
   adduser:
     silent: true
     cmds:

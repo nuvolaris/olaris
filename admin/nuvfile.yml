@@ -46,10 +46,10 @@ tasks:
         check_result="'$USERNAME' matches the regex."
 
         # check {{._username_}} complies with lower case RFC 1123
-        username_match="$(nuv -validate -r '^[a-z0-9](?:[a-z0-9\-]{0,61}[a-z0-9])?$' $USERNAME)"
+        username_match="$(nuv -validate -r '^[a-z0-9](?:[a-z0-9]{0,61}[a-z0-9])?$' $USERNAME)"
 
         if [ ! "$username_match" = "$check_result" ]; then
-          nuv -die "User name must consist of lower case characters separated by '-' (RFC 1123)"
+          nuv -die "User name must consist of only lower case characters (max 61 chars)"
         fi
 
         # check {{._username_}} is not api or api.*

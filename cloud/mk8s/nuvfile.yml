@@ -29,6 +29,19 @@ env:
 
 tasks:
 
+  prereq:
+    silent: true
+    cmds:
+      - test -n "$AWS_SECRET_ACCESS_KEY" || die "please configure AWS with 'nuv config aws'"
+      - aws --version >/dev/null || die 'You need to install and configure aws cli tool before running this command.'
+      - >
+        aws ec2 describe-key-pairs --key-names $AWS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' >/dev/null
+        || die 'Please generate or import the configured key  before continuing.'
+      - "{{.SSH}} -V 2>/dev/null || die 'you need an ssh client in your PATH'"
+      - config AWS_PREREQ_OK="true"
+    status:
+    - config AWS_PREREQ_OK
+
   install:
     silent: true
     #desc: install k3s with ssh in SERVER=<server> using USERNAME=<user> with sudo

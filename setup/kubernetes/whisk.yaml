@@ -30,6 +30,8 @@ spec:
       provisioner: ${NUVOLARIS_PROVISIONER:-auto}
       ingressclass: ${NUVOLARIS_INGRESSCLASS:-auto}
       ingresslb: ${NUVOLARIS_INGRESSLB:-auto}
+  controller:
+    image: "$IMAGES_CONTROLLER" 
   components:
     # start openwhisk controller
     openwhisk: true

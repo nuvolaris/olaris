@@ -45,15 +45,22 @@ tasks:
     desc: import an openshift configuration
     cmds:
     - |
-      if test -e "{{._kubeconfig_}}"
-      then cp "{{._kubeconfig_}}" "$NUV_TMP/kubeconfig"
-      else echo "{{._kubeconfig_}} not found" ; false
+      if test -e "$CONFIG"
+      then  cp "$CONFIG" "$NUV_TMP/kubeconfig"
+            cp "$CONFIG" "$NUV_TMP/openshift.kubeconfig"
+            echo "$CONFIG" imported as "openshift.kubeconfig"
+            oc --kubeconfig "$NUV_TMP/kubeconfig" cluster-info
+      else echo "$CONFIG not found" ; false
       fi
+    env:
+      CONFIG:
+        sh: realpath {{._kubeconfig_}}
 
   apihost:
     silent: true
     desc: prepare
     cmds:
+    - config NUVOLARIS_KUBE=openshift
     - "nuv config apihost '{{.APIHOST}}'"
     vars:
       APIHOST:

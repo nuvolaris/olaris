@@ -83,8 +83,11 @@ tasks:
         fi
 
         # uppercase user to create the secrets in the right format (USERNAME_SECRET_XXX)
-        upperCaseUser="$(echo $USERNAME | nuv -awk '{print toupper($0)}')"
+        upperCaseUser=${USERNAME^^}
+
         nuv util user-secrets $upperCaseUser
+
+        echo "Creating user ${USERNAME}..."
 
         export USER_SECRET_REDIS=$(nuv -config "${upperCaseUser}_SECRET_REDIS")
         export USER_SECRET_POSTGRES=$(nuv -config "${upperCaseUser}_SECRET_POSTGRES")

@@ -130,6 +130,7 @@ tasks:
     silent: true
     desc: delete the current Amazon EKS cluster
     cmds:
+    - "{{.RUN}} envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
     - echo "*** Deleting the Cluster"
     - "{{.RUN}} eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction"
     - "{{.RUN}} rm $NUV_TMP/kubeconfig"

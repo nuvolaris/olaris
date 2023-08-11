@@ -18,7 +18,7 @@
 version: "3"
 
 vars:
-  SSH: "/usr/bin/ssh -oStrictHostKeyChecking=no"
+  SSH: "ssh -oStrictHostKeyChecking=no"
 
 tasks:
   prereq:
@@ -32,14 +32,14 @@ tasks:
       - "{{.SSH}} -V 2>/dev/null || die 'you need an ssh client in your PATH'"
       - config AWS_PREREQ_OK="true"
     status:
-    - config AWS_PREREQ_OK
+      - config AWS_PREREQ_OK
 
   vm-list:
     silent: true
     cmds:
       - task: prereq
       - echo "*** Created VM:"
-      - > 
+      - >
         if ! aws ec2 describe-instances 
         --filters "Name=tag:Nuv,Values=true" 
         --query 'Reservations[].Instances[].[Tags[?Key==`NuvName`].Value | [0], Tags[?Key==`NuvType`].Value | [0], PublicIpAddress, State.Name]' 
@@ -60,7 +60,7 @@ tasks:
         aws cloudformation create-stack 
         --stack-name nuv-{{._name_}} 
         --template-body file://_vm-create.cf 
-        || true 
+        || true
       - echo "*** Waiting until the VM is started..."
       - >
         aws cloudformation wait 
@@ -75,23 +75,23 @@ tasks:
   vm-getip:
     silent: true
     cmds:
-    - |
-      aws ec2 describe-instances --output json \
-      --filters Name=tag:Nuv,Values=true Name=tag:NuvName,Values={{._name_}} Name=instance-state-name,Values=running \
-      | jq -r '.Reservations[].Instances[].PublicIpAddress' >_vm-ip
-      test -n "$(cat _vm-ip)" || die "Error: VM {{._name_}} not found"
-    - cat _vm-ip
+      - |
+        aws ec2 describe-instances --output json \
+        --filters Name=tag:Nuv,Values=true Name=tag:NuvName,Values={{._name_}} Name=instance-state-name,Values=running \
+        | jq -r '.Reservations[].Instances[].PublicIpAddress' >_vm-ip
+        test -n "$(cat _vm-ip)" || die "Error: VM {{._name_}} not found"
+      - cat _vm-ip
 
   vm-kubeconfig:
     silent: false
     cmds:
-    - task: prereq
-    - echo "*** Getting kubeconfig (if available) for:"
-    - task: vm-getip
-    - >
-      {{.SSH}} "$AWS_VM_IMAGE_USER@$(cat _vm-ip)" 
-      sudo cat /etc/kubeconfig >_kubeconfig
-    - cp _kubeconfig "$NUV_TMP/kubeconfig" "$NUV_TMP/aws-{{._name_}}.kubeconfig"
+      - task: prereq
+      - echo "*** Getting kubeconfig (if available) for:"
+      - task: vm-getip
+      - >
+        {{.SSH}} "$AWS_VM_IMAGE_USER@$(cat _vm-ip)" 
+        sudo cat /etc/kubeconfig >_kubeconfig
+      - cp _kubeconfig "$NUV_TMP/kubeconfig" "$NUV_TMP/aws-{{._name_}}.kubeconfig"
 
   vm-delete:
     cmds:
@@ -122,13 +122,13 @@ tasks:
   zone-getid:
     silent: true
     cmds:
-    - |
-      if test -n "{{._zone_}}"
-      then 
-          aws route53 list-hosted-zones --output text \
-          --query "HostedZones[?Name=='{{._zone_}}.'].Id" >_zone-id
-          test -n "$(cat _zone-id)" || die "Error: zone {{._zone_}} not found"
-      fi
+      - |
+        if test -n "{{._zone_}}"
+        then 
+            aws route53 list-hosted-zones --output text \
+            --query "HostedZones[?Name=='{{._zone_}}.'].Id" >_zone-id
+            test -n "$(cat _zone-id)" || die "Error: zone {{._zone_}} not found"
+        fi
 
   zone-list:
     silent: true
@@ -173,4 +173,3 @@ tasks:
         aws route53 change-resource-record-sets 
         --hosted-zone-id=$(cat _zone-id) 
         --change-batch file://_upsert.json
-

@@ -94,6 +94,8 @@ spec:
     controller:
       javaOpts: "-Xmx2048M"
   redis:
+    persistence-enabled: ${REDIS_PERSISTENCE_ENABLED:-true}
+    max-memory: ${REDIS_MAX_MEMORY:-1000mb}
     volume-size: 10
     default:
       password: $SECRET_REDIS_DEFAULT

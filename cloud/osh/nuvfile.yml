@@ -74,3 +74,8 @@ tasks:
       - task: prereq
       - task: copy
       - task: apihost
+
+  setup:
+    desc: setup openshift cluster with acme-openshift
+    cmds:
+      - kubectl apply -f acme-openshift

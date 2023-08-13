@@ -92,7 +92,12 @@ tasks:
     silent: true
     desc: watch nodes and pod deployment
     cmds:
-      - watch kubectl -n nuvolaris get po,deploy,sts
+      - |
+        while true
+        do   
+          kubectl -n nuvolaris get po,deploy,sts
+          sleep 5
+        done  
 
   info:
     - wsk property get

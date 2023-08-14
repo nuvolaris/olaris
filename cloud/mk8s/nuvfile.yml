@@ -99,7 +99,7 @@ tasks:
     - >
       {{.SSH}} '{{.USERNAME}}@{{.SERVER}}' 
       sudo microk8s config      
-      | replace --stdin -s '127.0.0.1' -r '{{.SERVER}}'
+      | sed -e "s!server: .*!server: https://{{.SERVER}}:16443!"
       >"$NUV_TMP/kubeconfig"
     - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/mk8s-{{.SERVER}}.kubeconfig"
     vars:

@@ -57,11 +57,25 @@ tasks:
         else echo "No kubeconfig to export"
         fi
 
-
   lb:
     desc: show ingress load balancer
     cmds:
       - kubectl -n ingress-nginx get svc
+
+  certs:
+    desc: show certificates
+    cmds:
+      - kubectl -n nuvolaris get ClusterIssuers,Certificates,CertificateRequests,Orders,Challenges
+
+  ingress:
+    desc: show ingresses
+    cmds:
+      - kubectl -n nuvolaris get ingress 
+
+  route:
+    desc: show openshift route
+    cmds:
+      - kubectl -n nuvolaris get route        
 
   status:
     desc: show deployment status

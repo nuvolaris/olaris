@@ -217,9 +217,15 @@ tasks:
     ignore_error: true
     desc: delete cluster
     cmds:
+      - "{{.RUN}} kubectl -n nuvolaris delete wsku --all"
       - "{{.RUN}} kubectl -n nuvolaris delete wsk/controller"
       - "{{.RUN}} kubectl -n nuvolaris delete all --all"
-      - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"
+      - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"     
+      - "{{.RUN}} kubectl -n nuvolaris delete ing --all --grace-period=0"
+      - "{{.RUN}} kubectl -n nuvolaris delete kubegres --all"
+      - "{{.RUN}} kubectl -n nuvolaris delete cm/config --grace-period=0"
+      - "{{.RUN}} kubectl delete clusterissuers/letsencrypt-issuer"
+      - "{{.RUN}} kubectl get ns nuvolaris -o json | jq '.spec.finalizers = []' | kubectl replace --raw '/api/v1/namespaces/nuvolaris/finalize' -f -"
       - "{{.RUN}} kubectl delete ns nuvolaris"
 
   unlock:

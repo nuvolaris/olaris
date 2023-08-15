@@ -124,5 +124,3 @@ tasks:
     kubectl -n nuvolaris patch wsk/controller 
     --type=merge --patch '{"metadata": {"finalizers":[] } }'
 
-  test:
-    desc: "misc test tasks (totally transient do not rely on those of no reasons at all!)"

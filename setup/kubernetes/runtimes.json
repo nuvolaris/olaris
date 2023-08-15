@@ -20,7 +20,7 @@
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
                     "name": "action-nodejs-v18",
-                    "tag": "0.3.0-dev.2305231724"
+                    "tag": "3.0.0-beta.2308141606"
                 },
                 "deprecated": false,
                 "attached": {
@@ -47,7 +47,7 @@
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
                     "name": "action-nodejs-v16",
-                    "tag": "0.3.0-dev.2305231724"
+                    "tag": "3.0.0-beta.2308141606"
                 },
                 "deprecated": false,
                 "attached": {
@@ -62,8 +62,8 @@
                 "default": true,
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
-                    "name": "action-python-v310",
-                    "tag": "0.3.0-morpheus.23012319"
+                    "name": "action-python-v311",
+                    "tag": "3.0.0-beta.2308150939"
                 },
                 "deprecated": false,
                 "attached": {
@@ -85,12 +85,12 @@
                 ]
             },
             {
-                "kind": "python:310ai",
+                "kind": "python:310",
                 "default": false,
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
-                    "name": "action-python-v310-ai",
-                    "tag": "0.3.0-morpheus.23030312"
+                    "name": "action-python-v310",
+                    "tag": "3.0.0-beta.2308150939"
                 },
                 "deprecated": false,
                 "attached": {

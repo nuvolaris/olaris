@@ -22,8 +22,8 @@ vars:
 env:
   KUBECONFIG:
     sh: |-
-      if test -e "$NUV_TMP/kubeconfig"
-      then echo "$NUV_TMP/kubeconfig"
+      if test -e $(realpath "$NUV_TMP/kubeconfig")
+      then echo $(realpath "$NUV_TMP/kubeconfig")
       else echo ~/.kube/config
       fi
 
@@ -98,7 +98,7 @@ tasks:
       - >
         {{.SSH}} '{{.USERNAME}}@{{.SERVER}}' 
         sudo microk8s config      
-        | awk '/server:/ {$2="https://{{.SERVER}}:16443"} 1'
+        | awk '/server:/ {$0="  server: https://{{.SERVER}}:16443"} 1'
         >"$NUV_TMP/kubeconfig"
       - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/mk8s-{{.SERVER}}.kubeconfig"
     vars:

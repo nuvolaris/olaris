@@ -30,8 +30,8 @@ vars:
 env:
   KUBECONFIG:
     sh: |
-      if test -e $NUV_TMP/kubeconfig
-      then echo  $NUV_TMP/kubeconfig
+      if test -e $(realpath "$NUV_TMP/kubeconfig")
+      then echo $(realpath "$NUV_TMP/kubeconfig")
       else echo ~/.kube/config
       fi
 
@@ -101,25 +101,25 @@ tasks:
   runtimes:
     silent: true
     cmds:
-    - |-
-      cat <<EOF >_runtimes.yaml
-      apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: openwhisk-runtimes
-        namespace: nuvolaris
-      data:
-        runtimes.json: |-
-      EOF
-    - awk '{ print "        " $0}' <"{{.RUNTIMES}}" >>_runtimes.yaml
-    - kubectl -n nuvolaris apply -f _runtimes.yaml
+      - |-
+        cat <<EOF >_runtimes.yaml
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: openwhisk-runtimes
+          namespace: nuvolaris
+        data:
+          runtimes.json: |-
+        EOF
+      - awk '{ print "        " $0}' <"{{.RUNTIMES}}" >>_runtimes.yaml
+      - kubectl -n nuvolaris apply -f _runtimes.yaml
     vars:
-      RUNTIMES: 
+      RUNTIMES:
         sh: |
-            if test -e "$NUV_TMP/runtimes.json"
-            then echo "$NUV_TMP/runtimes.json"
-            else echo "runtimes.json"
-            fi
+          if test -e "$NUV_TMP/runtimes.json"
+          then echo "$NUV_TMP/runtimes.json"
+          else echo "runtimes.json"
+          fi
 
   prepare:
     #desc: prepare the environment
@@ -220,7 +220,7 @@ tasks:
       - "{{.RUN}} kubectl -n nuvolaris delete wsku --all"
       - "{{.RUN}} kubectl -n nuvolaris delete wsk/controller"
       - "{{.RUN}} kubectl -n nuvolaris delete all --all"
-      - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"     
+      - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"
       - "{{.RUN}} kubectl -n nuvolaris delete ing --all --grace-period=0"
       - "{{.RUN}} kubectl -n nuvolaris delete kubegres --all"
       - "{{.RUN}} kubectl -n nuvolaris delete cm/config --grace-period=0"
@@ -232,7 +232,6 @@ tasks:
     silent: true
     desc: "unlock locked deletion (removing a finalizers)"
     cmds:
-    - >
-      kubectl -n nuvolaris patch wsk/controller --type=merge 
-      --patch '{"metadata": {"finalizers":[] } }'
-
+      - >
+        kubectl -n nuvolaris patch wsk/controller --type=merge 
+        --patch '{"metadata": {"finalizers":[] } }'

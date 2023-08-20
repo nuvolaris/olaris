@@ -15,30 +15,40 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: '3'
+version: "3"
+
+vars:
+  SSH: "/usr/bin/ssh -oStrictHostKeyChecking=no"
 
 tasks:
+  prereq:
+    silent: true
+    cmds:
+      - gcloud --version >/dev/null || die 'You need to install and configure gcloud cli tool before running this command.'
+    #status:
+    #- config AWS_PREREQ_OK
 
-  aws: 
-    desc: Amazon Web Services subcommands
+  vm-list:
+    silent: true
+    cmds:
+      - task: prereq
+      - echo "*** Created VM:"
+      - > 
+        echo list vm - todo
 
-  gcloud: 
-    desc: Google Cloud subcommands
+  vm-create:
+    silent: true
+    cmds:
+      - task: prereq
+      - echo vm create todo
+ 
+  vm-getip:
+    silent: true
+    cmds:
+    - |
+      echo vm ip todo
 
-  eks: 
-    desc: Amazon Web Services - EKS subcommands
+  vm-delete:
+    cmds:
+    - echo vm delete todo
 
-  aks:
-    desc: Azure AKS subcommands
-
-  gke:
-    desc: Google Cloud - GKE subcommands
-
-  k3s:                 
-    desc: Rancher K3S subcommands
-  
-  mk8s:                 
-    desc: Ubuntu MicroK8s subcommands
-  
-  osh:
-    desc: RedHat OpenShift subcommands

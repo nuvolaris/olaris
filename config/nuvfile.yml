@@ -232,6 +232,137 @@ tasks:
         VAL: "{{.__key}}"
         DEF: "nuvolaris-key"
 
+
+  eks:
+    silent: true
+    cmds:
+    - test -n "$AWS_SECRET_ACCESS_KEY" || die "Please, configure first AWS with nuv config aws"
+    - task: read
+      vars:
+        MSG: "EKS Name for Cluster and Node Group"
+        VAR: "EKS_NAME"
+        VAL: "{{.__name}}"
+        DEF: "nuvolaris"
+    - task: read
+      vars:
+        MSG: "EKS region"
+        HINT: > 
+              To get a list of valid values use:
+                aws ec2 describe-regions --output table
+        VAR: "EKS_REGION"
+        VAL: "{{.__region}}"
+        DEF: "us-east-1"
+    - task: read
+      vars:
+        MSG: "EKS number of worker nodes"
+        VAR: "EKS_COUNT"
+        VAL: "{{.__count}}"
+        DEF: "3"
+    - task: read
+      vars:
+        MSG: "EKS virtual machine type"
+        HINT: >
+              To get a list of valid values, use:
+                aws ec2 describe-instance-types --query 'InstanceTypes[].InstanceType' --output table 
+        VAR: "EKS_VM"
+        VAL: "{{.__vm}}"
+        DEF: "m5.xlarge"
+    - task: read
+      vars:
+        MSG: "EKS disk size in gigabyte"
+        VAR: "EKS_DISK"
+        VAL: "{{.__disk}}"
+        DEF: "50"
+    - task: read
+      vars:
+        MSG: "EKS Kubernetes Version"
+        VAR: "EKS_KUBERNETES_VERSION"
+        VAL: "{{.__kubever}}"
+        DEF: "1.25"
+    - config -d | grep EKS_
+
+  gcloud:
+    silent: true
+    cmds:
+    - task: readforce
+      vars:
+        MSG: "GCloud Project Id"
+        VAR: "GCLOUD_PROJECT"
+        VAL: "{{.__project}}"
+    - task: read
+      vars:
+        MSG: "GCloud Zone"
+        HINT: > 
+              To get a list of valid values use:
+                gcloud compute zones list
+        VAR: "GCLOUD_REGION"
+        VAL: "{{.__region}}"
+        DEF: "us-east1"
+    - task: read
+      vars:
+        MSG: "GCloud virtual machine type"
+        HINT: >
+              To get a list of valid values, use:
+                gcloud compute machine-types list
+        VAR: "GCLOUD_VM"
+        VAL: "{{.__vm}}"
+        DEF: "n2-standard-4"
+    - task: read
+      vars:
+        MSG: "GCloud disk size in gigabyte"
+        VAR: "GCLOUD_DISK"
+        VAL: "{{.__disk}}"
+        DEF: "50"
+    - config -d | grep GCLOUD_
+
+  gke:
+    silent: true
+    cmds:
+    - task: readforce
+      vars:
+        MSG: "GCloud Project Id"
+        VAR: "GKE_PROJECT"
+        VAL: "{{.__project}}"
+    - task: read
+      vars:
+        MSG: "GCloud Cluster Name"
+        HINT: >
+              The cluster name must be unique.
+        VAR: "GKE_NAME"
+        VAL: "{{.__name}}"
+        DEF: "nuvolaris"
+    - task: read
+      vars:
+        MSG: "GCloud Cluster Zone"
+        HINT: > 
+              To get a list of valid values use:
+                gcloud compute zones list
+        VAR: "GKE_REGION"
+        VAL: "{{.__region}}"
+        DEF: "us-east1"
+    - task: read
+      vars:
+        MSG: "GCloud number of worker nodes"
+        VAR: "GKE_COUNT"
+        VAL: "{{.__count}}"
+        DEF: "3"
+    - task: read
+      vars:
+        MSG: "GKE virtual machine type"
+        HINT: >
+              To get a list of valid values, use:
+                gcloud compute machine-types list
+        VAR: "GKE_VM"
+        VAL: "{{.__vm}}"
+        DEF: "e2-standard-2"
+    - task: read
+      vars:
+        MSG: "GKE disk size in gigabyte"
+        VAR: "GKE_DISK"
+        VAL: "{{.__disk}}"
+        DEF: "50"
+    - config -d | grep GKE_
+
   aks:
     silent: true
     cmds:
@@ -284,102 +415,6 @@ tasks:
           VAL: "{{.__key}}"
           DEF: "~/.ssh/id_rsa.pub"          
     - config -d | grep AKS_
-
-  eks:
-    silent: true
-    cmds:
-    - test -n "$AWS_SECRET_ACCESS_KEY" || die "Please, configure first AWS with nuv config aws"
-    - task: read
-      vars:
-        MSG: "EKS Name for Cluster and Node Group"
-        VAR: "EKS_NAME"
-        VAL: "{{.__name}}"
-        DEF: "nuvolaris"
-    - task: read
-      vars:
-        MSG: "EKS region"
-        HINT: > 
-              To get a list of valid values use:
-                aws ec2 describe-regions --output table
-        VAR: "EKS_REGION"
-        VAL: "{{.__region}}"
-        DEF: "us-east-1"
-    - task: read
-      vars:
-        MSG: "EKS number of worker nodes"
-        VAR: "EKS_COUNT"
-        VAL: "{{.__count}}"
-        DEF: "3"
-    - task: read
-      vars:
-        MSG: "EKS virtual machine type"
-        HINT: >
-              To get a list of valid values, use:
-                aws ec2 describe-instance-types --query 'InstanceTypes[].InstanceType' --output table 
-        VAR: "EKS_VM"
-        VAL: "{{.__vm}}"
-        DEF: "m5.xlarge"
-    - task: read
-      vars:
-        MSG: "EKS disk size in gigabyte"
-        VAR: "EKS_DISK"
-        VAL: "{{.__disk}}"
-        DEF: "50"
-    - task: read
-      vars:
-        MSG: "EKS Kubernetes Version"
-        VAR: "EKS_KUBERNETES_VERSION"
-        VAL: "{{.__kubever}}"
-        DEF: "1.25"
-    - config -d | grep EKS_
-
-  gke:
-    silent: true
-    cmds:
-    - task: readforce
-      vars:
-        MSG: "GCloud Project Id"
-        VAR: "GKE_PROJECT"
-        VAL: "{{.__project}}"
-    - task: read
-      vars:
-        MSG: "GCloud Cluster Name"
-        HINT: >
-              The cluster name must be unique.
-        VAR: "GKE_NAME"
-        VAL: "{{.__name}}"
-        DEF: "nuvolaris"
-    - task: read
-      vars:
-        MSG: "GCloud Cluster Zone"
-        HINT: > 
-              To get a list of valid values use:
-                gcloud compute zones list
-        VAR: "GKE_REGION"
-        VAL: "{{.__region}}"
-        DEF: "us-east1"
-    - task: read
-      vars:
-        MSG: "GCloud number of worker nodes"
-        VAR: "GKE_COUNT"
-        VAL: "{{.__count}}"
-        DEF: "3"
-    - task: read
-      vars:
-        MSG: "GKE virtual machine type"
-        HINT: >
-              To get a list of valid values, use:
-                gcloud compute machine-types list
-        VAR: "GKE_VM"
-        VAL: "{{.__vm}}"
-        DEF: "e2-standard-2"
-    - task: read
-      vars:
-        MSG: "GKE disk size in gigabyte"
-        VAR: "GKE_DISK"
-        VAL: "{{.__disk}}"
-        DEF: "50"
-    - config -d | grep GKE_
 
   runtimes:
     silent: true

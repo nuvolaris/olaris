@@ -1,0 +1,16 @@
+Subcommand:
+  nuv cloud gcloud
+
+Usage:
+  gcloud vm-list
+  gcloud vm-create <name>
+  gcloud vm-delete <name>
+  gcloud vm-getip  <name>
+  gcloud vm-exec   <name> <command>
+
+Commands:
+  vm-list     lists the vm and their ips
+  vm-create   create a vm
+  vm-getip    get ip
+  vm-delete   delete the vm
+

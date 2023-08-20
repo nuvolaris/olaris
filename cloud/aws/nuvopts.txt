@@ -15,7 +15,7 @@ Usage:
 
 Commands:
   vm-list     lists the vm and their ips
-  vm-create   create a vm, if --microk8s, also installing microk8s
+  vm-create   create a vm
   vm-getip    get ip
   vm-delete   delete the vm
   zone-create create a zone - you will have to delegate the zone 

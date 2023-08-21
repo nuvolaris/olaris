@@ -6,8 +6,6 @@ Usage:
   aws vm-create <name>
   aws vm-delete <name>
   aws vm-getip  <name>
-  aws vm-kubeconfig <name>
-  aws vm-exec   <name> <command>
   aws zone-create <zone>
   aws zone-delete <zone>
   aws zone-list [<zone>]
@@ -22,5 +20,4 @@ Commands:
               from the parent zone assigning the nameservers
   zone-delete delete a zone
   zone-list   list zones
-  zone-update update a zone with an ip or a cname
-
+  zone-update update a zone with an ip, a cname or the ip of a vm

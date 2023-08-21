@@ -15,12 +15,19 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
-apt update
-apt install -y snapd curl grep sudo
+IP="$1"
+# if not provided try to retrieve the public it
+if test -z "$IP"
+then IP="$(curl https://ipecho.net/plain)"
+fi
+if test -z "$IP"
+then IP="$(curl ifconfig.me)"
+fi
+# install microk8s
+apt-get update
+apt-get install -y snapd curl grep sudo
 snap install microk8s --classic
 microk8s stop
-IP="$(curl -sL http://169.254.169.254/latest/meta-data/public-ipv4)"
 sed -i "/#MOREIPS/a IP.10 = $IP" /var/snap/microk8s/current/certs/csr.conf.template
 microk8s start
 while microk8s kubectl get nodes | grep NotReady

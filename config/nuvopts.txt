@@ -6,7 +6,7 @@ Usage:
   config runtimes [<runtimesjson>]
   config (enable|disable) [--all] [--redis] [--mongodb] [--minio] [--cron] [--static] [--postgres]
   config aws [--access=<access>] [--secret=<secret>] [--region=<region>] [--image=<image>] [--vm=<vm>] [--vmuser=<vmuser>] [--disk=<disk>] [--key=<key>] 
-  config gcloud [--project=<project>] [--region=<region>] [--vm=<vm>] [--disk=<disk>]
+  config gcloud [--project=<project>] [--region=<region>] [--vm=<vm>] [--disk=<disk>] [--key=<key>]
   config eks [--name=<name>] [--region=<region>] [--count=<count>] [--vm=<vm>] [--disk=<disk>] [--kubever=<kubever>]
   config gke [--name=<name>] [--project=<project>] [--region=<region>] [--count=<count>] [--vm=<vm>] [--disk=<disk>]
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>]
@@ -18,7 +18,8 @@ Commands:
   config runtime          show the current runtime.json or import the <runtime-json> if provided
   config enable           enable Nuvolaris services to install
   config disable          disable Nuvolaris services to install
-  config aws              configure Amazon Web Service (AWS) credentials
+  config aws              configure Amazon Web Service (AWS) credentials and parameters
+  config gcloud           configure Google Cloud credentials and parameters
   config eks              configure Amazon EKS Kubernetes Cluster
   config aks              configure Azure AKS Kubernetest Cluster
   config gke              configure Google Cloud GKE Kubernetest Cluster

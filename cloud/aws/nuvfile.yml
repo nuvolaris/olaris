@@ -24,7 +24,7 @@ tasks:
   prereq:
     silent: true
     cmds:
-      - test -n "$AWS_SECRET_ACCESS_KEY" || die "please configure AWS with 'nuv config aws'"
+      - test -n "$AWS_SECRET_ACCESS_KEY" || die "Please configure AWS with 'nuv config aws'"
       - aws --version >/dev/null || die 'You need to install and configure aws cli tool before running this command.'
       - >
         aws ec2 describe-key-pairs --key-names $AWS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' >/dev/null

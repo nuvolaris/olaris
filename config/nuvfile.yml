@@ -312,7 +312,18 @@ tasks:
         MSG: "GCloud disk size in gigabyte"
         VAR: "GCLOUD_DISK"
         VAL: "{{.__disk}}"
-        DEF: "50"
+        DEF: "200"
+    - task: read
+      vars:
+          MSG: "GCloud public SSH key"
+          HINT: >
+                If you already have a public SSH key provide its path here.
+                If you do not have it, generate a key pair with the following command:
+                  ssh-keygen
+                The public key defaults to ~/.ssh/id_rsa.pub.
+          VAR: "GCLOUD_SSHKEY"
+          VAL: "{{.__key}}"
+          DEF: "~/.ssh/id_rsa.pub"          
     - config -d | grep GCLOUD_
 
   gke:

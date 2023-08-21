@@ -24,31 +24,76 @@ tasks:
   prereq:
     silent: true
     cmds:
-      - gcloud --version >/dev/null || die 'You need to install and configure gcloud cli tool before running this command.'
-    #status:
-    #- config AWS_PREREQ_OK
+      - test -n "$GCLOUD_PROJECT" || die "Please configure GCloud with 'nuv config gcloud'"
+      - gcloud --version >/dev/null || die 'You need to install and configure the gcloud CLI tool before running this command.'
+      - config GCLOUD_PREREQ_OK="true"
+    status:
+    - config GCLOUD_PREREQ_OK
 
   vm-list:
     silent: true
     cmds:
       - task: prereq
       - echo "*** Created VM:"
+      - gcloud compute instances list --filter="labels.nuv=true" --format="table(name,zone)"
+
+  vm-firewall-rule:
+    silent: true
+    cmds:
+    - > 
+      gcloud compute firewall-rules describe nuvolaris-vm ||
+      gcloud compute firewall-rules create nuvolaris-vm 
+      --allow tcp:80,tcp:443,tcp:6443,tcp:16443 
+      --target-tags=nuvolaris-vm
+
+  vm-add-sshkey:
+    silent: true
+    cmds:
       - > 
-        echo list vm - todo
+       cat $GCLOUD_SSHKEY | 
+       awk '/ssh-rsa/{ print "ubuntu:ssh-rsa " $2 }'
+       >_sshkey
+      - >  
+        gcloud compute instances 
+        add-metadata "{{._name_}}" --zone="$GCLOUD_REGION" 
+        --metadata-from-file ssh-keys=_sshkey
 
   vm-create:
     silent: true
     cmds:
       - task: prereq
-      - echo vm create todo
+      - task: vm-firewall-rule
+      - >
+        gcloud compute instances describe "{{._name_}}" --zone="$GCLOUD_REGION" 2>/dev/null >/dev/null
+        || gcloud compute instances 
+        create "{{._name_}}" --zone="$GCLOUD_REGION"
+        --machine-type="$GCLOUD_VM"
+        --boot-disk-size="$GCLOUD_DISK"GB
+        --image-family=ubuntu-minimal-2204-lts
+        --image-project=ubuntu-os-cloud
+        --tags=nuvolaris-vm
+        --labels=nuv=true
+      - task: vm-add-sshkey
+      - task: vm-getip
+      - >
+        echo "*** Waiting until the VM is ready..." ;
+        retry -t 1000 -m 1800 {{.SSH}} 
+        "ubuntu@$(cat _vm-ip)" hostname
+
  
   vm-getip:
     silent: true
     cmds:
-    - |
-      echo vm ip todo
+    - >
+      gcloud compute instances 
+      describe "{{._name_}}" --zone="$GCLOUD_REGION"
+      --format='get(networkInterfaces[0].accessConfigs[0].natIP)' >_vm-ip
+    - cat _vm-ip
 
   vm-delete:
     cmds:
-    - echo vm delete todo
+    - > 
+      gcloud compute instances 
+      delete "{{._name_}}" 
+      --zone="$GCLOUD_REGION"
 

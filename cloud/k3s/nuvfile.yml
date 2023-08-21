@@ -59,7 +59,7 @@ tasks:
       - config NUVOLARIS_KUBE=k3s
       - task: install
       - task: cert-manager
-      - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/ks3-{{.SERVER}}.kubeconfig"
+      - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/k3s-{{.SERVER}}.kubeconfig"
 
   delete:
     silent: true
@@ -67,7 +67,7 @@ tasks:
     cmds:
       - test -n "{{.SERVER}}" || die "please use SERVER="
       - "{{.SSH}} '{{.USERNAME}}@{{.SERVER}}' sudo /usr/local/bin/k3s-uninstall.sh"
-      - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/ks3-{{.SERVER}}.kubeconfig"
+      - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/k3s-{{.SERVER}}.kubeconfig"
     vars:
       USERNAME: '{{.USERNAME | default "root"}}'
 
@@ -99,6 +99,6 @@ tasks:
         sudo cat /etc/rancher/k3s/k3s.yaml 
         | replace --stdin -s '127.0.0.1' -r '{{.SERVER}}'
         >"$NUV_TMP/kubeconfig"
-      - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/ks3-{{.SERVER}}.kubeconfig"
+      - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/k3s-{{.SERVER}}.kubeconfig"
     vars:
       USERNAME: '{{.USERNAME | default "root"}}'

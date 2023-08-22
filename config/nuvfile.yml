@@ -458,39 +458,53 @@ tasks:
         if test -z "{{._n_}}"
         then N=1
             echo "*** Available kubeconfig (select by name or number):"
+            echo "0  default kubeconfig (usually ~/.kube/config)"
+            if test -e $NUV_TMP/kubeconfig
+            then CUR="$(cat $NUV_TMP/kubeconfig)"
+            else CUR=""
+            fi
             for i in $NUV_TMP/*.kubeconfig
             do  K=$(basename $i)
-                echo "$((N++))" "${K%%.kubeconfig}"
+                if test "$CUR" == "$(cat $NUV_TMP/$K)"
+                then MSG="* "
+                else MSG="  "
+                fi
+                echo "$((N++))$MSG${K%%.kubeconfig}"
             done
-        else 
-          N=1
-          for i in $NUV_TMP/*.kubeconfig
-          do  K=$(basename $i)
-              KK="${K%%.kubeconfig}"
-              if [[ "$((N++))" = "{{._n_}}" || "$KK" = "{{._n_}}" ]]
-              then  N=0
-                    if {{.__delete}}
-                    then echo removing kubeconfig "${KK}"
-                         rm "$i"
-                    elif test -n "{{.__rename}}"
-                    then  NEWNAME="$(dirname $i)/{{.__rename}}.kubeconfig"
-                          echo "renaming {{._n_}} to {{.__rename}}"
-                          mv "$i" "$NEWNAME"
-                    else
-                      cp "$i" "$NUV_TMP/kubeconfig"
-                      echo now using kubeconfig "${KK}"  
-                      if kubectl --kubeconfig "$NUV_TMP/kubeconfig" cluster-info
-                      then echo now using kubeconfig "${KK}" 
-                      else echo "problems using this kubeconfig - removed"
-                           rm "$NUV_TMP/kubeconfig"
-                           echo please remove it with "nuv config use {{._n_}} --delete"
+        else
+          if [[ "{{._n_}}" == "0" ]]
+          then rm $NUV_TMP/kubeconfig
+               echo using default kubeconfig "${KK}" 
+          else
+            N=1
+            for i in $NUV_TMP/*.kubeconfig
+            do  K=$(basename $i)
+                KK="${K%%.kubeconfig}"
+                if [[ "$((N++))" = "{{._n_}}" || "$KK" = "{{._n_}}" ]]
+                then  N=0
+                      if {{.__delete}}
+                      then echo removing kubeconfig "${KK}"
+                          rm "$i"
+                      elif test -n "{{.__rename}}"
+                      then  NEWNAME="$(dirname $i)/{{.__rename}}.kubeconfig"
+                            echo "renaming {{._n_}} to {{.__rename}}"
+                            mv "$i" "$NEWNAME"
+                      else
+                        cp "$i" "$NUV_TMP/kubeconfig"
+                        echo now using kubeconfig "${KK}"  
+                        if kubectl --kubeconfig "$NUV_TMP/kubeconfig" cluster-info
+                        then echo now using kubeconfig "${KK}" 
+                        else echo "problems using this kubeconfig - removed"
+                            rm "$NUV_TMP/kubeconfig"
+                            echo please remove it with "nuv config use {{._n_}} --delete"
+                        fi
                       fi
-                    fi
-                    break
-              fi
-          done
-          if test "$N" != "0"
-          then echo not found kubeconfig "{{._n_}}"
+                      break
+                fi
+            done
+            if test "$N" != "0"
+            then echo not found kubeconfig "{{._n_}}"
+            fi
           fi
         fi
       else echo "no available kubeconfig to use"

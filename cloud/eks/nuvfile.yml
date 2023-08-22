@@ -18,13 +18,6 @@
 version: '3'
 
 vars:
-  D: ""
-  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
-  DIE: '{{if eq .D ""}}{{else}}die RUN:{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
-  DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
-  _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
-  TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
   MAX: 100
   TIMEOUT: 1m
 
@@ -37,6 +30,16 @@ env:
         fi
 
 tasks:
+  prereq:
+    #desc: check prerequisites
+    silent: true
+    cmds:
+    - test -n "$EKS_NAME" || die 'Please, configure EKS with "nuv config eks"'
+    - "aws --version || die 'You need to install and configure aws cli tool before running this command.'"
+    - "aws ec2 describe-key-pairs --key-names $AWS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' --output table || die 'Please generate or import the configured key  before continuing.'"
+    - config EKS_PREREQ_OK="true"
+    status:
+    - config EKS_PREREQ_OK
 
   update-yaml:
     cmds:
@@ -50,7 +53,7 @@ tasks:
     - |
       N=0
       echo "Waiting for {{.OBJECT}}"
-      while ! {{.RUN}} kubectl --kubeconfig=$NUV_TMP/kubeconfig get {{.OBJECT}}  --request-timeout="{{.TIMEOUT}}" 2>/dev/null >/dev/null
+      while ! kubectl --kubeconfig=$NUV_TMP/kubeconfig get {{.OBJECT}}  --request-timeout="{{.TIMEOUT}}" 2>/dev/null >/dev/null
       do echo "$((N++)) Still waiting for {{.OBJECT}}..."
       done
     - |
@@ -58,7 +61,7 @@ tasks:
       RES=false
       while [[ $N -lt {{.MAX}} ]]
       do  echo "$((N++)) Waiting for {{.OBJECT}} ready"
-          if {{.RUN}} kubectl --kubeconfig=$NUV_TMP/kubeconfig get {{.OBJECT}} --request-timeout={{.TIMEOUT}} 2>/dev/null
+          if kubectl --kubeconfig=$NUV_TMP/kubeconfig get {{.OBJECT}} --request-timeout={{.TIMEOUT}} 2>/dev/null
           then RES=true
               break
           fi
@@ -70,29 +73,22 @@ tasks:
     cmds:
     - kubectl get nodes
 
-  prereq:
-    #desc: check prerequisites
-    silent: true
-    cmds:
-    - test -n "$EKS_NAME" || die 'Please, configure EKS with "nuv config eks"'
-    - "{{.RUN}} aws --version || die 'You need to install and configure aws cli tool before running this command.'"
-    - "{{.RUN}} aws ec2 describe-key-pairs --key-names $AWS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' --output table || die 'Please generate or import the configured key  before continuing.'"
 
   build:
     silent: true
     #desc: install EKS using eksctl CLI
     cmds:
-      - "{{.RUN}} envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
+      - "envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
       - |
-        if ! {{.DIE}} eksctl get cluster -n "$EKS_NAME" --region "$EKS_REGION"
-        then {{.RUN}} eksctl create cluster -f _eks-cluster.yml --kubeconfig {{.TMP}}/kubeconfig
+        if ! eksctl get cluster -n "$EKS_NAME" --region "$EKS_REGION"
+        then eksctl create cluster -f _eks-cluster.yml --kubeconfig $NUV_TMP/kubeconfig
         fi
 
   certman: 
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 1000 -m 1800 kubectl --kubeconfig {{.TMP}}/kubeconfig apply -f cert-manager.yaml
+        then retry -t 1000 -m 1800 kubectl --kubeconfig $NUV_TMP/kubeconfig apply -f cert-manager.yaml
         else kubectl apply -f cert-manager.yaml
         fi
 
@@ -100,8 +96,8 @@ tasks:
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 1000 -m 1800 kubectl --kubeconfig {{.TMP}}/kubeconfig apply -f ingress-deploy.yaml
-        else {{.RUN}} kubectl delete -f ingress-deploy.yaml
+        then retry -t 1000 -m 1800 kubectl --kubeconfig  $NUV_TMP/kubeconfig apply -f ingress-deploy.yaml
+        else kubectl delete -f ingress-deploy.yaml
         fi
   
   create:
@@ -130,10 +126,10 @@ tasks:
     silent: true
     desc: delete the current Amazon EKS cluster
     cmds:
-    - "{{.RUN}} envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
+    - "envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
     - echo "*** Deleting the Cluster"
-    - "{{.RUN}} eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction"
-    - "{{.RUN}} rm $NUV_TMP/kubeconfig"
+    - "eksctl delete cluster -f _eks-cluster.yml --disable-nodegroup-eviction"
+    - "rm $NUV_TMP/kubeconfig"
     ignore_error: true
 
   config:
@@ -147,5 +143,6 @@ tasks:
     desc: extract kubeconfig for connecting to the cluster
     cmds:
     - task: prereq
-    - "{{.RUN}} rm {{.TMP}}/kubeconfig"
-    - "{{.RUN}} eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $EKS_REGION --kubeconfig {{.TMP}}/kubeconfig"
+    - "rm $NUV_TMP/kubeconfig"
+    - "eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $EKS_REGION --kubeconfig $NUV_TMP/kubeconfig"
+    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/eks-$EKS_NAME.kubeconfig"

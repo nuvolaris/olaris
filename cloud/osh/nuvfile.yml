@@ -18,9 +18,6 @@
 version: "3"
 
 vars:
-  D: ""
-  RUN: '{{if eq .D ""}}{{else}}echo{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
   OS: "{{OS}}"
   ARCH: "{{ARCH}}"
 

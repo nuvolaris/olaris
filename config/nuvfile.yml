@@ -472,6 +472,10 @@ tasks:
                     if {{.__delete}}
                     then echo removing kubeconfig "${KK}"
                          rm "$i"
+                    elif test -n "{{.__rename}}"
+                    then  NEWNAME="$(dirname $i)/{{.__rename}}.kubeconfig"
+                          echo "renaming {{._n_}} to {{.__rename}}"
+                          mv "$i" "$NEWNAME"
                     else
                       cp "$i" "$NUV_TMP/kubeconfig"
                       echo now using kubeconfig "${KK}"  

@@ -11,7 +11,7 @@ Usage:
   config gke [--name=<name>] [--project=<project>] [--region=<region>] [--count=<count>] [--vm=<vm>] [--disk=<disk>]
   config aks [--name=<name>] [--region=<region>] [--count=<count>]  [--vm=<vm>] [--disk=<disk>] [--key=<key>]
   config (status|export|reset)
-  config use [<n>] [--delete]
+  config use [<n>] [--delete] [--rename=<rename>]
  
 Commands:
   config apihost          configure the apihost (auto: auto assign) and enable tls

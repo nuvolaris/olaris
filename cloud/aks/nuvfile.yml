@@ -26,6 +26,14 @@ env:
       fi
 
 tasks:
+  prereq:
+    silent: true
+    cmds:
+    - test -n "$AKS_NAME" || die 'Please, configure AKS with "nuv config aks"'
+    - az version || die 'You need to install and configure az cli tool before running this command.'
+    - config AKS_PREREQ_OK="true"
+    status:
+    - config AKS_PREREQ_OK
 
   update-yaml:
     cmds:
@@ -51,11 +59,6 @@ tasks:
     cmds:
     - nuv config aks
 
-  prereq:
-    silent: true
-    cmds:
-    - test -n "$AKS_NAME" || die 'Please, configure AKS with "nuv config aks"'
-    - az version || die 'You need to install and configure az cli tool before running this command.'
 
   create:
     silent: true

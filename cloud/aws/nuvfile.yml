@@ -21,6 +21,7 @@ vars:
   SSH: "ssh -oStrictHostKeyChecking=no"
 
 tasks:
+
   prereq:
     silent: true
     cmds:
@@ -31,7 +32,7 @@ tasks:
         || die 'Please generate or import the configured key  before continuing.'
       - "{{.SSH}} -V 2>/dev/null || die 'you need an ssh client in your PATH'"
       - config AWS_PREREQ_OK="true"
-    status:
+      status:
       - config AWS_PREREQ_OK
 
   vm-list:

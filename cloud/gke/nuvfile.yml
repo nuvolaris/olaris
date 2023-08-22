@@ -18,12 +18,6 @@
 version: '3'
 
 vars:
-  D: ""
-  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
-  DATA: '{{if eq .D ""}}>_data_{{else}}echo DATA:{{end}}'
-  _DATA: '{{if eq .D ""}}$(cat _data_){{else}}\$DATA{{end}}'
-  TMP: '{{if eq .D ""}}$NUV_TMP{{else}}\$NUV_TMP{{end}}'
 
 env:
   KUBECONFIG:
@@ -34,6 +28,15 @@ env:
       fi
 
 tasks:
+  prereq:
+    silent: true
+    cmds:
+    - test -n "$GKE_NAME" || die 'Please, configure GKE with "nuv config gke"'
+    - "gcloud --version || die 'You need to install and configure the gcloud tool before running this command.'"
+    - "gcloud auth login"
+    - config GKE_PREREQ_OK="true"
+    status:
+    - config GKE_PREREQ_OK
 
   update-yaml:
     cmds:
@@ -45,7 +48,11 @@ tasks:
     silent: true
     cmds:
     - task: prereq
-    - "{{.RUN}} gcloud container clusters get-credentials $GKE_NAME --zone=$GKE_REGION"
+    - >
+      gcloud container clusters 
+      get-credentials $GKE_NAME --zone=$GKE_REGION
+    - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/gke-$GKE_NAME.kubeconfig"
+  
     env:
       KUBECONFIG: 
         sh: echo $NUV_TMP/kubeconfig
@@ -56,13 +63,6 @@ tasks:
     cmds:
     - nuv config gke
 
-  prereq:
-    silent: true
-    cmds:
-    - test -n "$GKE_NAME" || die 'Please, configure GKE with "nuv config gke"'
-    - "{{.RUN}} gcloud --version || die 'You need to install and configure the gcloud tool before running this command.'"
-    - "{{.RUN}} gcloud auth login"
-
   create:
     silent: true
     desc: create a Google Kubernetes Engine cluster
@@ -70,14 +70,16 @@ tasks:
       KUBECONFIG: 
         sh: echo $NUV_TMP/kubeconfig
     cmds:
-    #- task: prereq
-    - "{{.RUN}} gcloud config set project $GKE_PROJECT"
+    - task: prereq
+    - "gcloud config set project $GKE_PROJECT"
     - > 
-      {{.RUN}} gcloud container clusters create $GKE_NAME
+      gcloud container clusters 
+      describe "$GKE_NAME" --zone="$GKE_REGION" 2>/dev/null >/dev/null
+      || gcloud container clusters 
+      create "$GKE_NAME" --zone="$GKE_REGION"
       --machine-type="$GKE_VM"
       --disk-size="${GKE_DISK}GB"
       --num-nodes="$GKE_COUNT"
-      --zone="$GKE_REGION"
     - task: kubeconfig
     - task: ingress
     - task: certman
@@ -87,13 +89,15 @@ tasks:
     desc: delete aks cluster
     cmds:
     - echo "*** Deleting the $GKE_NAME cluster"
-    - "{{.RUN}} gcloud container clusters delete $GKE_NAME --zone=$GKE_REGION"
+    - >
+      gcloud container clusters 
+      delete "$GKE_NAME" --zone="$GKE_REGION"
 
   certman: 
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 1000 -m 1800 kubectl  --kubeconfig {{.TMP}}/kubeconfig  apply -f cert-manager.yaml
+        then retry -t 1000 -m 1800 kubectl  --kubeconfig "$NUV_TMP/kubeconfig"  apply -f cert-manager.yaml
         else kubectl apply -f cert-manager.yaml
         fi
 
@@ -101,8 +105,8 @@ tasks:
     cmds:
       - |
         if test -z "{{.DEL}}"
-        then {{.RUN}} retry -t 1000 -m 1800 kubectl --kubeconfig {{.TMP}}/kubeconfig apply -f ingress-deploy.yaml
-        else {{.RUN}} kubectl delete -f ingress-deploy.yaml
+        then retry -t 1000 -m 1800 kubectl --kubeconfig "$NUV_TMP/kubeconfig" apply -f ingress-deploy.yaml
+        else kubectl delete -f ingress-deploy.yaml
         fi
 
   lb:

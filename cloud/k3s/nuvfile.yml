@@ -63,7 +63,7 @@ tasks:
 
   delete:
     silent: true
-    desc: uninstall with ssh in SERVER=<server> using USER=<user> with sudo
+    desc: uninstall with ssh in SERVER=<server> using USERNAME=<username> with sudo
     cmds:
       - test -n "{{.SERVER}}" || die "please use SERVER="
       - "{{.SSH}} '{{.USERNAME}}@{{.SERVER}}' sudo /usr/local/bin/k3s-uninstall.sh"
@@ -90,7 +90,7 @@ tasks:
       - echo SERVER_USERNAME="$SERVER_USERNAME"
 
   kubeconfig:
-    desc: recover the kubeconfig from a server with k3s
+    desc: recover the kubeconfig from a K3S server SERVER=<server> with user USERNAME=<username>
     cmds:
       - task: prereq
       - test -n "{{.SERVER}}" || die "please use SERVER="

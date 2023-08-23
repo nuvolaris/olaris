@@ -8,7 +8,7 @@ Usage:
   aws vm-getip  <name>
   aws zone-create <zone>
   aws zone-delete <zone>
-  aws zone-list [<zone>]
+  aws zone-list  [<zone>]
   aws zone-update <zone> (--host=<host>|--wildcard) (--vm=<vm>|--ip=<ip>|--cname=<cname>)
 
 Commands:

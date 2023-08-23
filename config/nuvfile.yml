@@ -164,8 +164,7 @@ tasks:
       done
       config {{.VAR}}="$input"
 
-  aws:
-    silent: true
+  _aws:
     cmds:
     - task: readforce
       vars:
@@ -186,6 +185,23 @@ tasks:
                 aws ec2 describe-regions --output table
         VAL: "{{.__region}}"
         DEF: "us-east-1"
+    - task: read
+      vars:
+        MSG: "AWS public SSH key "
+        HINT: |
+              If you already have a public SSH key in AWS, provide its name here.
+              If you do not have it, generate a key pair with the following command:
+                ssh-keygen
+              The public key defaults to ~/.ssh/id_rsa.pub and you can import with:
+                aws ec2 import-key-pair --key-name nuvolaris-key --public-key-material --region=<your-region> fileb://~/.ssh/id_rsa.pub
+        VAR: "AWS_SSHKEY"
+        VAL: "{{.__key}}"
+        DEF: "nuvolaris-key"
+
+  aws:
+    silent: true
+    cmds:
+    - task: _aws
     - task: read
       vars:
         MSG: "AWS Image to use for VMs"
@@ -219,24 +235,11 @@ tasks:
           VAR: "AWS_VM_DISK_SIZE"
           VAL: "{{.__disk}}"
           DEF: "100"
-    - task: read
-      vars:
-        MSG: "AWS public SSH key "
-        HINT: |
-              If you already have a public SSH key in AWS, provide its name here.
-              If you do not have it, generate a key pair with the following command:
-                ssh-keygen
-              The public key defaults to ~/.ssh/id_rsa.pub and you can import with:
-                aws ec2 import-key-pair --key-name nuvolaris-key --public-key-material --region=<your-region> fileb://~/.ssh/id_rsa.pub
-        VAR: "AWS_SSHKEY"
-        VAL: "{{.__key}}"
-        DEF: "nuvolaris-key"
-
 
   eks:
     silent: true
     cmds:
-    - test -n "$AWS_SECRET_ACCESS_KEY" || die "Please, configure first AWS with nuv config aws"
+    - task: _aws
     - task: read
       vars:
         MSG: "EKS Name for Cluster and Node Group"
@@ -446,7 +449,6 @@ tasks:
            then echo "$NUV_TMP/runtimes.json"
            else echo ../setup/kubernetes/runtimes.json
            fi
-
 
   use:
     silent: true

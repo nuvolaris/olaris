@@ -33,7 +33,6 @@ tasks:
     cmds:
     - test -n "$GKE_NAME" || die 'Please, configure GKE with "nuv config gke"'
     - "gcloud --version || die 'You need to install and configure the gcloud tool before running this command.'"
-    - "gcloud auth login"
     - config GKE_PREREQ_OK="true"
     status:
     - config GKE_PREREQ_OK
@@ -63,6 +62,7 @@ tasks:
     cmds:
     - nuv config gke
 
+
   create:
     silent: true
     desc: create a Google Kubernetes Engine cluster
@@ -71,6 +71,7 @@ tasks:
         sh: echo $NUV_TMP/kubeconfig
     cmds:
     - task: prereq
+    - "gcloud auth login"
     - "gcloud config set project $GKE_PROJECT"
     - > 
       gcloud container clusters 
@@ -89,6 +90,7 @@ tasks:
     desc: delete aks cluster
     cmds:
     - echo "*** Deleting the $GKE_NAME cluster"
+    - "gcloud auth login"
     - >
       gcloud container clusters 
       delete "$GKE_NAME" --zone="$GKE_REGION"

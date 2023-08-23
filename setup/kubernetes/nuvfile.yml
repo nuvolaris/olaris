@@ -18,13 +18,8 @@
 version: "3"
 
 vars:
-  # if D=1 will not run and show commands
-  # otherwise will not cat anything but run commands
-  D: ""
-  RUN: '{{if eq .D ""}}{{else}}echo RUN:{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
   RETRY: 100
-  TIMEOUT: 10
+  TIMEOUT: 10s
   CONTEXT: ""
 
 env:
@@ -41,7 +36,7 @@ tasks:
     silent: true
     cmds:
       - echo "=== Nuvolaris Deployment"
-      - "{{.RUN}} kubectl -n nuvolaris get sts,po,svc"
+      - "kubectl -n nuvolaris get sts,po,svc"
 
   info:
     desc: show nuvolaris cluster info
@@ -50,11 +45,11 @@ tasks:
       - |
         echo "=== KUBECONFIG and Current Context "
         echo $KUBECONFIG
-        {{.RUN}} kubectl config get-contexts
+        kubectl config get-contexts
         echo "=== Nodes"
-        {{.RUN}} kubectl -n nuvolaris get no
+        kubectl -n nuvolaris get no
         echo "=== kubectl version"
-        {{.RUN}} kubectl version --short 2>/dev/null
+        kubectl version --short 2>/dev/null
 
   crd:
     #desc get crd
@@ -68,17 +63,23 @@ tasks:
     cmds:
       - test -n "{{.OBJECT}}" || die "use OBJECT=<to-wait-for>"
       - |
-        echo "Waiting for {{.OBJECT}}"
-        while ! {{.RUN}} kubectl -n nuvolaris wait --for=condition=Ready --timeout=30s {{.OBJECT}} 2>/dev/null
-        do sleep {{.TIMEOUT}}
+        N=0
+        RES=false
+        while [[ $N -lt {{.RETRY}} ]]
+        do echo "$((N++)) waiting for {{.OBJECT}}"
+           if kubectl -n nuvolaris get {{.OBJECT}} 2>/dev/null
+           then RES=true ; break
+           fi
+           sleep {{.TIMEOUT}}
         done
+        $RES
       - |
         N=0
         RES=false
         while [[ $N -lt {{.RETRY}} ]]
         do 
-          echo "$((N++)) Waiting for {{.OBJECT}} ready"
-          if {{.RUN}} kubectl -n nuvolaris wait --for=condition=Ready {{.OBJECT}} --timeout={{.TIMEOUT}}s 2>/dev/null
+          echo "$((N++)) waiting for {{.OBJECT}} ready"
+          if kubectl -n nuvolaris wait --for=condition=Ready {{.OBJECT}} --timeout={{.TIMEOUT}} 2>/dev/null
           then RES=true ; break
           fi
         done
@@ -90,12 +91,12 @@ tasks:
     cmds:
       - |
         if test -n "{{.CONTEXT}}"
-        then  if {{.RUN}} kubectl config use-context "{{.CONTEXT}}"
-              then {{.RUN}} kubectl config get-contexts
+        then  if kubectl config use-context "{{.CONTEXT}}"
+              then kubectl config get-contexts
               else false
               fi
         else echo Using current context
-            {{.RUN}} kubectl config get-contexts
+            kubectl config get-contexts
         fi
 
   runtimes:
@@ -126,16 +127,16 @@ tasks:
     ignore_error: true
     silent: true
     cmds:
-      - "{{.CAT}} common/*.yaml roles/*.yaml crds/*.yaml"
-      - "{{.RUN}} kubectl apply  -f common -f roles -f crds"
+      #- "cat common/*.yaml roles/*.yaml crds/*.yaml"
+      - "kubectl apply  -f common -f roles -f crds"
 
   operator:
     #desc: deploy operator
     silent: true
     cmds:
       - envsubst -i operator.yaml -o _operator.yaml
-      - "{{.CAT}} _operator.yaml"
-      - "{{.RUN}} kubectl apply -f _operator.yaml"
+      #- "cat _operator.yaml"
+      - "kubectl apply -f _operator.yaml"
       - task: wait
         vars:
           OBJECT: pod/nuvolaris-operator
@@ -161,9 +162,10 @@ tasks:
     silent: true
     cmds:
       - nuv setup kubernetes whiskcrd
+      #- cat _whisk.yaml
       - |
-        {{.CAT}} _whisk.yaml
-        {{.RUN}} kubectl apply -f _whisk.yaml
+        
+        kubectl apply -f _whisk.yaml
       - task: wait
         vars:
           OBJECT: pod/couchdb-0
@@ -217,16 +219,18 @@ tasks:
     ignore_error: true
     desc: delete cluster
     cmds:
-      - "{{.RUN}} kubectl -n nuvolaris delete wsku --all"
-      - "{{.RUN}} kubectl -n nuvolaris delete wsk/controller"
-      - "{{.RUN}} kubectl -n nuvolaris delete all --all"
-      - "{{.RUN}} kubectl -n nuvolaris delete pvc --all"
-      - "{{.RUN}} kubectl -n nuvolaris delete ing --all --grace-period=0"
-      - "{{.RUN}} kubectl -n nuvolaris delete kubegres --all"
-      - "{{.RUN}} kubectl -n nuvolaris delete cm/config --grace-period=0"
-      - "{{.RUN}} kubectl delete clusterissuers/letsencrypt-issuer"
-      - "{{.RUN}} kubectl get ns nuvolaris -o json | jq '.spec.finalizers = []' | kubectl replace --raw '/api/v1/namespaces/nuvolaris/finalize' -f -"
-      - "{{.RUN}} kubectl delete ns nuvolaris"
+      - kubectl -n nuvolaris delete wsku --all
+      - kubectl -n nuvolaris delete wsk/controller
+      - kubectl -n nuvolaris delete pod/nuvolaris-operator
+      - kubectl -n nuvolaris delete po,sts,job,deploy,svc --all --grace-period=0
+      - kubectl -n nuvolaris delete cm,secret,sa,role --all
+      - kubectl -n nuvolaris delete pvc --all
+      - kubectl -n nuvolaris delete ing --all --grace-period=0 2>/dev/null
+      - kubectl -n nuvolaris delete route --all --grace-period=0 2>/dev/null
+      - kubectl -n nuvolaris delete kubegres --all
+      - kubectl delete clusterissuers/letsencrypt-issuer 2>/dev/null
+      #- "kubectl get ns nuvolaris -o json | jq '.spec.finalizers = []' | kubectl replace --raw '/api/v1/namespaces/nuvolaris/finalize' -f -"
+      - kubectl delete ns nuvolaris
 
   unlock:
     silent: true

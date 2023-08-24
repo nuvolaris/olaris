@@ -35,6 +35,7 @@ env:
 tasks:
   cli:
     desc: update the cli
+    silent: true
     cmds:
       - test -n "{{.EXT}}" || die "Sorry I cannot determine the environent. Please download from {{.BASE}}"
       - |
@@ -43,10 +44,12 @@ tasks:
         if test -e "$TGT"
         then rm "$TGT"
         fi
+        echo "Downloading updated installer..."
         if curl --progress-bar -L -o "$TGT" "$SRC"
         then
           #echo $FILE
           #echo {{.CMD}}
+          echo "Installing..."
           if {{.CMD}} "$TGT"
           then  echo "Update successful"
           else  echo "Someting went wrong, please download this file and install manually:"

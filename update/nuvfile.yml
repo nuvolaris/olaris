@@ -43,7 +43,7 @@ tasks:
         if test -e "$TGT"
         then rm "$TGT"
         fi
-        if curl -sL -o "$TGT" "$SRC"
+        if curl --progress-bar -L -o "$TGT" "$SRC"
         then
           #echo $FILE
           #echo {{.CMD}}

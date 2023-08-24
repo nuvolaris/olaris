@@ -85,7 +85,7 @@ tasks:
             else echo "unknown"
             fi
           ;;
-          (darwin) echo "installer -target / -pkg" ;;
+          (darwin) echo "sudo installer -target / -pkg" ;;
           (windows) echo "msiexec /i" ;;
           esac
 

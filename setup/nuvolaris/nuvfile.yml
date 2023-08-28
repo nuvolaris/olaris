@@ -167,7 +167,18 @@ tasks:
     silent: true
     desc: showing the configuration status
     cmds:
-    - wsk {{.ETC}} property get --apihost
+    - echo "=== Nuvolaris Host:"
+    - wsk property get --apihost | awk '/whisk API host/{print $4}'
+    - echo "=== Nuvolaris Key:"
+    - wsk property get --auth | awk '/whisk auth/{print $3}'
+    - echo "=== Minio"
+    - kubectl -n nuvolaris get configmap config -n nuvolaris -o=jsonpath='{.metadata.annotations}' | jq . | awk '/minio_/{print $1 " " $2}'
+    - echo "=== Redis"
+    - kubectl -n nuvolaris get configmap config -n nuvolaris -o=jsonpath='{.metadata.annotations}' | jq . | awk '/redis_/{print $1 " " $2}'
+    - echo "=== Postgres"
+    - kubectl -n nuvolaris get configmap config -n nuvolaris -o=jsonpath='{.metadata.annotations}' | jq . | awk '/postgres_/{print $1 " " $2}'
+    - echo "=== MongoDB (FerretDB)"
+    - kubectl -n nuvolaris get configmap config -n nuvolaris -o=jsonpath='{.metadata.annotations}' | jq . | awk '/mongodb_/{print $1 " " $2}'
 
   info:
     - echo "kubectl={{.KUBECTL}}"

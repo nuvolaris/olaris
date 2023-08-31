@@ -33,6 +33,10 @@ tasks:
     cmds:
     - test -n "$GKE_NAME" || die 'Please, configure GKE with "nuv config gke"'
     - "gcloud --version || die 'You need to install and configure the gcloud tool before running this command.'"
+    - |
+      if ! gke-gcloud-auth-plugin 2>/dev/null >/dev/null
+      then die "Please Install gke-gcloud-auth-plugin with 'gcloud components install gke-gcloud-auth-plugin'"
+      fi
     - config GKE_PREREQ_OK="true"
     status:
     - config GKE_PREREQ_OK

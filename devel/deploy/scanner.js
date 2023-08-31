@@ -32,7 +32,8 @@ let manifest = {};
 
 manifest = scanPackages();
 scanWeb();
-
+let manifestYaml = nuv.toYaml(manifest);
+nuv.writeFile(nuv.joinPath(path, "manifest.yml"), manifestYaml);
 
 function scanPackages(manifest) {
     manifest = { packages: {} };
@@ -44,12 +45,14 @@ function scanPackages(manifest) {
     }
 
     nuv.readDir(packagesFolderPath).forEach(function (entry) {
-        let isPackage = nuv.isDir(nuv.joinPath(packagesFolderPath, entry));
+        const packagePath = nuv.joinPath(packagesFolderPath, entry);
+        let isPackage = nuv.isDir(packagePath);
         if (isPackage) {
             // check we are not overwriting the default package
             if (entry != 'default' || (entry == 'default' && !manifest.packages['default'])) {
                 manifest.packages[entry] = { actions: {} };
             }
+            scanSinglePackage(manifest, packagePath);
         } else {
             if (isSupportedRuntime(entry)) {
                 const actionName = getActionName(entry);
@@ -57,13 +60,11 @@ function scanPackages(manifest) {
                 if (!manifest.packages['default']) {
                     manifest.packages['default'] = { actions: {} };
                 }
-                console.log('Adding action ' + actionName + ' to package default');
                 manifest.packages['default'].actions[actionName] = { function: entry };
             }
         }
     });
     console.log('Packages scanned');
-    console.log('Manifest: ' + JSON.stringify(manifest, null, 2));
     return manifest;
 }
 
@@ -76,6 +77,20 @@ function scanWeb() {
         return;
     }
     console.log("Web folder scanned");
+}
+
+function scanSinglePackage(manifest, packagePath) {
+    let packageName = nuv.basePath(packagePath);
+    nuv.readDir(packagePath).forEach(function (entry) {
+        console.log('Scanning ' + entry);
+        let isSingleFileAction = !nuv.isDir(nuv.joinPath(packagePath, entry));
+        if (isSingleFileAction) {
+            if (isSupportedRuntime(entry)) {
+                const actionName = getActionName(entry);
+                manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packageName, entry) };
+            }
+        }
+    });
 }
 
 function isSupportedRuntime(file) {

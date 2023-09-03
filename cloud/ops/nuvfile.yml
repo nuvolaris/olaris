@@ -1,0 +1,57 @@
+version: '3'
+
+vars:
+  NTFY_URL: https://github.com/binwiederhier/ntfy/releases/download/v2.7.0/ntfy_2.7.0_linux_{{ARCH}}.tar.gz
+  NTFY: $NUV_TMP/nuvops/ntfy
+  UPLOAD_TAR: $NUV_TMP/nuvops/upload.tar
+  UPLOAD_DIR: $NUVOPS_UPLOAD_DIR
+
+tasks:
+
+  download-ntfy:
+    cmds:
+    - test "{{OS}}" == "linux" || die "only for linux for now"
+    - mkdir -p $NUV_TMP/nuvops
+    - curl -sL {{.NTFY_URL}} | /usr/bin/tar xzvf - --strip-components=1 -C $NUV_TMP/nuvops
+    status:
+    - test -e "{{.NTFY}}"
+
+  client:
+    desc: client
+    cmds:
+    - test -n "{{.MSG}}" || die "specify MSG="
+    - > 
+      ntfy publish
+      --token "$NUVOPS_TOKEN" 
+      "$NUVOPS_TOPIC" "{{.MSG}}"
+
+  server:
+    desc: server
+    cmds:
+    - test -n "$NUVOPS_TOPIC" || die "configure NUVOPS_TOPIC"
+    - test -n "$NUVOPS_TOKEN" || die "configure NUVOPS_TOKEN"
+    - task: download
+    - mkdir /tmp/nuvops
+    - >
+      cd /tmp/nuvops ;
+      {{.NTFY}} sub 
+      --token "$NUVOPS_TOKEN" 
+      "$NUVOPS_TOPIC" "nuv cloud ops on_message"
+
+  upload-tar:
+    cmds:
+    - test -d "$NUV_PWD/olaris-ops" || die "we need an olaris-ops folder in current directory"
+    - cd $NUV_PWD ; /usr/bin/tar czvf olaris-ops.tar.gz olaris-ops
+    - echo "tar done"
+    sources: 
+    - "olaris-ops/**"
+    generates:
+    - olaris-ops.tar.gz
+
+  on_message:
+    cmds:
+    - echo "message received"
+    - echo "$NTFY_RAW" | jq .  
+
+
+

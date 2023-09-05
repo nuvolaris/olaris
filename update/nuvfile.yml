@@ -42,20 +42,20 @@ tasks:
       - test -n "{{.EXT}}" || die "Sorry I cannot determine the environent. Please download from {{.BASE}}"
       - |
         SRC="{{.BASE}}/{{.VER}}/nuv_{{.VER}}_{{.ARCH}}{{.EXT}}"
-        TGT="$NUV_TMP/nuv{{.EXT}}"
+        TGT="$NUV_TMP/download/nuv{{.EXT}}"
         if test -e "$TGT"
         then rm "$TGT"
         fi
         echo "Downloading updated installer..."
+        mkdir -p $NUV_TMP/download
         if curl --progress-bar -L -o "$TGT" "$SRC"
         then
           #echo $FILE
           #echo {{.CMD}}
           echo "Installing..."
-          cd "$NUV_TMP"
-          if {{.CMD}} "{{.PRE}}nuv{{.EXT}}"
-          then  echo "Update successful"
-          else  echo "Someting went wrong, please download this file and install manually:"
+          if {{.CMD}} $TGT
+          then  echo "{{.MSG}}"
+          else  echo "Someting went wrong, please download this file and install it manually:"
                 echo "$SRC"
           fi
         else
@@ -66,7 +66,7 @@ tasks:
       BASE: "https://github.com/nuvolaris/nuv/releases/download"
       VER:
         sh: jq .version -r $NUV_ROOT/nuvroot.json
-      PRE: '{{if eq OS "windows"}}/i {{else}}{{end}}'
+      MSG: '{{if eq OS "windows"}}Please execute the Installer.{{else}}Installation Complete.{{end}}'
       EXT:
         sh: |
           case {{.OS}} in
@@ -97,7 +97,7 @@ tasks:
             fi
           ;;
           (darwin) echo "sudo installer -target / -pkg" ;;
-          (windows) echo "powershell -Command Start-Process -Verb RunAs -FilePath msiexec.exe -ArgumentList " ;;
+          (windows) echo "powershell -File update.ps1 -Installer" ;;
           esac
 
   secrets:

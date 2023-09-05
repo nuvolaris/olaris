@@ -89,7 +89,7 @@ tasks:
             fi
           ;;
           (darwin) echo "sudo installer -target / -pkg" ;;
-          (windows) echo "msiexec /qn /i" ;;
+          (windows) echo "msiexec /i" ;;
           esac
 
   secrets:

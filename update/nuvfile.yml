@@ -33,6 +33,8 @@ env:
       fi
 
 tasks:
+  hi: echo hi
+
   cli:
     desc: update the cli
     silent: true
@@ -50,7 +52,8 @@ tasks:
           #echo $FILE
           #echo {{.CMD}}
           echo "Installing..."
-          if {{.CMD}} "$TGT"
+          cd "$NUV_TMP"
+          if {{.CMD}} "{{.PRE}}nuv.{{.EXT}}"
           then  echo "Update successful"
           else  echo "Someting went wrong, please download this file and install manually:"
                 echo "$SRC"
@@ -63,6 +66,7 @@ tasks:
       BASE: "https://github.com/nuvolaris/nuv/releases/download"
       VER:
         sh: jq .version -r $NUV_ROOT/nuvroot.json
+      PRE:  "{{if eq OS "windows"}}"/i "{{end}}
       EXT:
         sh: |
           case {{.OS}} in
@@ -89,7 +93,7 @@ tasks:
             fi
           ;;
           (darwin) echo "sudo installer -target / -pkg" ;;
-          (windows) echo "msiexec /i" ;;
+          (windows) echo "powershell -Command Start-Process -Verb RunAs -FilePath msiexec.exe -ArgumentList" ;;
           esac
 
   secrets:

@@ -41,8 +41,8 @@ tasks:
     cmds:
       - test -n "{{.EXT}}" || die "Sorry I cannot determine the environent. Please download from {{.BASE}}"
       - |
-        SRC="{{.BASE}}/{{.VER}}/nuv_{{.VER}}_{{.ARCH}}.{{.EXT}}"
-        TGT="$NUV_TMP/nuv.{{.EXT}}"
+        SRC="{{.BASE}}/{{.VER}}/nuv_{{.VER}}_{{.ARCH}}{{.EXT}}"
+        TGT="$NUV_TMP/nuv{{.EXT}}"
         if test -e "$TGT"
         then rm "$TGT"
         fi
@@ -53,7 +53,7 @@ tasks:
           #echo {{.CMD}}
           echo "Installing..."
           cd "$NUV_TMP"
-          if {{.CMD}} "{{.PRE}}nuv.{{.EXT}}"
+          if {{.CMD}} "{{.PRE}}nuv{{.EXT}}"
           then  echo "Update successful"
           else  echo "Someting went wrong, please download this file and install manually:"
                 echo "$SRC"
@@ -66,20 +66,24 @@ tasks:
       BASE: "https://github.com/nuvolaris/nuv/releases/download"
       VER:
         sh: jq .version -r $NUV_ROOT/nuvroot.json
-      PRE: '{{if eq OS "windows"}}/i {{end}}'
+      PRE: '{{if eq OS "windows"}}/i {{else}}{{end}}'
       EXT:
         sh: |
           case {{.OS}} in
           (linux)  
             if test -e /bin/dpkg
-            then echo deb 
+            then echo ".deb"
             elif test -e /bin/rpm
-            then echo rpm
+            then echo ".rpm"
             else echo "unknown"
             fi
           ;;
-          (darwin) echo pkg ;;
-          (windows) echo msi ;;
+          (darwin) 
+            echo ".pkg"
+          ;;
+          (windows) 
+            echo ".msi"
+          ;;
           esac
       CMD:
         sh: |
@@ -93,7 +97,7 @@ tasks:
             fi
           ;;
           (darwin) echo "sudo installer -target / -pkg" ;;
-          (windows) echo "powershell -Command Start-Process -Verb RunAs -FilePath msiexec.exe -ArgumentList" ;;
+          (windows) echo "powershell -Command Start-Process -Verb RunAs -FilePath msiexec.exe -ArgumentList " ;;
           esac
 
   secrets:

@@ -17,6 +17,7 @@ Commands:
   admin       Manage users in a Nuvolaris platform
   cloud       Manage cloud environments (AWS, GCP, Azure, K3S, MK8S, OpenShift)
   config      Manage the Nuvolaris configuration
+  devel       Utilities to scan and deploy Nuvolaris projects
   setup       Setup the Nuvolaris platform on multiple environments
   update      Update utilities for a Nuvolaris installation, cli, and secrets
 

@@ -74,7 +74,7 @@ function scanPackages(manifest) {
                 if (!manifest.packages['default']) {
                     manifest.packages['default'] = { actions: {} };
                 }
-                manifest.packages['default'].actions[actionName] = { function: entry };
+                manifest.packages['default'].actions[actionName] = { function: entry, web: true };
             }
         }
     });
@@ -87,25 +87,35 @@ function scanSinglePackage(manifest, packagePath) {
     // console.log('Scanning package ' + packageName);
     nuv.readDir(packagePath).forEach(function (entry) {
         // console.log('Scanning ' + packageName + '/' + entry);
+        // if the ext is .zip it's probably an old zip action
+        if (nuv.fileExt(entry) == '.zip') {
+            return;
+        }
+
+        const actionName = getActionName(entry);
+        let functionEntry = nuv.joinPath(packageName, entry);
+        let err = false;
 
         if (isSingleFileAction(packagePath, entry) && isSupportedRuntime(entry)) {
             // console.log(packageName + '/' + entry + ' is supported single file action');
             const actionName = getActionName(entry);
-            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packageName, entry) };
         } else if (isMultiFileAction(packagePath, entry)) {
             // console.log(packageName + '/' + entry + ' is multi file action');
             let res = nuv.nuvExec('-zipf', nuv.joinPath(packagePath, entry));
+
             // nuv -zipf prints the path of the zip file to stdout
             // so if the result doesn't end with .zip\n, it's an error
             if (!res.endsWith('.zip\n')) {
                 console.error("ZIP ERROR:", res)
-                return
+                err = true;
             }
-            const zipName = nuv.basePath(res.split(" ")[2])
-            // console.log('ZIP name: ' + zipName);
-            manifest.packages[packageName].actions[entry] = { function: zipName };
+
+            functionEntry = nuv.basePath(res.split(" ")[2]).trim();
         }
 
+        if (!err) {
+            manifest.packages[packageName].actions[actionName] = { function: functionEntry, web: true };
+        }
     });
 }
 

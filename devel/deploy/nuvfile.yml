@@ -35,19 +35,19 @@ tasks:
         fi
 
         if [ -d "$PACKAGES_PATH" ] && [ -d "$WEB_PATH" ]; then
-          echo "Detected packages and web directory"  
+          echo "Packages and web directory present."  
           exit 0
         fi
 
         if [ -d "$PACKAGES_PATH" ]; then
-          echo "Detected packages directory"
+          echo "Packages directory present."
           exit 0
         fi
         if [ -d "$WEB_PATH" ]; then
-          echo "Detected web directory"
+          echo "Web directory present."
           exit 0
         fi
-        die "No project detected (missing packages and web directory)"
+        die "No project detected (missing packages and web directory)."
   scan:
     silent: true
     desc: scan directory and generate nuvolaris manifest files

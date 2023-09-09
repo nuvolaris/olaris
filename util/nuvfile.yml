@@ -25,10 +25,9 @@ tasks:
       - config SECRET_OPENWHISK_SYSTEM="$(random --uuid):$(random --str 64)" SECRET_OPENWHISK_NUVOLARIS="$(random --uuid):$(random --str 64)"
       - config SECRET_COUCHDB_ADMIN="$(random --str 12)" SECRET_COUCHDB_CONTROLLER="$(random --str 12)"  SECRET_COUCHDB_INVOKER="$(random --str 12)"
       - config SECRET_REDIS_DEFAULT="$(random --str 12)" SECRET_REDIS_NUVOLARIS="$(random --str 12)"
-      - config SECRET_MONGODB_ADMIN="$(random --str 12)" SECRET_MONGODB_NUVOLARIS="$(random --str 12)"      
+      - config SECRET_MONGODB_ADMIN="$(random --str 12)" SECRET_MONGODB_NUVOLARIS="$(random --str 12)"
       - config SECRET_MINIO_ADMIN="$(random --str 40)" SECRET_MINIO_NUVOLARIS="$(random --str 40)"
       - config SECRET_POSTGRES_ADMIN="$(random --str 12)" SECRET_POSTGRES_REPLICA="$(random --str 12)" SECRET_POSTGRES_NUVOLARIS="$(random --str 12)"
-      - config SECRET_NUVOLARIS_METADATA="$(random --str 12)"
       - echo "Generated $(config -d | grep SECRET_ | wc -l) secrets."
 
   user-secrets:
@@ -55,7 +54,6 @@ tasks:
       - config -r SECRET_MONGODB_ADMIN SECRET_MONGODB_NUVOLARIS
       - config -r SECRET_MINIO_ADMIN SECRET_MINIO_NUVOLARIS
       - config -r SECRET_POSTGRES_ADMIN SECRET_POSTGRES_REPLICA SECRET_POSTGRES_NUVOLARIS
-      - config -r SECRET_NUVOLARIS_METADATA
       - config -d | grep SECRET_
 
   no-user-secrets:
@@ -88,14 +86,9 @@ tasks:
         if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
         then curl -s -d "Installed '{{._message_}}'" https://ntfy.sh/nuvolaris-nir >/dev/null
         fi
+ 
+  ntfy2slack:
+    desc: install a service to receive on slack notifications
 
-  testbed:
-    - echo $(realpath $GCLOUD_SSHKEY)
-
-  check-operator-version:
-    silent: true
-    cmds:
-      - |
-        output=$(nuv debug operator:version)
-        tag=$(echo $output | awk -F: '{print $2}')
-        needupdate {{._version_}} $tag
+  1password:
+    desc: 1password support utils

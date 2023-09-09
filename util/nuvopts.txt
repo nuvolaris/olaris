@@ -20,3 +20,5 @@ Commands:
   util detect               detect the current kubernetes cluster
   util poll                 run wsk poll
   util realpath             return full path of specified file
+  util notify               install notifications service for nuvolaris installation
+  

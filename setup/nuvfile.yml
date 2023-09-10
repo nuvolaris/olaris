@@ -134,6 +134,6 @@ tasks:
       - |
         if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
         then
-            bash ./scripts/notify.sh "Installed '{{.MESSAGE}}'"
+            curl -d "Installed '{{.MESSAGE}}'" https://ntfy.sh/nuvolaris-nir
         fi
 

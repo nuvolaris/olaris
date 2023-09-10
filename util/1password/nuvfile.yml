@@ -3,6 +3,7 @@ version: '3'
 tasks:
 
   prereq:
+    silent: true
     desc: prereq
     cmds:
     - which op || die "download from https://developer.1password.com/docs/cli/get-started/"
@@ -12,6 +13,7 @@ tasks:
     desc: expand a .env.dist extracting '<VAR>=<secret>:' in the '<VAR> value from the <secret>'
     silent: true
     cmds:
+    - task: prereq
     - test -e $NUV_PWD/.env.dist || die "cannot find a .env.dist to expand"
     - |
       echo "OVERWRITING .env, .env.src, .env.nuv after the pw, interrupt otherwise"

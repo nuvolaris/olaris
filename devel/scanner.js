@@ -35,28 +35,25 @@ function getActionName(path) {
 }
 
 // *** Main ***
-
-let path = process.argv[2];
-let manifest = {};
 main();
 
 function main() {
-    manifest = scanPackages();
-    scanWeb();
+    let path = process.argv[2];
+    let manifest = scanPackages(path);
+    scanWeb(path);
     let manifestYaml = nuv.toYaml(manifest);
     nuv.writeFile(nuv.joinPath(path, "manifest.yml"), manifestYaml);
     console.log("Manifest file written at " + nuv.joinPath(path, "manifest.yml"));
 }
 
-function scanPackages(manifest) {
+function scanPackages(path) {
     manifest = { packages: {} };
-    console.log('Scanning packages folder...');
     const packagesFolderPath = path + '/packages';
     if (!nuv.exists(packagesFolderPath)) {
-        // console.log('Packages folder not found');
-        return;
+        return manifest;
     }
 
+    console.log('Scanning packages folder...');
     nuv.readDir(packagesFolderPath).forEach(function (entry) {
         const packagePath = nuv.joinPath(packagesFolderPath, entry);
         // if it's a directory, it's an ow package
@@ -119,13 +116,13 @@ function scanSinglePackage(manifest, packagePath) {
     });
 }
 
-function scanWeb() {
-    console.log("Scanning web folder...");
+function scanWeb(path) {
     const webFolderPath = path + '/web';
     if (!nuv.exists(webFolderPath)) {
         console.log('Web folder not found');
         return;
     }
-    console.log("Web folder scanned");
+    // console.log("Scanning web folder...");
+    // console.log("TODO: implement web folder scanning");
 }
 

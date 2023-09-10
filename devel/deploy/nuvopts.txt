@@ -1,7 +1,0 @@
-Subcommand: nuv devel deploy
-
-Detect a Nuvolaris project based on the packages and web folders in the given path (or the current directory if no path is given).
-
-Usage:
-  deploy detect [<path>]
-  deploy scan [<path>]

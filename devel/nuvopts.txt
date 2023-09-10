@@ -1,0 +1,13 @@
+Subcommand: nuv devel 
+
+Commands to manage Nuvolaris projects.
+
+Usage:
+  devel detect [<path>]
+  devel scan [<path>]
+  devel deploy [<repo_or_path>]
+
+Commands:
+  detect    Detect if in a directory there is a web and/or packages folders.
+  scan      Scan a project directory and generate a manifest file.
+  deploy    Deploy a project from a directory or from a git repository.

@@ -42,7 +42,7 @@ function main() {
 
     let manifest = scanPackages(path);
 
-    manifest = scanEnvfile(path, manifest);
+    manifest = scanEnv(manifest);
 
     let manifestYaml = nuv.toYaml(manifest);
 
@@ -52,30 +52,26 @@ function main() {
     console.log("Manifest file written at " + manifestPath);
 }
 
-function scanEnvfile(path, manifest) {
-    const envfilePath = nuv.joinPath(path, '.env');
+function scanEnv(manifest) {
+    console.log('Adding secrets...');
 
-    // for each line in the envfile
-    // add in each package the env variables
+    let config = nuv.nuvExec('-config', '-d');
 
-    if (!nuv.exists(envfilePath)) {
-        return manifest;
-    }
 
-    console.log('Scanning .env file...');
-
-    const envfile = nuv.readFile(envfilePath);
-    const lines = envfile.split('\n');
+    const lines = config.split('\n');
     lines.forEach(function (line) {
         const parts = line.split('=');
         if (parts.length == 2) {
             const key = parts[0];
-            const value = parts[1];
+            if (!key.startsWith('SECRET_')) {
+                return;
+            }
+
             for (const packageName in manifest.packages) {
-                if (!manifest.packages[packageName].env) {
-                    manifest.packages[packageName].env = {};
+                if (!manifest.packages[packageName].inputs) {
+                    manifest.packages[packageName].inputs = {};
                 }
-                manifest.packages[packageName].env[key] = value;
+                manifest.packages[packageName].inputs[key.toLowerCase()] = `$${key}`;
             }
         }
     });

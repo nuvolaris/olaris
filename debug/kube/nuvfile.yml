@@ -136,3 +136,9 @@ tasks:
             kubectl -n nuvolaris get $a
         fi
     done 
+
+
+  operator:
+    desc: describe operator
+    cmds:
+    - kubectl -n nuvolaris describe pod/nuvolaris-operator

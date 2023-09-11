@@ -39,13 +39,48 @@ main();
 
 function main() {
     let path = process.argv[2];
-    let { packagesPath, manifest } = scanPackages(path);
-    scanWeb(path);
+
+    let manifest = scanPackages(path);
+
+    manifest = scanEnvfile(path, manifest);
+
     let manifestYaml = nuv.toYaml(manifest);
 
-    const manifestPath = nuv.joinPath(packagesPath, "manifest.yml");
+    const manifestPath = nuv.joinPath(process.env.NUV_TMP, "manifest.yml");
+
     nuv.writeFile(manifestPath, manifestYaml);
     console.log("Manifest file written at " + manifestPath);
+}
+
+function scanEnvfile(path, manifest) {
+    const envfilePath = nuv.joinPath(path, '.env');
+
+    // for each line in the envfile
+    // add in each package the env variables
+
+    if (!nuv.exists(envfilePath)) {
+        return manifest;
+    }
+
+    console.log('Scanning .env file...');
+
+    const envfile = nuv.readFile(envfilePath);
+    const lines = envfile.split('\n');
+    lines.forEach(function (line) {
+        const parts = line.split('=');
+        if (parts.length == 2) {
+            const key = parts[0];
+            const value = parts[1];
+            for (const packageName in manifest.packages) {
+                if (!manifest.packages[packageName].env) {
+                    manifest.packages[packageName].env = {};
+                }
+                manifest.packages[packageName].env[key] = value;
+            }
+        }
+    });
+
+    return manifest;
 }
 
 function scanPackages(path) {
@@ -73,12 +108,12 @@ function scanPackages(path) {
                 if (!manifest.packages['default']) {
                     manifest.packages['default'] = { actions: {} };
                 }
-                manifest.packages['default'].actions[actionName] = { function: entry, web: true };
+                manifest.packages['default'].actions[actionName] = { function: packagePath, web: true };
             }
         }
     });
     console.log('Packages scanned');
-    return { packagesPath, manifest };
+    return manifest;
 }
 
 function scanSinglePackage(manifest, packagePath) {
@@ -91,14 +126,12 @@ function scanSinglePackage(manifest, packagePath) {
             return;
         }
 
-        const actionName = getActionName(entry);
-        let functionEntry = nuv.joinPath(packageName, entry);
-        let err = false;
-
         if (isSingleFileAction(packagePath, entry) && isSupportedRuntime(entry)) {
             // console.log(packageName + '/' + entry + ' is supported single file action');
             const actionName = getActionName(entry);
+            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packagePath, entry), web: true };
         } else if (isMultiFileAction(packagePath, entry)) {
+            const actionName = getActionName(entry);
             // console.log(packageName + '/' + entry + ' is multi file action');
             let res = nuv.nuvExec('-zipf', nuv.joinPath(packagePath, entry));
 
@@ -106,25 +139,12 @@ function scanSinglePackage(manifest, packagePath) {
             // so if the result doesn't end with .zip\n, it's an error
             if (!res.endsWith('.zip\n')) {
                 console.error("ZIP ERROR:", res)
-                err = true;
+                return;
             }
 
-            functionEntry = nuv.basePath(res.split(" ")[2]).trim();
+            const functionEntry = nuv.basePath(res.split(" ")[2]).trim();
+            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packagePath, functionEntry), web: true };
         }
 
-        if (!err) {
-            manifest.packages[packageName].actions[actionName] = { function: functionEntry, web: true };
-        }
     });
 }
-
-function scanWeb(path) {
-    const webFolderPath = path + '/web';
-    if (!nuv.exists(webFolderPath)) {
-        console.log('Web folder not found');
-        return;
-    }
-    // console.log("Scanning web folder...");
-    // console.log("TODO: implement web folder scanning");
-}
-

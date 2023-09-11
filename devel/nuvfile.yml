@@ -80,3 +80,4 @@ tasks:
         fi
 
         nuv devel scan $DEPLOY_PATH
+        nuv project deploy $DEPLOY_PATH

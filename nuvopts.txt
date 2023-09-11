@@ -18,6 +18,7 @@ Commands:
   cloud       Manage cloud environments (AWS, GCP, Azure, K3S, MK8S, OpenShift)
   config      Manage the Nuvolaris configuration
   devel       Utilities to scan and deploy Nuvolaris projects
+  project     Manage Nuvolaris projects
   setup       Setup the Nuvolaris platform on multiple environments
   update      Update utilities for a Nuvolaris installation, cli, and secrets
 

@@ -1,6 +1,6 @@
 Subcommand: nuv devel 
 
-Commands to manage Nuvolaris projects.
+Utility commands to help with developing Nuvolaris projects.
 
 Usage:
   devel detect [<path>]

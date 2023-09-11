@@ -39,23 +39,25 @@ main();
 
 function main() {
     let path = process.argv[2];
-    let manifest = scanPackages(path);
+    let { packagesPath, manifest } = scanPackages(path);
     scanWeb(path);
     let manifestYaml = nuv.toYaml(manifest);
-    nuv.writeFile(nuv.joinPath(path, "manifest.yml"), manifestYaml);
-    console.log("Manifest file written at " + nuv.joinPath(path, "manifest.yml"));
+
+    const manifestPath = nuv.joinPath(packagesPath, "manifest.yml");
+    nuv.writeFile(manifestPath, manifestYaml);
+    console.log("Manifest file written at " + manifestPath);
 }
 
 function scanPackages(path) {
     manifest = { packages: {} };
-    const packagesFolderPath = path + '/packages';
-    if (!nuv.exists(packagesFolderPath)) {
+    const packagesPath = nuv.joinPath(path, '/packages');
+    if (!nuv.exists(packagesPath)) {
         return manifest;
     }
 
     console.log('Scanning packages folder...');
-    nuv.readDir(packagesFolderPath).forEach(function (entry) {
-        const packagePath = nuv.joinPath(packagesFolderPath, entry);
+    nuv.readDir(packagesPath).forEach(function (entry) {
+        const packagePath = nuv.joinPath(packagesPath, entry);
         // if it's a directory, it's an ow package
         if (nuv.isDir(packagePath)) {
             // check we are not overwriting the default package
@@ -76,7 +78,7 @@ function scanPackages(path) {
         }
     });
     console.log('Packages scanned');
-    return manifest;
+    return { packagesPath, manifest };
 }
 
 function scanSinglePackage(manifest, packagePath) {

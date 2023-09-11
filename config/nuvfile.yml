@@ -463,6 +463,26 @@ tasks:
           else echo ../setup/kubernetes/runtimes.json
           fi
 
+  standalone:
+    silent: true
+    cmds:
+    - task: read
+      vars:
+        MSG: "Openwhisk Standalone Controller Java Options"
+        VAR: "OPENWHISK_CONTROLLER_JAVA_OPTS"
+        HINT: | 
+              Specifies nuvolaris controller Java options
+        VAL: "{{.__javaopts}}"
+        DEF: "-Xmx2048M"
+    - task: read
+      vars:
+        MSG: "Openwhisk Standalone Controller Pool Memory Settings"
+        VAR: "OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY"
+        HINT: | 
+              Specifies nuvolaris controller Java options
+        VAL: "{{.__poolmemory}}"
+        DEF: "2048m"                   
+
   use:
     silent: true
     desc: select a different kubeconfig among those you created

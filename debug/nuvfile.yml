@@ -108,7 +108,7 @@ tasks:
     cmds:
       - |
         while true
-        do   
+        do
           kubectl -n nuvolaris get po,deploy,sts
           sleep 5
         done  

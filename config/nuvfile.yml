@@ -448,11 +448,12 @@ tasks:
       - |
         if test -z "{{._runtimesjson_}}"
         then cat "{{.RUNTIMES}}"
-        else  if test -e "{{._runtimesjson_}}"
-              then cp "{{._runtimesjson_}}" $NUV_TMP/runtimes.json
-                   echo "Imported runtimes.json from {{._runtimesjson_}}"
-              else echo "not found {{._runtimesjson_}}"
-              fi
+        else RT="$(realpath "{{._runtimesjson_}}")"
+            if test -e "$RT"
+            then cp "$RT" "$NUV_TMP/runtimes.json"
+                 echo "Imported runtimes.json from $RT"
+            else echo "not found {{._runtimesjson_}}"
+            fi
         fi
     vars:
       RUNTIMES:
@@ -461,6 +462,26 @@ tasks:
           then echo "$NUV_TMP/runtimes.json"
           else echo ../setup/kubernetes/runtimes.json
           fi
+
+  standalone:
+    silent: true
+    cmds:
+    - task: read
+      vars:
+        MSG: "Openwhisk Standalone Controller Java Options"
+        VAR: "OPENWHISK_CONTROLLER_JAVA_OPTS"
+        HINT: | 
+              Specifies nuvolaris controller Java options
+        VAL: "{{.__javaopts}}"
+        DEF: "-Xmx2048M"
+    - task: read
+      vars:
+        MSG: "Openwhisk Standalone Controller Pool Memory Settings"
+        VAR: "OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY"
+        HINT: | 
+              Specifies nuvolaris controller Java options
+        VAL: "{{.__poolmemory}}"
+        DEF: "2048m"                   
 
   use:
     silent: true

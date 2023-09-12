@@ -8,6 +8,7 @@ Usage:
   util no-user-secrets <username>
   util detect
   util poll
+  util realpath <file>
   
 Commands:
   util secrets              generate system secrets 
@@ -16,3 +17,4 @@ Commands:
   util no-user-secrets      remove user secrets for the given user
   util detect               detect the current kubernetes cluster
   util poll                 run wsk poll
+  util realpath             return full path of specified file

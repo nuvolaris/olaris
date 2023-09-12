@@ -92,7 +92,12 @@ spec:
         limit-std: "${OPENWHISK_TIME_LIMIT_STD:-1min}"
         limit-max: "${OPENWHISK_TIME_LIMIT_STD:-5min}"
     controller:
-      javaOpts: "-Xmx2048M"
+      javaOpts: "${OPENWHISK_CONTROLLER_JAVA_OPTS:- -Xmx2048M}"
+      loggingLevel: "INFO"
+    invoker:
+      loggingLevel: "INFO"
+      containerPool:
+        userMemory: "${OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY:-2048m}"
   redis:
     persistence-enabled: ${REDIS_PERSISTENCE_ENABLED:-true}
     max-memory: ${REDIS_MAX_MEMORY:-1000mb}

@@ -31,3 +31,4 @@ header:
     - 'ingress-deploy.yaml'
     - 'setup/kubernetes/runtimes.json'
     - '**/*.json'
+    - 'update/update.ps1' 

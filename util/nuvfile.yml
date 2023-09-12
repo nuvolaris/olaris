@@ -76,3 +76,5 @@ tasks:
     cmds:
       - wsk activation poll
 
+  realpath:
+    - realpath {{._file_}}

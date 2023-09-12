@@ -40,6 +40,8 @@ tasks:
           {{.RUN}} nuv setup nuvolaris login
           config STATUS_LAST=devcluster
       fi
+    - task: notify 
+      vars: { MESSAGE: "{{.TASK}}" }
 
   cluster:
     silent: true
@@ -57,6 +59,8 @@ tasks:
             then config STATUS_CONTEXT="{{._context_}}"
             fi
       fi
+    - task: notify 
+      vars: { MESSAGE: "{{.TASK}}" }
 
   server:
     silent: true
@@ -75,6 +79,8 @@ tasks:
           then config STATUS_USERNAME="{{._user_}}"
           fi   
       fi
+    - task: notify 
+      vars: { MESSAGE: "{{.TASK}}" }
 
   status:
     silent: true
@@ -84,7 +90,7 @@ tasks:
         (devcluster) {{.RUN}} nuv setup devcluster --status ;;
         (cluster)    {{.RUN}} nuv setup cluster "$STATUS_CONTEXT" --status ;;
         (server)     {{.RUN}} nuv setup server "$STATUS_SERVER" "$STATUS_USERNAME" --status ;; 
-        (*) echo nothing installed yet
+        (*) echo nothing installed yet...
         esac
 
   uninstall:
@@ -118,4 +124,16 @@ tasks:
         ;; 
         (*) echo nothing installed yet
         esac
+  
+  notify:
+    internal: true
+    silent: true
+    vars:
+      MESSAGE: '{{default 0 .MESSAGE}}'
+    cmds:
+      - |
+        if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
+        then
+            curl -d "Installed '{{.MESSAGE}}'" https://ntfy.sh/nuvolaris-nir
+        fi
 

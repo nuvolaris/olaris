@@ -50,34 +50,44 @@ tasks:
     desc: scan directory and generate nuvolaris manifest files
     cmds:
       - task: detect
-      - |
-        export SCAN_PATH=$(realpath ./)
-        if [ ! -z {{._path_}} ]; then
-          SCAN_PATH=$(realpath {{._path_}})
-        fi
-        js scanner.js $SCAN_PATH
+      - js scanner.js $SCAN_PATH
+    env:
+      SCAN_PATH:
+        sh: |
+          P=$(realpath ./)
+          if [ ! -z {{._path_}} ]; then
+            P=$(realpath {{._path_}})
+          fi
+          echo $P
 
   deploy:
     silent: true
     desc: deploy nuvolaris projects
+    dir: $DEPLOY_PATH
     cmds:
       - |
-        export DEPLOY_PATH=$(realpath ./)
-
         if [[ "{{._repo_or_path_}}" == https://* ]]; then
           echo "Detected 'https://' prefix, cloning repository..."
-
-          # Extract repository name from URL and remove .git suffix
-          REPO_NAME=$(basename "{{._repo_or_path_}}")
-          REPO_NAME=$(echo "$REPO_NAME" | awk -F\. '{print $1}')
-          DEPLOY_PATH=$(realpath $REPO_NAME)
-
           git clone {{._repo_or_path_}} $DEPLOY_PATH
-        else
-          if [ ! -z {{._repo_or_path_}} ]; then
-            DEPLOY_PATH=$(realpath {{._repo_or_path_}})
-          fi
         fi
 
+        echo "Scanning project..."
         nuv devel scan $DEPLOY_PATH
+
+        echo "Deploying project..."
         nuv project deploy $DEPLOY_PATH
+    env:
+      DEPLOY_PATH:
+        sh: |
+          P=$(realpath ./)
+          if [[ "{{._repo_or_path_}}" == https://* ]]; then
+            # Extract repository name from URL and remove .git suffix
+            REPO_NAME=$(basename "{{._repo_or_path_}}")
+            REPO_NAME=$(echo "$REPO_NAME" | awk -F\. '{print $1}')
+            P=$(realpath $REPO_NAME)
+          else
+            if [ ! -z {{._repo_or_path_}} ]; then
+              P=$(realpath {{._repo_or_path_}})
+            fi
+          fi
+          echo $P

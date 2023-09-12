@@ -6,7 +6,6 @@ Usage:
   gcloud vm-create <name>
   gcloud vm-delete <name>
   gcloud vm-getip  <name>
-  gcloud vm-exec   <name> <command>
 
 Commands:
   vm-list     lists the vm and their ips

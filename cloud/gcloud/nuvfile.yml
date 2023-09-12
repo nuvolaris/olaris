@@ -46,23 +46,15 @@ tasks:
       --allow tcp:80,tcp:443,tcp:6443,tcp:16443 
       --target-tags=nuvolaris-vm
 
-  vm-add-sshkey:
-    silent: true
-    cmds:
-      - > 
-       cat $(realpath $GCLOUD_SSHKEY) | 
-       awk '/ssh-rsa/{ print "ubuntu:ssh-rsa " $2 }'
-       >_sshkey
-      - >  
-        gcloud compute instances 
-        add-metadata "{{._name_}}" --zone="$GCLOUD_REGION" 
-        --metadata-from-file ssh-keys=_sshkey
-
   vm-create:
     silent: true
     cmds:
       - task: prereq
       - task: vm-firewall-rule
+      - > 
+       cat "$(realpath $GCLOUD_SSHKEY)" |
+       awk '/ssh-rsa/{ print "ubuntu:ssh-rsa " $2 }'
+       >_sshkey
       - >
         gcloud compute instances describe "{{._name_}}" --zone="$GCLOUD_REGION" 2>/dev/null >/dev/null
         || gcloud compute instances 
@@ -73,14 +65,13 @@ tasks:
         --image-project=ubuntu-os-cloud
         --tags=nuvolaris-vm
         --labels=nuv=true
-      - task: vm-add-sshkey
+        --metadata-from-file=ssh-keys=_sshkey 
       - task: vm-getip
       - >
         echo "*** Waiting until the VM is ready..." ;
         retry -t 1000 -m 1800 {{.SSH}} 
         "ubuntu@$(cat _vm-ip)" hostname
 
- 
   vm-getip:
     silent: true
     cmds:
@@ -92,6 +83,7 @@ tasks:
 
   vm-delete:
     cmds:
+    - task: vm-add-sshkey
     - > 
       gcloud compute instances 
       delete "{{._name_}}" 

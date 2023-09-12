@@ -6,4 +6,4 @@ Usage:
     project deploy
 
 Commands:
-    deploy     Deploy a project to Nuvolaris (in )
+    deploy     Deploy a project to Nuvolaris (from current directory)

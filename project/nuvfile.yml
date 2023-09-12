@@ -4,9 +4,12 @@ tasks:
   deploy:
     silent: true
     cmds:
-      - |
-        export DEPLOY_PATH=$(realpath ./)
-        if [ ! -z {{._path_}} ]; then
-          DEPLOY_PATH=$(realpath {{._path_}})
-        fi
-        nuv -wsk project deploy --project $DEPLOY_PATH/packages
+      - nuv -wsk project deploy --manifest $MANIFEST
+    env:
+      MANIFEST:
+        sh: |
+          if [ -f "$NUV_PWD/manifest.yaml" ]; then
+            echo "$NUV_PWD/manifest.yaml"
+          else 
+            echo "$NUV_TMP/manifest.yaml"
+          fi

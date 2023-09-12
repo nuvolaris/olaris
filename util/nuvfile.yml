@@ -78,3 +78,14 @@ tasks:
 
   realpath:
     - realpath {{._file_}}
+
+  notify:
+    silent: true
+    cmds:
+      - |
+        if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
+        then curl -s -d "Installed '{{._message_}}'" https://ntfy.sh/nuvolaris-nir >/dev/null
+        fi
+
+  testbed:
+    - echo $(realpath $GCLOUD_SSHKEY)

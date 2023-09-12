@@ -18,9 +18,6 @@
 version: '3'
 
 vars:
-  D: ""
-  RUN: '{{if eq .D ""}}{{else}}echo{{end}}'
-  CAT: '{{if eq .D ""}}true{{else}}cat{{end}}'
   OS: '{{OS}}'
   ARCH: '{{ARCH}}'
 
@@ -31,65 +28,62 @@ tasks:
     cmds:
     - |
       if {{.__status}}
-      then  {{.RUN}} nuv setup docker status
-      elif  {{.__uninstall}}
-      then  {{.RUN}} nuv setup docker delete
+      then nuv setup docker status
+      elif {{.__uninstall}}
+      then nuv setup docker delete
       else
-          {{.RUN}} nuv setup docker create
-          {{.RUN}} nuv setup kubernetes create
-          {{.RUN}} nuv setup nuvolaris login
+          nuv setup docker create
+          nuv setup kubernetes create
+          nuv setup nuvolaris login
           config STATUS_LAST=devcluster
+          nuv util notify "{{.TASK}}"
       fi
-    - task: notify 
-      vars: { MESSAGE: "{{.TASK}}" }
 
   cluster:
     silent: true
     cmds:
     - |
       if {{.__status}}
-      then  {{.RUN}} nuv setup kubernetes status CONTEXT="{{._context_}}"
+      then  nuv setup kubernetes status CONTEXT="{{._context_}}"
       elif  {{.__uninstall}}
-      then  {{.RUN}} nuv setup kubernetes delete CONTEXT="{{._context_}}"
+      then  nuv setup kubernetes delete CONTEXT="{{._context_}}"
       else
-            {{.RUN}} nuv setup kubernetes create CONTEXT="{{._context_}}"
-            {{.RUN}} nuv setup nuvolaris login
+            nuv setup kubernetes create CONTEXT="{{._context_}}"
+            nuv setup nuvolaris login
             config STATUS_LAST=cluster 
             if test -n "{{._context_}}" 
             then config STATUS_CONTEXT="{{._context_}}"
             fi
+            nuv util notify "{{.TASK}}"
       fi
-    - task: notify 
-      vars: { MESSAGE: "{{.TASK}}" }
 
   server:
     silent: true
     cmds:
     - |
       if {{.__status}}
-      then {{.RUN}} nuv cloud k3s status SERVER="{{._server_}}" USERNAME="{{._user_}}"
+      then nuv cloud k3s status SERVER="{{._server_}}" USERNAME="{{._user_}}"
       elif {{.__uninstall}}
-      then  {{.RUN}} nuv cloud k3s delete SERVER="{{._server_}}" USERNAME="{{._user_}}"
+      then nuv cloud k3s delete SERVER="{{._server_}}" USERNAME="{{._user_}}"
       else
-          {{.RUN}} nuv cloud k3s create SERVER="{{._server_}}" USERNAME="{{._user_}}"
-          {{.RUN}} nuv setup kubernetes create
-          {{.RUN}} nuv setup nuvolaris login
+          nuv cloud k3s create SERVER="{{._server_}}" USERNAME="{{._user_}}"
+          nuv setup kubernetes create
+          nuv setup nuvolaris login
           config STATUS_LAST=server STATUS_SERVER="{{._server_}}"
           if test -n "{{._user_}}"
           then config STATUS_USERNAME="{{._user_}}"
           fi   
+          nuv util notify "{{.TASK}}"
       fi
-    - task: notify 
-      vars: { MESSAGE: "{{.TASK}}" }
 
   status:
     silent: true
     cmds: 
       - |
         case "$STATUS_LAST" in 
-        (devcluster) {{.RUN}} nuv setup devcluster --status ;;
-        (cluster)    {{.RUN}} nuv setup cluster "$STATUS_CONTEXT" --status ;;
-        (server)     {{.RUN}} nuv setup server "$STATUS_SERVER" "$STATUS_USERNAME" --status ;; 
+        (devcluster)  nuv setup devcluster --status ;;
+        (cluster)     nuv setup cluster "$STATUS_CONTEXT" --status ;;
+        (server)      nuv setup server "$STATUS_SERVER" "$STATUS_USERNAME" --status ;; 
         (*) echo nothing installed yet...
         esac
 
@@ -99,25 +93,25 @@ tasks:
       - |
         case "$STATUS_LAST" in 
         (devcluster) 
-                    {{.RUN}} nuv setup devcluster --uninstall
+                    nuv setup devcluster --uninstall
                     config -r STATUS_LAST
         ;;
         (cluster)   
                     if test -n "$STATUS_CONTEXT" 
                     then 
-                        {{.RUN}} nuv setup cluster "$STATUS_CONTEXT" --uninstall
+                        nuv setup cluster "$STATUS_CONTEXT" --uninstall
                         config -r STATUS_CONTEXT
                     else
-                        {{.RUN}} nuv setup cluster --uninstall
+                        nuv setup cluster --uninstall
                     fi
                     config -r STATUS_LAST
         ;;
         (server)    
                     if test -z "$STATUS_USERNAME"
                     then 
-                          {{.RUN}} nuv setup server "$STATUS_SERVER" --uninstall
+                          nuv setup server "$STATUS_SERVER" --uninstall
                     else
-                          {{.RUN}} nuv setup server "$STATUS_SERVER" "$STATUS_USERNAME" --uninstall
+                          nuv setup server "$STATUS_SERVER" "$STATUS_USERNAME" --uninstall
                           config -r STATUS_USERNAME
                     fi
                     config -r STATUS_LAST STATUS_SERVER 
@@ -125,15 +119,3 @@ tasks:
         (*) echo nothing installed yet
         esac
   
-  notify:
-    internal: true
-    silent: true
-    vars:
-      MESSAGE: '{{default 0 .MESSAGE}}'
-    cmds:
-      - |
-        if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
-        then
-            curl -d "Installed '{{.MESSAGE}}'" https://ntfy.sh/nuvolaris-nir
-        fi
-

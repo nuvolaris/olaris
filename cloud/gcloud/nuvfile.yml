@@ -50,7 +50,7 @@ tasks:
     silent: true
     cmds:
       - > 
-       cat $GCLOUD_SSHKEY | 
+       cat $(realpath $GCLOUD_SSHKEY) | 
        awk '/ssh-rsa/{ print "ubuntu:ssh-rsa " $2 }'
        >_sshkey
       - >  

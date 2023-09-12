@@ -21,11 +21,34 @@ const nuv = require('nuv');
 
 const isSingleFileAction = (package, entry) => !nuv.isDir(nuv.joinPath(package, entry));
 
-// TODO: check for package.json, go.mod, requirements.txt, pom.xml
-const isMultiFileAction = (package, entry) => nuv.isDir(nuv.joinPath(package, entry));
+const checkMultiFileAction = (package, entry) => {
+    const path = nuv.joinPath(package, entry);
+    if (nuv.isDir(path)) {
+        return { isDir: true, runtime: findRuntime(path) };
+    }
+    return { isDir: false, runtime: null };
+};
 
 const supportedRuntimes = [".js", ".py", ".go", ".java"];
+const supportedRuntimesValues = {
+    "main.js": "nodejs:default",
+    "__main__.py": "python:default",
+    "main.go": "go:default",
+    "main.java": "java:default",
+    "main.php": "php:default",
+}
 const isSupportedRuntime = (file) => supportedRuntimes.includes(nuv.fileExt(file));
+
+const findRuntime = (folder) => {
+    const files = nuv.readDir(folder);
+    for (const file of files) {
+        if (supportedRuntimesValues[file]) {
+            return supportedRuntimesValues[file];
+        }
+    }
+    return null;
+};
+
 
 // Get the action name from the file name: "/path/to/action.js" -> "action"
 function getActionName(path) {
@@ -126,7 +149,11 @@ function scanSinglePackage(manifest, packagePath) {
         if (isSingleFileAction(packagePath, entry) && isSupportedRuntime(entry)) {
             // console.log(packageName + '/' + entry + ' is supported single file action');
             manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packageName, entry), web: true };
-        } else if (isMultiFileAction(packagePath, entry)) {
+            return;
+        }
+
+        let { isDir, runtime } = checkMultiFileAction(packagePath, entry);
+        if (isDir && runtime) {
             // console.log(packageName + '/' + entry + ' is multi file action');
             let res = nuv.nuvExec('-zipf', nuv.joinPath(packagePath, entry));
 
@@ -138,8 +165,11 @@ function scanSinglePackage(manifest, packagePath) {
             }
 
             const functionEntry = nuv.basePath(res.split(" ")[2]).trim();
-            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packageName, functionEntry), web: true };
+            manifest.packages[packageName].actions[actionName] = {
+                function: nuv.joinPath(packageName, functionEntry),
+                runtime,
+                web: true,
+            };
         }
-
     });
 }

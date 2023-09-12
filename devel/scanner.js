@@ -46,7 +46,7 @@ function main() {
 
     let manifestYaml = nuv.toYaml(manifest);
 
-    const manifestPath = nuv.joinPath(process.env.NUV_TMP, "manifest.yml");
+    const manifestPath = nuv.joinPath(process.env.NUV_TMP, "manifest.yaml");
 
     nuv.writeFile(manifestPath, manifestYaml);
     console.log("Manifest file written at " + manifestPath);
@@ -98,13 +98,12 @@ function scanPackages(path) {
             scanSinglePackage(manifest, packagePath);
         } else {// otherwise it could be a single file action in the default package
             if (isSupportedRuntime(entry)) {
-                // console.log(entry + ' is supported single file action in default package');
-                const actionName = getActionName(entry);
                 // add 'default' package if not present
                 if (!manifest.packages['default']) {
                     manifest.packages['default'] = { actions: {} };
                 }
-                manifest.packages['default'].actions[actionName] = { function: packagePath, web: true };
+                const actionName = getActionName(entry);
+                manifest.packages['default'].actions[actionName] = { function: nuv.basePath(packagePath), web: true };
             }
         }
     });
@@ -122,12 +121,12 @@ function scanSinglePackage(manifest, packagePath) {
             return;
         }
 
+        const packageName = nuv.basePath(packagePath);
+        const actionName = getActionName(entry);
         if (isSingleFileAction(packagePath, entry) && isSupportedRuntime(entry)) {
             // console.log(packageName + '/' + entry + ' is supported single file action');
-            const actionName = getActionName(entry);
-            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packagePath, entry), web: true };
+            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packageName, entry), web: true };
         } else if (isMultiFileAction(packagePath, entry)) {
-            const actionName = getActionName(entry);
             // console.log(packageName + '/' + entry + ' is multi file action');
             let res = nuv.nuvExec('-zipf', nuv.joinPath(packagePath, entry));
 
@@ -139,7 +138,7 @@ function scanSinglePackage(manifest, packagePath) {
             }
 
             const functionEntry = nuv.basePath(res.split(" ")[2]).trim();
-            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packagePath, functionEntry), web: true };
+            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packageName, functionEntry), web: true };
         }
 
     });

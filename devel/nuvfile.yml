@@ -18,6 +18,66 @@
 version: "3"
 
 tasks:
+  detect:
+    silent: true
+    desc: detect project in directory
+    cmds:
+      - |
+        export PACKAGES_PATH=$(realpath ./packages)
+        export WEB_PATH=$(realpath ./web)
+        if [ ! -z {{._path_}} ]; then
+          PACKAGES_PATH=$(realpath {{._path_}}/packages)
+          WEB_PATH=$(realpath {{._path_}}/web)
+        fi
+
+        if [ -d "$PACKAGES_PATH" ] && [ -d "$WEB_PATH" ]; then
+          echo "Packages and web directory present."  
+          exit 0
+        fi
+
+        if [ -d "$PACKAGES_PATH" ]; then
+          echo "Packages directory present."
+          exit 0
+        fi
+        if [ -d "$WEB_PATH" ]; then
+          echo "Web directory present."
+          exit 0
+        fi
+        die "No project detected (missing packages and web directory)."
+
+  scan:
+    silent: true
+    desc: scan directory and generate nuvolaris manifest files
+    cmds:
+      - task: detect
+      - |
+        export SCAN_PATH=$(realpath ./)
+        if [ ! -z {{._path_}} ]; then
+          SCAN_PATH=$(realpath {{._path_}})
+        fi
+        js scanner.js $SCAN_PATH
+
   deploy:
     silent: true
-    desc: scan and deploy nuvolaris deployment files
+    desc: deploy nuvolaris projects
+    cmds:
+      - |
+        export DEPLOY_PATH=$(realpath ./)
+
+        if [[ "{{._repo_or_path_}}" == https://* ]]; then
+          echo "Detected 'https://' prefix, cloning repository..."
+
+          # Extract repository name from URL and remove .git suffix
+          REPO_NAME=$(basename "{{._repo_or_path_}}")
+          REPO_NAME=$(echo "$REPO_NAME" | awk -F\. '{print $1}')
+          DEPLOY_PATH=$(realpath $REPO_NAME)
+
+          git clone {{._repo_or_path_}} $DEPLOY_PATH
+        else
+          if [ ! -z {{._repo_or_path_}} ]; then
+            DEPLOY_PATH=$(realpath {{._repo_or_path_}})
+          fi
+        fi
+
+        nuv devel scan $DEPLOY_PATH
+        nuv project deploy $DEPLOY_PATH

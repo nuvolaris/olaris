@@ -1,0 +1,18 @@
+version: 3
+
+tasks:
+  deploy:
+    silent: true
+    cmds:
+      - |
+        cd $NUV_PWD
+        MANIFEST=$NUV_PWD/packages/manifest.yaml
+        if [ ! -f "$MANIFEST" ]; then
+          if [ ! -f "$NUV_TMP/manifest.yaml" ]; then
+            die "No manifest files found. Generate one with nuv devel scan."
+          fi
+
+          cp $NUV_TMP/manifest.yaml $MANIFEST
+        fi
+
+        nuv -wsk project deploy --manifest $MANIFEST

@@ -21,11 +21,34 @@ const nuv = require('nuv');
 
 const isSingleFileAction = (package, entry) => !nuv.isDir(nuv.joinPath(package, entry));
 
-// TODO: check for package.json, go.mod, requirements.txt, pom.xml
-const isMultiFileAction = (package, entry) => nuv.isDir(nuv.joinPath(package, entry));
+const checkMultiFileAction = (package, entry) => {
+    const path = nuv.joinPath(package, entry);
+    if (nuv.isDir(path)) {
+        return { isDir: true, runtime: findRuntime(path) };
+    }
+    return { isDir: false, runtime: null };
+};
 
 const supportedRuntimes = [".js", ".py", ".go", ".java"];
+const supportedRuntimesValues = {
+    "main.js": "nodejs:default",
+    "__main__.py": "python:default",
+    "main.go": "go:default",
+    "main.java": "java:default",
+    "main.php": "php:default",
+}
 const isSupportedRuntime = (file) => supportedRuntimes.includes(nuv.fileExt(file));
+
+const findRuntime = (folder) => {
+    const files = nuv.readDir(folder);
+    for (const file of files) {
+        if (supportedRuntimesValues[file]) {
+            return supportedRuntimesValues[file];
+        }
+    }
+    return null;
+};
+
 
 // Get the action name from the file name: "/path/to/action.js" -> "action"
 function getActionName(path) {
@@ -35,30 +58,60 @@ function getActionName(path) {
 }
 
 // *** Main ***
-
-let path = process.argv[2];
-let manifest = {};
 main();
 
 function main() {
-    manifest = scanPackages();
-    scanWeb();
+    let path = process.argv[2];
+
+    let manifest = scanPackages(path);
+
+    manifest = scanEnv(manifest);
+
     let manifestYaml = nuv.toYaml(manifest);
-    nuv.writeFile(nuv.joinPath(path, "manifest.yml"), manifestYaml);
-    console.log("Manifest file written at " + nuv.joinPath(path, "manifest.yml"));
+
+    const manifestPath = nuv.joinPath(process.env.NUV_TMP, "manifest.yaml");
+
+    nuv.writeFile(manifestPath, manifestYaml);
+    console.log("Manifest file written at " + manifestPath);
 }
 
-function scanPackages(manifest) {
+function scanEnv(manifest) {
+    console.log('Adding secrets...');
+
+    let config = nuv.nuvExec('-config', '-d');
+
+
+    const lines = config.split('\n');
+    lines.forEach(function (line) {
+        const parts = line.split('=');
+        if (parts.length == 2) {
+            const key = parts[0];
+            if (!key.startsWith('SECRET_')) {
+                return;
+            }
+
+            for (const packageName in manifest.packages) {
+                if (!manifest.packages[packageName].inputs) {
+                    manifest.packages[packageName].inputs = {};
+                }
+                manifest.packages[packageName].inputs[key.toLowerCase()] = `$${key}`;
+            }
+        }
+    });
+
+    return manifest;
+}
+
+function scanPackages(path) {
     manifest = { packages: {} };
-    console.log('Scanning packages folder...');
-    const packagesFolderPath = path + '/packages';
-    if (!nuv.exists(packagesFolderPath)) {
-        // console.log('Packages folder not found');
-        return;
+    const packagesPath = nuv.joinPath(path, '/packages');
+    if (!nuv.exists(packagesPath)) {
+        return manifest;
     }
 
-    nuv.readDir(packagesFolderPath).forEach(function (entry) {
-        const packagePath = nuv.joinPath(packagesFolderPath, entry);
+    console.log('Scanning packages folder...');
+    nuv.readDir(packagesPath).forEach(function (entry) {
+        const packagePath = nuv.joinPath(packagesPath, entry);
         // if it's a directory, it's an ow package
         if (nuv.isDir(packagePath)) {
             // check we are not overwriting the default package
@@ -68,13 +121,12 @@ function scanPackages(manifest) {
             scanSinglePackage(manifest, packagePath);
         } else {// otherwise it could be a single file action in the default package
             if (isSupportedRuntime(entry)) {
-                // console.log(entry + ' is supported single file action in default package');
-                const actionName = getActionName(entry);
                 // add 'default' package if not present
                 if (!manifest.packages['default']) {
                     manifest.packages['default'] = { actions: {} };
                 }
-                manifest.packages['default'].actions[actionName] = { function: entry, web: true };
+                const actionName = getActionName(entry);
+                manifest.packages['default'].actions[actionName] = { function: nuv.basePath(packagePath), web: true };
             }
         }
     });
@@ -92,14 +144,16 @@ function scanSinglePackage(manifest, packagePath) {
             return;
         }
 
+        const packageName = nuv.basePath(packagePath);
         const actionName = getActionName(entry);
-        let functionEntry = nuv.joinPath(packageName, entry);
-        let err = false;
-
         if (isSingleFileAction(packagePath, entry) && isSupportedRuntime(entry)) {
             // console.log(packageName + '/' + entry + ' is supported single file action');
-            const actionName = getActionName(entry);
-        } else if (isMultiFileAction(packagePath, entry)) {
+            manifest.packages[packageName].actions[actionName] = { function: nuv.joinPath(packageName, entry), web: true };
+            return;
+        }
+
+        let { isDir, runtime } = checkMultiFileAction(packagePath, entry);
+        if (isDir && runtime) {
             // console.log(packageName + '/' + entry + ' is multi file action');
             let res = nuv.nuvExec('-zipf', nuv.joinPath(packagePath, entry));
 
@@ -107,25 +161,15 @@ function scanSinglePackage(manifest, packagePath) {
             // so if the result doesn't end with .zip\n, it's an error
             if (!res.endsWith('.zip\n')) {
                 console.error("ZIP ERROR:", res)
-                err = true;
+                return;
             }
 
-            functionEntry = nuv.basePath(res.split(" ")[2]).trim();
-        }
-
-        if (!err) {
-            manifest.packages[packageName].actions[actionName] = { function: functionEntry, web: true };
+            const functionEntry = nuv.basePath(res.split(" ")[2]).trim();
+            manifest.packages[packageName].actions[actionName] = {
+                function: nuv.joinPath(packageName, functionEntry),
+                runtime,
+                web: true,
+            };
         }
     });
 }
-
-function scanWeb() {
-    console.log("Scanning web folder...");
-    const webFolderPath = path + '/web';
-    if (!nuv.exists(webFolderPath)) {
-        console.log('Web folder not found');
-        return;
-    }
-    console.log("Web folder scanned");
-}
-

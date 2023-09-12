@@ -1,0 +1,9 @@
+Subcommand: nuv project 
+
+Commands to manage and deploy Nuvolaris projects.
+
+Usage:
+    project deploy
+
+Commands:
+    deploy     Deploy a project to Nuvolaris from the current directory. (must be the parent directory of 'packages')

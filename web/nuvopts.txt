@@ -1,0 +1,9 @@
+Subcommand: nuv web
+
+Commands to upload and manage static content.
+
+Usage:
+  web upload [<folder>]
+
+Commands:
+  upload   Uploads a folder to the web bucket in Nuvolaris.

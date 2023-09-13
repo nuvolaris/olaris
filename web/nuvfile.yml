@@ -1,0 +1,20 @@
+version: 3
+
+tasks:
+  upload:
+    silent: true
+    cmds:
+      - js upload.js $FOLDER_PATH
+
+    env:
+      FOLDER_PATH:
+        sh: |
+          P=$(realpath ./)
+          if [ ! -z {{._folder_}} ]; then
+            P=$(realpath {{._folder_}})
+          fi
+          echo $P
+      NUVUSER:
+        sh: wsk property get | awk '/whisk namespace/{print $3}'
+      APIHOST:
+        sh: wsk property get | awk '/whisk API host/{print $4}'

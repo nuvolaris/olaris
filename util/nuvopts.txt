@@ -19,4 +19,4 @@ Commands:
   util no-user-secrets      remove user secrets for the given user
   util detect               detect the current kubernetes cluster
   util poll                 run wsk poll
-  util realpath             return full path of specified file  
+  util realpath             return full path of specified file

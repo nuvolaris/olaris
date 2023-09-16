@@ -76,7 +76,6 @@ tasks:
     cmds:
       - wsk activation poll
 
-<<<<<<< HEAD
   realpath:
     - realpath {{._file_}}
 
@@ -87,11 +86,9 @@ tasks:
         if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
         then curl -s -d "Installed '{{._message_}}'" https://ntfy.sh/nuvolaris-nir >/dev/null
         fi
-=======
   notify:
     desc: install notifications
 
   1password:
     desc: 1password support utils
     
->>>>>>> 1513c49 (1password utils)

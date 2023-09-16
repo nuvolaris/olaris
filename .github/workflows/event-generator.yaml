@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-#
+# It does not use matrix loop on purpose as it will require too many runners
 name: OnOlarisPush
 
 on:
@@ -23,17 +23,56 @@ on:
       branches: '3.0.0-testing'
 
 jobs:
-    dispatch:
-      strategy:
-        fail-fast: false
-        matrix:
-          platform: [kind,k3s,mk8s,eks,aks,gke,osh]          
+    dispatch:        
       runs-on: ubuntu-latest
       steps:
-      - name: Repository Dispatch
+      - name: Dispatch Kind
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
             repository: francescotimperi/nuvolaris-testing
             token: ${{ secrets.PAT }}
-            client-payload: '{"platform": "${{ matrix.platform }}"}'
+            client-payload: '{"platform": "kind"}'
+      - name: Dispatch K3s
+        uses: peter-evans/repository-dispatch@v2
+        with:
+            event-type: olaris-testing-update
+            repository: francescotimperi/nuvolaris-testing
+            token: ${{ secrets.PAT }}
+            client-payload: '{"platform": "k3s"}'            
+      - name: Dispatch Mk8s
+        uses: peter-evans/repository-dispatch@v2
+        with:
+            event-type: olaris-testing-update
+            repository: francescotimperi/nuvolaris-testing
+            token: ${{ secrets.PAT }}
+            client-payload: '{"platform": "mk8s"}' 
+      - name: Dispatch EKS
+        uses: peter-evans/repository-dispatch@v2
+        with:
+            event-type: olaris-testing-update
+            repository: francescotimperi/nuvolaris-testing
+            token: ${{ secrets.PAT }}
+            client-payload: '{"platform": "eks"}'  
+      - name: Dispatch AKS
+        uses: peter-evans/repository-dispatch@v2
+        with:
+            event-type: olaris-testing-update
+            repository: francescotimperi/nuvolaris-testing
+            token: ${{ secrets.PAT }}
+            client-payload: '{"platform": "aks"}'  
+      - name: Dispatch GKE
+        uses: peter-evans/repository-dispatch@v2
+        with:
+            event-type: olaris-testing-update
+            repository: francescotimperi/nuvolaris-testing
+            token: ${{ secrets.PAT }}
+            client-payload: '{"platform": "gke"}'
+      - name: Dispatch OSH
+        uses: peter-evans/repository-dispatch@v2
+        with:
+            event-type: olaris-testing-update
+            repository: francescotimperi/nuvolaris-testing
+            token: ${{ secrets.PAT }}
+            client-payload: '{"platform": "osh"}'                                              
+            

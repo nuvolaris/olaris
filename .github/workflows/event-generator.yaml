@@ -30,49 +30,49 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: francescotimperi/nuvolaris-testing
+            repository: nuvolaris/nuvolaris-testing
             token: ${{ secrets.PAT }}
             client-payload: '{"platform": "kind"}'
       - name: Dispatch K3s
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: francescotimperi/nuvolaris-testing
+            repository: nuvolaris/nuvolaris-testing
             token: ${{ secrets.PAT }}
             client-payload: '{"platform": "k3s"}'            
       - name: Dispatch Mk8s
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: francescotimperi/nuvolaris-testing
+            repository: nuvolaris/nuvolaris-testing
             token: ${{ secrets.PAT }}
             client-payload: '{"platform": "mk8s"}' 
       - name: Dispatch EKS
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: francescotimperi/nuvolaris-testing
+            repository: nuvolaris/nuvolaris-testing
             token: ${{ secrets.PAT }}
             client-payload: '{"platform": "eks"}'  
       - name: Dispatch AKS
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: francescotimperi/nuvolaris-testing
+            repository: nuvolaris/nuvolaris-testing
             token: ${{ secrets.PAT }}
             client-payload: '{"platform": "aks"}'  
       - name: Dispatch GKE
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: francescotimperi/nuvolaris-testing
+            repository: nuvolaris/nuvolaris-testing
             token: ${{ secrets.PAT }}
             client-payload: '{"platform": "gke"}'
       - name: Dispatch OSH
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: francescotimperi/nuvolaris-testing
+            repository: nuvolaris/nuvolaris-testing
             token: ${{ secrets.PAT }}
             client-payload: '{"platform": "osh"}'                                              
             

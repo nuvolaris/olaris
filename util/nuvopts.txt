@@ -21,8 +21,5 @@ Commands:
   util poll                 run wsk poll
   util realpath             return full path of specified file
   util notify               install notifications service for nuvolaris installation
-<<<<<<< HEAD
   
-=======
   util 1password            1password support
->>>>>>> 1513c49 (1password utils)

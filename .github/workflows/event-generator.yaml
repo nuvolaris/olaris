@@ -24,11 +24,16 @@ on:
 
 jobs:
     dispatch:
+      strategy:
+        fail-fast: false
+        matrix:
+          platform: [kind,k3s,mk8s,eks,aks,gke,osh]          
       runs-on: ubuntu-latest
       steps:
       - name: Repository Dispatch
         uses: peter-evans/repository-dispatch@v2
         with:
             event-type: olaris-testing-update
-            repository: nuvolaris/nuvolaris-testing
+            repository: francescotimperi/nuvolaris-testing
             token: ${{ secrets.PAT }}
+            client-payload: '{"platform": "${{ matrix.platform }}"}'

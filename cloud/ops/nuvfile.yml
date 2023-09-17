@@ -1,5 +1,8 @@
 version: '3'
 
+dotenv:
+  - /etc/environment
+
 vars:
   NTFY_URL: https://github.com/binwiederhier/ntfy/releases/download/v2.7.0/ntfy_2.7.0_linux_{{ARCH}}.tar.gz
   NTFY: "$NUV_TMP/nuvops/ntfy"
@@ -30,7 +33,11 @@ tasks:
       echo "CURR=$CURR LAST=$LAST"
       if test "$LAST" != "$CURR"
       then
-        ntfy publish --token "$NUVOPS_TOKEN" --tags upload --file $NUV_TMP/nuvops/olaris-ops.tgz "$NUVOPS_TOPIC"
+        ntfy publish \
+        --token "$NUV_OPS_NTFY_TOKEN" \
+        --tags upload \
+        --file $NUV_TMP/nuvops/olaris-ops.tgz \
+        "$NUV_OPS_NTFY_TOPIC"
         cp $NUV_TMP/nuvops/olaris-ops.curr $NUV_TMP/nuvops/olaris-ops.last
       fi
 
@@ -41,10 +48,10 @@ tasks:
     - task: upload-tasks
     - > 
       ntfy publish
-      --token "$NUVOPS_TOKEN"
+      --token "$NUV_OPS_NTFY_TOKEN"
       --title "{{or .T "*"}}"
       --tags command
-      "$NUVOPS_TOPIC" "{{.CLI_ARGS}}"
+      "$NUV_OPS_NTFY_TOPIC" "{{.CLI_ARGS}}"
 
   test: 
     cmds:
@@ -59,15 +66,16 @@ tasks:
     desc: server
     cmds:
     - test -n "{{.HOSTNAME}}" || die "no hostname specified - use HOSTNAME="
-    - test -n "$NUVOPS_TOPIC" || die "configure NUVOPS_TOPIC"
-    - test -n "$NUVOPS_TOKEN" || die "configure NUVOPS_TOKEN"
+    - test -n "$NUV_OPS_NTFY_TOPIC" || die "configure NUV_OPS_NTFY_TOPIC"
+    - test -n "$NUV_OPS_NTFY_TOKEN" || die "configure NUV_OPS_NTFY_TOKEN"
     - task: setup
     - echo "*** {{.HOSTNAME}} ***"
     - mkdir -p "{{.BASEDIR}}/{{.WORKDIR}}"
     - >
       {{.NTFY}} sub
-      --token "$NUVOPS_TOKEN"
-      "$NUVOPS_TOPIC" "nuv cloud ops on_message HOSTNAME={{.HOSTNAME}}"
+      --token "$NUV_OPS_NTFY_TOKEN"
+      "$NUV_OPS_NTFY_TOPIC" 
+      "nuv cloud ops on_message HOSTNAME={{.HOSTNAME}}"
 
   on_message:
     cmds:

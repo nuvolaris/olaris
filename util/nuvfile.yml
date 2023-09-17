@@ -86,9 +86,16 @@ tasks:
         if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
         then curl -s -d "Installed '{{._message_}}'" https://ntfy.sh/nuvolaris-nir >/dev/null
         fi
-  notify:
-    desc: install notifications
+ 
+  ntfy:
+    desc: ntfy support
 
   1password:
     desc: 1password support utils
     
+  test:
+    desc: test
+    cmds:
+      - |
+        pwd
+        nuv -info

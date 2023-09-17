@@ -1,5 +1,15 @@
-Section:
-  nuv util 
+Section: nuv util
+
+Commands:
+  secrets              generate system secrets 
+  nosecrets            remove system secrets
+  user-secrets         generate user secrets for the given user
+  no-user-secrets      remove user secrets for the given user
+  detect               detect the current kubernetes cluster
+  poll                 run wsk poll
+  realpath             return full path of specified file
+  ntfy                 install notifications service for nuvolaris installation
+  1password            1password support
 
 Usage:
   util secrets
@@ -10,16 +20,6 @@ Usage:
   util poll
   util realpath <file>
   util notify <message>
-  util testbed
+  util ntfy
+  util 1password
   
-Commands:
-  util secrets              generate system secrets 
-  util nosecrets            remove system secrets
-  util user-secrets         generate user secrets for the given user
-  util no-user-secrets      remove user secrets for the given user
-  util detect               detect the current kubernetes cluster
-  util poll                 run wsk poll
-  util realpath             return full path of specified file
-  util notify               install notifications service for nuvolaris installation
-  
-  util 1password            1password support

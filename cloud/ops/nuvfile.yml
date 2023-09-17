@@ -102,9 +102,10 @@ tasks:
     silent: true
     cmds:
     - | 
-      #echo "Title $NTFY_TITLE {{.HOSTNAME}}"
+      echo "Title $NTFY_TITLE {{.HOSTNAME}}"
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
-      then echo "$NTFY_TITLE matched {{.HOSTNAME}}"
+      then pwd ; ls -l
+           echo "$NTFY_TITLE matched {{.HOSTNAME}}"
            nuv ops $NTFY_MESSAGE
       else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
       fi 

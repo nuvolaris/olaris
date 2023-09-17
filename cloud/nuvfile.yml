@@ -42,3 +42,6 @@ tasks:
   
   osh:
     desc: RedHat OpenShift subcommands
+
+  ops:
+    desc: NuvOps aka Remote Nuv

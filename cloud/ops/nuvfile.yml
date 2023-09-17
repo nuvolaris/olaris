@@ -108,8 +108,8 @@ tasks:
            echo "$NTFY_TITLE matched {{.HOSTNAME}}"
            ls -l
            pwd
-           nuv -info 
-           nuv
+           nuv -info
+
       else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
       fi 
     #- echo $(pwd) "[nuv ops $NTFY_MESSAGE]"

@@ -98,11 +98,11 @@ tasks:
       fi
 
   on_command:
-    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
     silent: true
     cmds:
     - | 
-      echo "Title $NTFY_TITLE {{.HOSTNAME}}"
+      cd "{{.BASEDIR}}/{{.HOSTNAME}}"
+      echo "[{{.HOSTNAME}}] $NTFY_TITLE "
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
       then pwd ; ls -l ; nuv -info
            echo "$NTFY_TITLE matched {{.HOSTNAME}}"

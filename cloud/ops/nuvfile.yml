@@ -99,13 +99,16 @@ tasks:
 
   on_command:
     silent: true
+    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
     cmds:
     - | 
-      cd "{{.BASEDIR}}/{{.HOSTNAME}}"
       echo "[{{.HOSTNAME}}] $NTFY_TITLE "
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
-      then pwd ; ls -l ; nuv -info
+      then 
            echo "$NTFY_TITLE matched {{.HOSTNAME}}"
+           pwd
+           ls -l
+           nuv -info 
            nuv
       else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
       fi 

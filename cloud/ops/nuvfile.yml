@@ -107,7 +107,6 @@ tasks:
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
       then 
            echo "$NTFY_TITLE matched {{.HOSTNAME}}"
-           nuv 
+           nuv ops $NTFY_MESSAGE
       else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
       fi 
-    #- echo $(pwd) "[nuv ops $NTFY_MESSAGE]"

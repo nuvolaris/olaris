@@ -101,15 +101,13 @@ tasks:
     silent: true
     dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
     cmds:
-    - | 
+    - |
+      export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
       echo "[{{.HOSTNAME}}] $NTFY_TITLE "
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
       then 
            echo "$NTFY_TITLE matched {{.HOSTNAME}}"
-           ls -l
-           pwd
-           nuv -info
-
+           nuv 
       else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
       fi 
     #- echo $(pwd) "[nuv ops $NTFY_MESSAGE]"

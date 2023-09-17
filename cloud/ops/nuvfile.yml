@@ -106,7 +106,7 @@ tasks:
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
       then pwd ; ls -l ; nuv -info
            echo "$NTFY_TITLE matched {{.HOSTNAME}}"
-           nuv ops $NTFY_MESSAGE
+           nuv
       else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
       fi 
     #- echo $(pwd) "[nuv ops $NTFY_MESSAGE]"

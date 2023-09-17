@@ -78,6 +78,7 @@ tasks:
       "nuv cloud ops on_message HOSTNAME={{.HOSTNAME}}"
 
   on_message:
+    desc: react on messages using the first tag
     cmds:
     - task: on_{{.TAG}}
     vars:

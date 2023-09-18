@@ -54,27 +54,16 @@ tasks:
           nuv -die "User name must be at least 5 chars long: $USERNAME"
         fi
 
-        check_result="'$USERNAME' matches the regex."
-
         # check {{._username_}} complies with lower case RFC 1123
-        username_match="$(nuv -validate -r '^[a-z0-9](?:[a-z0-9]{0,61}[a-z0-9])?$' $USERNAME)"
-
-        if [ ! "$username_match" = "$check_result" ]; then
-          nuv -die "User name must consist of only lower case characters (max 61 chars)"
-        fi
+        validate -r '^[a-z0-9](?:[a-z0-9]{0,61}[a-z0-9])?$' $USERNAME "User name must consist of only lower case characters (max 61 chars)"
 
         # check {{._username_}} is not api or api.*
-        username_match="$(nuv -validate -r '^api(\..*)?$' $USERNAME)"
-
-        if [ "$username_match" = "$check_result" ]; then
-          nuv -die "api and any api.* are reserved names."
-        fi
+        # This cannot happen as the minimum length is 5 chars and the dot would fail the previous check
+        # so we can disable this check
+        # validate -r '^api(\..*)?$' $USERNAME "api and any api.* are reserved names."
 
         # check that {{.email}} is a valid email
-        if ! [[ "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]
-        then 
-          nuv -die "Invalid email: $EMAIL"
-        fi
+        validate -m $EMAIL "Invalid email: $EMAIL"
 
         # check that password is not empty
         if [ -z "$PASSWORD" ]

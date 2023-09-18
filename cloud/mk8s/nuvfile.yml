@@ -37,7 +37,7 @@ tasks:
       - >
         cat mk8s.sh | {{.SSH}} {{.USERNAME}}@{{.SERVER}} 
         tee mk8s.sh >/dev/null
-      - "{{.SSH}} {{.USERNAME}}@{{.SERVER}} sudo bash mk8s.sh"
+      - "{{.SSH}} {{.USERNAME}}@{{.SERVER}} sudo bash mk8s.sh {{.SERVER}}"
     vars:
       USERNAME: '{{.USERNAME | default "root"}}'
 

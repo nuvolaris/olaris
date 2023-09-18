@@ -72,7 +72,7 @@ function main() {
     const manifestPath = nuv.joinPath(process.env.NUV_TMP, "manifest.yaml");
 
     nuv.writeFile(manifestPath, manifestYaml);
-    console.log("Manifest file written at " + manifestPath);
+    console.log("Manifest file generated.");
 }
 
 function scanEnv(manifest) {

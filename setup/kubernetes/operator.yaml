@@ -20,6 +20,10 @@ kind: Pod
 metadata:
   name: nuvolaris-operator
   namespace: nuvolaris
+  labels:
+      name: nuvolaris-operator
+  annotations:
+    whisks.nuvolaris.org/annotate-version: "true"    
 spec:
   serviceAccount: nuvolaris-operator
   containers:

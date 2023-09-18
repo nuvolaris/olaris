@@ -42,11 +42,11 @@ tasks:
 
   kubeconfig:
     desc: extract the kubeconfig to access
-    silent: true
+    silent: false
     cmds:
     - task: prereq
     - >
-      az aks get-credentials 
+      retry -t 20 -m 600 az aks get-credentials 
       --name $AKS_NAME 
       --resource-group $AKS_NAME 
       --overwrite-existing 
@@ -59,16 +59,18 @@ tasks:
     cmds:
     - nuv config aks
 
-
   create:
     silent: true
     desc: create an Azure AKS kubernetes cluster
     cmds:
     - task: prereq
     - az account set --subscription "$(az account show --query 'id' -o tsv)"
-    - az group create --name "$AKS_NAME" --location "$AKS_REGION"
-    - > 
-      az aks create 
+    - >
+      az group show -a "$AKS_NAME" 2>/dev/null 
+      || az group create --name "$AKS_NAME" --location "$AKS_REGION"
+    - >
+      az aks show  -g "$AKS_NAME" -n "$AKS_NAME" 2>/dev/null
+      || az aks create 
       -g "$AKS_NAME" -n "$AKS_NAME"
       --enable-managed-identity 
       --node-count "$AKS_COUNT"
@@ -87,6 +89,7 @@ tasks:
     - echo "*** Deleting the $AKS_NAME cluster"
     - az account set --subscription $(az account show --query 'id' -o tsv)
     - az aks delete --name $AKS_NAME --resource-group $AKS_NAME
+    - az group delete --resource-group $AKS_NAME
     - rm "$NUV_TMP/kubeconfig" "$NUV_TMP/aks-$AKS_NAME.kubeconfig"
 
   certman: 
@@ -109,6 +112,7 @@ tasks:
     silent: true
     desc: show the load balancer
     cmds:
+      - task: kubeconfig
       - > 
         kubectl -n ingress-nginx get svc/ingress-nginx-controller  
         -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null

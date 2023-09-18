@@ -32,6 +32,10 @@ tasks:
         fi
 
         nuv -wsk project deploy --manifest $MANIFEST
+      - |
+        if [ -d "$DEPATH/web" ]; then
+          nuv web upload $DEPATH/web
+        fi
     env:
       DEPATH:
         sh: |

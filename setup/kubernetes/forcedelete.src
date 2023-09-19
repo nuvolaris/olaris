@@ -1,0 +1,22 @@
+K="kubectl -n nuvolaris"
+
+function force_delete {
+    ITEM=$1
+    N=0
+    while [[ $N -lt 3 ]]
+    do
+        echo $((N++)) deleting $ITEM
+        if ! $K get $ITEM 2>/dev/null
+        then echo $ITEM gone...
+             return
+        fi
+        if ! $K delete $ITEM --timeout=10s --grace-period=0
+        then $K patch $ITEM --type=merge --patch '{"metadata": {"finalizers":[] } }'
+        fi
+    done
+    exit 1
+}
+
+for i in $($K get wsku -o name) wsk/controller 
+do force_delete $i
+done

@@ -219,9 +219,8 @@ tasks:
     ignore_error: true
     desc: delete cluster
     cmds:
-      - kubectl -n nuvolaris delete wsku --all
-      - kubectl -n nuvolaris delete wsk/controller
-      - kubectl -n nuvolaris delete pod/nuvolaris-operator
+      - source forcedelete.src
+      - kubectl -n nuvolaris delete pod/nuvolaris-operator --grace-period=0
       - kubectl -n nuvolaris delete po,sts,job,deploy,svc --all --grace-period=0
       - kubectl -n nuvolaris delete cm,secret,sa,role --all
       - kubectl -n nuvolaris delete pvc --all
@@ -231,6 +230,9 @@ tasks:
       - kubectl delete clusterissuers/letsencrypt-issuer 2>/dev/null
       #- "kubectl get ns nuvolaris -o json | jq '.spec.finalizers = []' | kubectl replace --raw '/api/v1/namespaces/nuvolaris/finalize' -f -"
       - kubectl delete ns nuvolaris
+
+  superdelete:
+    - source superdelete.src
 
   unlock:
     silent: true

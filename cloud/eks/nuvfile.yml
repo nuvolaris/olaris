@@ -35,7 +35,7 @@ tasks:
     silent: true
     cmds:
     - test -n "$EKS_NAME" || die 'Please, configure EKS with "nuv config eks"'
-    - "aws --version || die 'You need to install aws cli from : https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
+    - "aws --version || die 'You need to install aws cli from : https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html'"
     - "aws ec2 describe-key-pairs --key-names $AWS_SSHKEY --query 'KeyPairs[*].{KeyName: KeyName}' --output table || die 'Please generate or import the configured key  before continuing.'"
     - config EKS_PREREQ_OK="true"
     status:

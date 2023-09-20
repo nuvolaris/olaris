@@ -260,15 +260,6 @@ tasks:
           DEF: "nuvolaris"
       - task: read
         vars:
-          MSG: "EKS region"
-          HINT: >
-            To get a list of valid values use:
-              aws ec2 describe-regions --output table
-          VAR: "EKS_REGION"
-          VAL: "{{.__region}}"
-          DEF: "us-east-1"
-      - task: read
-        vars:
           MSG: "EKS number of worker nodes"
           VAR: "EKS_COUNT"
           VAL: "{{.__count}}"
@@ -294,6 +285,7 @@ tasks:
           VAR: "EKS_KUBERNETES_VERSION"
           VAL: "{{.__kubever}}"
           DEF: "1.25"
+      - config -d | grep AWS_
       - config -d | grep EKS_
 
   gcloud:

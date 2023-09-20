@@ -79,7 +79,7 @@ tasks:
     cmds:
       - "envsubst -i eks-cluster.yml  -o _eks-cluster.yml"
       - |
-        if ! eksctl get cluster -n "$EKS_NAME" --region "$EKS_REGION" 2>/dev/null
+        if ! eksctl get cluster -n "$EKS_NAME" --region "$AWS_REGION" 2>/dev/null
         then eksctl create cluster -f _eks-cluster.yml --kubeconfig $NUV_TMP/kubeconfig
         fi
 
@@ -143,5 +143,5 @@ tasks:
     desc: extract kubeconfig for connecting to the cluster
     cmds:
     - task: prereq
-    - "eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $EKS_REGION --kubeconfig $NUV_TMP/kubeconfig"
+    - "eksctl utils write-kubeconfig --cluster=$EKS_NAME --region "$AWS_REGION" --kubeconfig $NUV_TMP/kubeconfig"
     - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/eks-$EKS_NAME.kubeconfig"

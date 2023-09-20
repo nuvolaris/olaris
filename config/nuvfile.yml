@@ -267,6 +267,7 @@ tasks:
           VAR: "EKS_REGION"
           VAL: "{{.__region}}"
           DEF: "us-east-1"
+      - config AWS_REGION=$EKS_REGION
       - task: read
         vars:
           MSG: "EKS number of worker nodes"

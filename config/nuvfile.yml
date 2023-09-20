@@ -190,15 +190,6 @@ tasks:
           VAL: "{{.__secret}}"
       - task: read
         vars:
-          MSG: "AWS Region to use"
-          VAR: "AWS_DEFAULT_REGION"
-          HINT: |
-            To get a list of valid values use:
-              aws ec2 describe-regions --output table
-          VAL: "{{.__region}}"
-          DEF: "us-east-1"
-      - task: read
-        vars:
           MSG: "AWS public SSH key "
           HINT: |
             If you already have a public SSH key in AWS, provide its name here.
@@ -214,6 +205,15 @@ tasks:
     silent: true
     cmds:
       - task: _aws
+      - task: read
+        vars:
+          MSG: "AWS Region to use"
+          VAR: "AWS_DEFAULT_REGION"
+          HINT: |
+            To get a list of valid values use:
+              aws ec2 describe-regions --output table
+          VAL: "{{.__region}}"
+          DEF: "us-east-1"
       - task: read
         vars:
           MSG: "AWS Image to use for VMs"

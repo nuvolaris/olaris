@@ -143,5 +143,5 @@ tasks:
     desc: extract kubeconfig for connecting to the cluster
     cmds:
     - task: prereq
-    - "eksctl utils write-kubeconfig --cluster=$EKS_NAME --region "$AWS_REGION" --kubeconfig $NUV_TMP/kubeconfig"
+    - "eksctl utils write-kubeconfig --cluster=$EKS_NAME --region $AWS_REGION --kubeconfig $NUV_TMP/kubeconfig"
     - cp "$NUV_TMP/kubeconfig" "$NUV_TMP/eks-$EKS_NAME.kubeconfig"

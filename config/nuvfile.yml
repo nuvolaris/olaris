@@ -285,6 +285,7 @@ tasks:
           VAR: "EKS_KUBERNETES_VERSION"
           VAL: "{{.__kubever}}"
           DEF: "1.25"
+      - config -d | grep AWS_
       - config -d | grep EKS_
 
   gcloud:

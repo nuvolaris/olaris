@@ -1,5 +1,5 @@
 {
-  "version": "3.0.1-beta.2309201007",
+  "version": "3.0.1-beta.2309212128",
   "config": {
     "nuvolaris": {
       "apihost": "auto",
@@ -13,7 +13,7 @@
       "postgres": false
     },
     "images": {
-      "operator": "ghcr.io/nuvolaris/nuvolaris-operator:3.0.0-beta.2309210824",
+      "operator": "ghcr.io/nuvolaris/nuvolaris-operator:3.0.0-beta.2309211943",
       "controller": "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"
     },
     "server": {

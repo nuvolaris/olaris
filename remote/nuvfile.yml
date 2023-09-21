@@ -1,0 +1,112 @@
+version: '3'
+
+dotenv:
+  - /etc/environment
+
+vars:
+  NTFY_URL: https://github.com/binwiederhier/ntfy/releases/download/v2.7.0/ntfy_2.7.0_linux_{{ARCH}}.tar.gz
+  NTFY: "$NUV_TMP/nuvops/ntfy"
+  BASEDIR: /tmp/nuvops
+
+tasks:
+
+  setup:
+    cmds:
+    - test "{{OS}}" == "linux" || die "only for linux for now"
+    - mkdir -p "$NUV_TMP/nuvops"
+    - curl -sL "{{.NTFY_URL}}" | /usr/bin/tar xzvf - --strip-components=1 -C "$NUV_TMP/nuvops"
+    status:
+    - test -e "{{.NTFY}}"
+
+######################
+
+  upload-tasks:
+    cmds:
+    - test -d "$NUV_PWD/olaris-ops" || die "we need an olaris-ops folder in current directory"
+    - |
+      cd $NUV_PWD 
+      /usr/bin/tar czvf $NUV_TMP/nuvops/olaris-ops.tgz olaris-ops
+      md5sum $NUV_TMP/nuvops/olaris-ops.tgz | awk '{print $1}' >$NUV_TMP/nuvops/olaris-ops.curr
+    - |
+      export LAST="$(cat $NUV_TMP/nuvops/olaris-ops.last)"
+      export CURR="$(cat $NUV_TMP/nuvops/olaris-ops.curr)"
+      echo "CURR=$CURR LAST=$LAST"
+      if test "$LAST" != "$CURR"
+      then
+        ntfy publish \
+        --token "$NUV_OPS_NTFY_TOKEN" \
+        --tags upload \
+        --file $NUV_TMP/nuvops/olaris-ops.tgz \
+        "$NUV_OPS_NTFY_TOPIC"
+        cp $NUV_TMP/nuvops/olaris-ops.curr $NUV_TMP/nuvops/olaris-ops.last
+      fi
+
+  client:
+    desc: client
+    cmds:
+    - task: setup
+    - task: upload-tasks
+    - > 
+      ntfy publish
+      --token "$NUV_OPS_NTFY_TOKEN"
+      --title "{{or .T "*"}}"
+      --tags command
+      "$NUV_OPS_NTFY_TOPIC" "{{.CLI_ARGS}}"
+
+  test: 
+    cmds:
+    - echo "[{{.HOSTNAME}}] {{.CLI_ARGS}}" 
+    vars:
+      HOSTNAME: '{{or .T "*"}}'
+
+######################
+ 
+  server:
+    silent: true
+    desc: server
+    cmds:
+    - test -n "{{.HOSTNAME}}" || die "no hostname specified - use HOSTNAME="
+    - test -n "$NUV_OPS_NTFY_TOPIC" || die "configure NUV_OPS_NTFY_TOPIC"
+    - test -n "$NUV_OPS_NTFY_TOKEN" || die "configure NUV_OPS_NTFY_TOKEN"
+    - task: setup
+    - echo "*** {{.HOSTNAME}} ***"
+    - mkdir -p "{{.BASEDIR}}/{{.WORKDIR}}"
+    - >
+      {{.NTFY}} sub
+      --token "$NUV_OPS_NTFY_TOKEN"
+      "$NUV_OPS_NTFY_TOPIC" 
+      "nuv cloud ops on_message HOSTNAME={{.HOSTNAME}}"
+
+  on_message:
+    desc: react on messages using the first tag
+    cmds:
+    - task: on_{{.TAG}}
+    vars:
+      TAG:
+        sh: echo "$NTFY_TAGS"
+
+  on_upload:
+    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
+    silent: true
+    cmds:
+    - echo -n "[upload] files "
+    - |
+      URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
+      if curl -sL "$URL" -o _nuvops.tgz 
+      then /usr/bin/tar xzvf _nuvops.tgz | wc -l
+      else echo "ERROR!"
+      fi
+
+  on_command:
+    silent: true
+    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
+    cmds:
+    - |
+      export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
+      echo "[{{.HOSTNAME}}] $NTFY_TITLE "
+      if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
+      then 
+           echo "$NTFY_TITLE matched {{.HOSTNAME}}"
+           nuv ops $NTFY_MESSAGE
+      else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
+      fi 

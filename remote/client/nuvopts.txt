@@ -1,0 +1,7 @@
+Subcommand: 
+ nuv remote client
+
+Usage:
+    client task <host> <task> [<args>...]
+    client shell <host> [<args>...]
+ 

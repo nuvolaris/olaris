@@ -1,0 +1,42 @@
+version: '3'
+
+tasks:
+
+  upload-tasks:
+    cmds:
+    - test -d "$NUV_PWD/olaris-ops" || die "we need an olaris-ops folder in current directory"
+    - |
+      cd $NUV_PWD 
+      /usr/bin/tar czvf $NUV_TMP/nuvops/olaris-ops.tgz olaris-ops
+      md5sum $NUV_TMP/nuvops/olaris-ops.tgz | awk '{print $1}' >$NUV_TMP/nuvops/olaris-ops.curr
+    - |
+      export LAST="$(cat $NUV_TMP/nuvops/olaris-ops.last)"
+      export CURR="$(cat $NUV_TMP/nuvops/olaris-ops.curr)"
+      echo "CURR=$CURR LAST=$LAST"
+      if test "$LAST" != "$CURR"
+      then
+        ntfy publish \
+        --token "$NUV_OPS_NTFY_TOKEN" \
+        --tags upload \
+        --file $NUV_TMP/nuvops/olaris-ops.tgz \
+        "$NUV_OPS_NTFY_TOPIC"
+        cp $NUV_TMP/nuvops/olaris-ops.curr $NUV_TMP/nuvops/olaris-ops.last
+      fi
+
+  task:
+    desc: client
+    cmds:
+    - task: upload-tasks
+    - > 
+      ntfy publish
+      --token "$NUV_OPS_NTFY_TOKEN"
+      --title "{{._host_}}"
+      --tags command
+      "$NUV_OPS_NTFY_TOPIC" "{{._task_}}" $ARGS
+    env:
+      ARGS: 
+        sh: a="{{._args_}}" ; echo "${a:1:-1}"
+
+  shell: 
+    cmds:
+    - echo $ARGS

@@ -1,7 +1,9 @@
 Subcommand: 
- nuv remote client
+    nuv remote client
 
 Usage:
-    client task <host> <task> [<args>...]
-    client shell <host> [<args>...]
+    client select <cloud>
+    client expand <host-selector>
+    client task <host-selector> <task> [<args>...]
+    client shell <host-selector>  [<command>...]
  

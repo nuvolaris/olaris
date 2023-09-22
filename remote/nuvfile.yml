@@ -11,19 +11,18 @@ vars:
 tasks:
  
   client:
-    desc: client 
+    desc: client subcommand
 
   server:
     silent: true
     desc: server
     cmds:
     - test "{{OS}}" == "linux" || die "sorry this is only for linux for now"
-    - test -n "{{.HOSTNAME}}" || die "no hostname specified - use HOSTNAME="
+    - test  $(echo "{{.HOSTNAME}}" | awk -F- '{print NF}') == "4" || die "hostname should be in format <type>-<group>-<node>-<cloud>"
     - test -n "$NUV_REMOTE_NTFY_TOPIC" || die "configure NUV_REMOTE_NTFY_TOPIC"
     - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
-    - mkdir -p "$NUV_TMP/nuvops"
+    - mkdir -p "{{.BASEDIR}}/{{.HOSTNAME}}"
     - echo "*** {{.HOSTNAME}} ***"
-    - mkdir -p "{{.BASEDIR}}/{{.WORKDIR}}"
     - >
       ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
@@ -31,7 +30,7 @@ tasks:
       "nuv remote on_message"
 
   on_message:
-    desc: react on messages using the first tag
+    #desc: react on messages using the first tag
     cmds:
     - task: on_{{.TAG}}
     vars:
@@ -47,7 +46,7 @@ tasks:
       URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
       if curl -sL "$URL" -o _nuvops.tgz 
       then /usr/bin/tar xzvf _nuvops.tgz | wc -l
-      else echo "ERROR!"
+      else echo "ERROR in downloading updted tasks!"
       fi
 
   on_command:
@@ -56,10 +55,10 @@ tasks:
     cmds:
     - |
       export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
-      echo "[{{.HOSTNAME}}] $NTFY_TITLE "
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
       then 
-           echo "$NTFY_TITLE matched {{.HOSTNAME}}"
+           echo "!!! MATCH {{.HOSTNAME}}"
+           echo "$NTFY_TITLE matched "
            nuv ops $NTFY_MESSAGE
-      else echo "!!! $NTFY_TITLE did NOT match {{.HOSTNAME}}"
+      else echo "... skip {{.HOSTNAME}}"
       fi 

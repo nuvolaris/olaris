@@ -5,6 +5,7 @@ tasks:
   upload-tasks:
     cmds:
     - test -d "$NUV_PWD/olaris-ops" || die "we need an olaris-ops folder in current directory"
+    - test -e _sel || die "no host selector"
     - |
       cd $NUV_PWD 
       /usr/bin/tar czvf $NUV_TMP/nuvops/olaris-ops.tgz olaris-ops
@@ -16,27 +17,74 @@ tasks:
       if test "$LAST" != "$CURR"
       then
         ntfy publish \
-        --token "$NUV_OPS_NTFY_TOKEN" \
+        --token "$NUV_REMOTE_NTFY_TOKEN" \
+        --title "$(cat _sel)" \
         --tags upload \
         --file $NUV_TMP/nuvops/olaris-ops.tgz \
-        "$NUV_OPS_NTFY_TOPIC"
+        "$NUV_REMOTE_NTFY_TOPIC"
         cp $NUV_TMP/nuvops/olaris-ops.curr $NUV_TMP/nuvops/olaris-ops.last
       fi
+
+  select:
+    desc: cloud selection
+    cmds:
+    - config NUV_REMOTE_CLOUD={{._cloud_}}
+    - echo selected cloud "{{._cloud_}}"
+
+  expand:
+    cmds:
+      - echo {{.HOSTSEL}}
+      - test -n "$NUV_REMOTE_CLOUD" || die "select current cloud with 'select' subcommand"
+      - |
+        echo "{{.HOSTSEL}}-$NUV_REMOTE_CLOUD" >_hostsel
+        echo "{{.HOSTSEL}}" | awk -F- '{if($1=="*") $1="all"; print($1)}' >_cmd
+        echo "$(cat _cmd) $(cat _hostsel)"
+    vars:
+      HOSTSEL:
+        sh: |
+            echo  "{{._host_selector_}}" | awk -F- '{
+              if($1 == "") $1="*";
+              if($2 == "") $2="*";
+              if($3 == "") $3="*";
+              print $1 "-" $2 "-" $3
+            }'
 
   task:
     desc: client
     cmds:
+    - task: expand
     - task: upload-tasks
     - > 
       ntfy publish
-      --token "$NUV_OPS_NTFY_TOKEN"
-      --title "{{._host_}}"
+      --token "$NUV_REMOTE_NTFY_TOKEN"
+      --title "$(cat _hostsel)"
       --tags command
-      "$NUV_OPS_NTFY_TOPIC" "{{._task_}}" $ARGS
+      "$NUV_REMOTE_NTFY_TOPIC" nuv ops "$(cat _cmd)" $ARGS
     env:
       ARGS: 
         sh: a="{{._args_}}" ; echo "${a:1:-1}"
 
   shell: 
     cmds:
-    - echo $ARGS
+    - task: expand
+    - > 
+      ntfy publish
+      --token "$NUV_REMOTE_NTFY_TOKEN"
+      --title "$(cat _hostsel)"
+      --tags command
+      "$NUV_REMOTE_NTFY_TOPIC" 
+      nuv ops "$(cat _cmd)" $ARGS
+    env:
+      ARGS: 
+        sh: a="{{._args_}}" ; echo "${a:1:-1}"
+    vars:
+      HOST_SELECTOR:
+        sh: |
+            echo  "{{._host_selector_}}" | awk -F- '{
+              if($1 == "") $1="*";
+              if($2 == "") $2="*";
+              if($3 == "") $3="*";
+              print $1 "-" $2 "-" $3
+            }'
+
+ 

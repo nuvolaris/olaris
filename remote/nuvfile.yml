@@ -121,7 +121,7 @@ tasks:
       else echo "FAIL" >_tag
       fi
       cat _stderr _stdout >_out  
-    - task: notify
+    #- task: notify
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
 

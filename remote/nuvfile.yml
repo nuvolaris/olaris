@@ -117,6 +117,7 @@ tasks:
       echo "[running...]"
       echo "$NTFY_MESSAGE" >_msg
       eval "$NTFY_MESSAGE"
+      echo "[...done]"
       #if eval "$NTFY_MESSAGE" >_stdout 2>_stderr
       #then echo "OK" >_tag
       #else echo "FAIL" >_tag

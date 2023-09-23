@@ -9,24 +9,58 @@ vars:
     sh: hostname
 
 tasks:
- 
-  client:
-    desc: client subcommand
 
-  server:
+  prereq:
     silent: true
-    desc: server
     cmds:
     - test "{{OS}}" == "linux" || die "sorry this is only for linux for now"
     - test  $(echo "{{.HOSTNAME}}" | awk -F- '{print NF}') == "4" || die "hostname should be in format <type>-<group>-<node>-<cloud>"
-    - test -n "$NUV_REMOTE_NTFY_TOPIC" || die "configure NUV_REMOTE_NTFY_TOPIC"
+    - test -n "$NUV_REMOTE_NTFY_TOPIC_IN" || die "configure NUV_REMOTE_NTFY_TOPIC_IN"
+    - test -n "$NUV_REMOTE_NTFY_TOPIC_OUT" || die "configure NUV_REMOTE_NTFY_TOPIC_OUT"
     - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
+
+  readme:
+    desc: README
+    cmds:
+    - cat README.md
+
+  client:
+    desc: client subcommand
+
+  logger:
+    silent: true
+    desc: reply logger
+    cmds:
+    - task: prereq
+    - echo "*** logger ***"
+    - >
+      ntfy sub
+      --token "$NUV_REMOTE_NTFY_TOKEN"
+      "$NUV_REMOTE_NTFY_TOPIC_OUT" 
+      "nuv remote on_log"
+
+  on_log:
+    silent: true
+    #desc: log one entry
+    cmds:            
+    - echo "=== [ $NTFY_TITLE ] $NTFY_MESSAGE"
+    - curl -sL "$URL"
+    - echo
+    env:
+      URL: 
+        sh: echo "$NTFY_RAW" | jq -r .attachment.url
+
+  server:
+    silent: true
+    desc: remote server
+    cmds:
+    - task: prereq
     - mkdir -p "{{.BASEDIR}}/{{.HOSTNAME}}"
     - echo "*** {{.HOSTNAME}} ***"
     - >
       ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
-      "$NUV_REMOTE_NTFY_TOPIC" 
+      "$NUV_REMOTE_NTFY_TOPIC_IN" 
       "nuv remote on_message"
 
   on_message:
@@ -46,7 +80,7 @@ tasks:
       URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
       if curl -sL "$URL" -o _nuvops.tgz 
       then /usr/bin/tar xzvf _nuvops.tgz | wc -l
-      else echo "ERROR in downloading updted tasks!"
+      else echo "ERROR in downloading updated tasks!"
       fi
 
   on_command:
@@ -57,8 +91,16 @@ tasks:
       export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
       then 
-           echo "!!! MATCH {{.HOSTNAME}}"
-           echo "$NTFY_TITLE matched "
-           nuv ops $NTFY_MESSAGE
-      else echo "... skip {{.HOSTNAME}}"
-      fi 
+           echo ">>> $NTFY_TITLE MATCH {{.HOSTNAME}}"
+           echo 'COMMAND:' $NTFY_MESSAGE 
+           echo "[running...]"
+           eval $NTFY_MESSAGE >_out 2>_err
+           export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
+           cat _out _err | ntfy publish \
+           --no-firebase -p 1 \
+           --title "{{.HOSTNAME}}" \
+           --token "$NUV_REMOTE_NTFY_TOKEN" \
+           --file=- "$NTFY_MESSAGE" |\
+           jq -r '"REPLY: "+ .attachment.url' 
+      else echo ">>> $NTFY_TITLE skip {{.HOSTNAME}}"
+      fi

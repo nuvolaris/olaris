@@ -1,0 +1,173 @@
+# nuv remote
+
+It works as a remote task executor and it is based on [nuv](https://github.com/nuvolaris/nuv)
+
+The basic idea is:
+
+- You write the commands you want as tasks under olaris-ops
+- Then you invoke and execute them in the remote hosts, even multiple hosts at the same time.
+- All the output are collected in a logger and that you can read
+
+You select the hosts to run the command, and then execute commands and task in them.
+
+Hosts are named following a convention, have some environment variables configured and run `nuv remote server`
+
+You write the tasks to execute under the olaris-ops folder as a `nuv` , and they are immediately uploaded to the remote server that should execute them
+
+There are some prerequisites and conventions to follow.
+
+# How it works
+
+Topics:
+
+- prerequisites
+- how to name and select hosts
+- setup the server
+- setup the client
+- execute remote shell commands
+- distribute and execute tasks
+
+## Select hosts
+
+Each host managed by `nuv remote` must have the hostname in the format: `<node-type>-<node-num>-<group-num>-<cloud>`
+
+The name is essential as it is used to select them.
+
+- `<node-type>` is a string identifiying a node type (`hub`, `mst`, `wrk` etc)
+- `<node-num>` is a number identifying a node 
+- `<group-num>` is a number identifying a group of nodes.
+- `<cloud>` is string identifying a cloud (`aws`, `gcp`, `hz`, `cc`) etc
+
+For example:  
+
+- `hub-1-1-hz` (hub 1, group 1 in cloud hetzner) 
+- `mst-1-1-aws` (master 1 group 1 in cloud aws g) 
+- `wrk-1-2-gcp` (worker 2 in cloud gcp group 1)
+
+You can now execute commands and tasks using the host selector in the format:
+
+`[<type>][-][<group>][-][<node>]`
+
+Each part if omitted is replaced with `*`, and `-` are added to became a wildcard in format `<type>-<group>-<node>`.
+
+At the end `-` and the current cloud suffix will be added. If the current cloud is `aws`:
+
+- `-` expands to `*-*-*-aws`
+- `hub`  expands to `hub-*-*-aws`
+- `mst-1` expands to `mst-1-1-aws`
+- `wrk--1` expands tp `wrk-*-1-aws`
+
+## Setup the server 
+
+We use `ntfy.sh` to connect servers and clients.
+
+Setup an account on ntfy.sh (or self-host it) Then you can create two topics, one for sending commands, and another for retrieving rsults. 
+
+Take note of the name and store in the variables `NUV_REMOTE_NTFY_TOPIC_IN` and ``NUV_REMOTE_NTFY_TOPIC_OUT`.  Make them private
+
+Then generate an authentication token to be able to read and write in it. It will be the `NUV_REMOTE_NTFY_TOKEN`
+
+You should set those values as the environment variables in `/etc/environment`
+
+- `NUV_BRANCH=3.0.0-remote`
+- `NUV_REMOTE_NTFY_TOKEN=<ntfy topic>`
+- `NUV_REMOTE_NTFY_TOPIC_IN=<ntfy token>`
+- `NUV_REMOTE_NTFY_TOPIC_OUT=<ntfy token>`
+
+
+Finally, install `nuv`, pull the tasks (`nuv -update`) and execute it in server mode as root:
+
+`nuv remote server`
+
+TODO: we should install a service actually
+
+
+# Setup the Client
+
+Now you can use the client to control the servers
+
+You should execute the client from the `saas` project home directory
+
+You need to configure servers remote and tokes:
+
+```
+nuv -config NUV_REMOTE_NFTY_TOKEN=xxx
+nuv -config NUV_REMOTE_NTFY_TOPIC_IN=xxx
+nuv -config NUV_REMOTE_NTFY_TOPIC_OUT=xxx
+```
+
+For simplicity of execution add the following aliases in .bashrc
+
+alias nrt="nuv remote client task"
+alias nrs="nuv remote client shell"
+alias nrsel="nuv remote client select"
+
+
+Commands are always restricted to one cloud, so you should select the cloud (that is a suffix for all the hostnames) you want to manage. Example:
+
+```
+nrsel aws
+```
+
+Also to see the outputs you need to start a logger, so you will need two terminals: one to execute commands and one to see the output from the servers.
+
+Start in another terminal:
+
+```
+nuv remote logger
+```
+
+## Remote command Execution
+
+Now you can execute remotely shell commands with:
+
+`nrs <host-selector> <command>`
+
+where `<host-selector>`  allows to select the commands where to run a task.
+
+It will execute the shell command with the args in the hosts matching the expanded host selector.
+
+**NOTE** If the command has parameters with `-`, you have to use
+
+`nrs <host-selector> -- <command>`
+
+Example:
+
+```
+$ nrs - hostname 
+# executes hostname on all hosts
+$ nrs mst -- df -h
+# execute `df -h` on all the `mst` hosts
+```
+
+## Remote task execution
+
+You can execute task remotely, for example:
+
+```
+nrt wrk-1 check
+```
+
+To execute commands, first the tasks under `olaris-ops` will be distributed.
+
+Then the host selector will be expandes: `wrk-1-*-aws` (if cloud is `aws`)
+
+Then the host `<type>` (in our case `wrk`) will be extracted
+
+Then finally command: `nuv ops wrk check` will be executed in all the hosts of the group 1.
+
+Note that in a plugin (like `ops`) your tasks are grouped  by subcommand. For example
+
+```
+$ nuv ops
+* all:        commands for all
+* host:       ubuntu host
+* hub:        commands for the hub
+* mst:        commands for the master
+* wrk:        commands for the worker
+```
+
+When you invoke the remote task, it will execute tasks under the subcommand corresponding to the host type you selected.
+
+If you select all the hosts `-` then the `all` subcommand will be used instead.
+

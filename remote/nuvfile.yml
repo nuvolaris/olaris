@@ -110,11 +110,10 @@ tasks:
       export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
       echo 'COMMAND:' $NTFY_MESSAGE 
       echo "[running...]"
-      if eval $NTFY_MESSAGE >_stdout 2>_stderr
+      if eval "$NTFY_MESSAGE" >_stdout 2>_stderr
       then echo "OK: $NTFY_MESSAGE" >_msg
       else echo "FAIL: $NTFY_MESSAGE" >_msg
       fi 
-      cat _msg
       cat _stderr _stdout >_out  
     - task: notify
 

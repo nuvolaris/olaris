@@ -44,11 +44,11 @@ tasks:
           exit 0
         fi
 
-        if [! -d "$PACKAGES_PATH" ]; then
+        if [ ! -d "$PACKAGES_PATH" ]; then
           echo "No project detected (missing packages directory)."
           exit 1
         fi
-        if [! -d "$WEB_PATH" ]; then
+        if [ ! -d "$WEB_PATH" ]; then
           echo "Project detected: packages directory found."
           exit 0
         fi

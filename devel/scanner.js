@@ -78,7 +78,7 @@ function main() {
 function scanEnv(manifest) {
     console.log('Adding secrets...');
 
-    let config = nuv.nuvExec('-config', '-d');
+    let config = nuv.nuvExec('nuv', '-config', '-d');
 
 
     const lines = config.split('\n');
@@ -155,7 +155,7 @@ function scanSinglePackage(manifest, packagePath) {
         let { isDir, runtime } = checkMultiFileAction(packagePath, entry);
         if (isDir && runtime) {
             // console.log(packageName + '/' + entry + ' is multi file action');
-            let res = nuv.nuvExec('-zipf', nuv.joinPath(packagePath, entry));
+            let res = nuv.nuvExec('nuv', '-zipf', nuv.joinPath(packagePath, entry));
 
             // nuv -zipf prints the path of the zip file to stdout
             // so if the result doesn't end with .zip\n, it's an error

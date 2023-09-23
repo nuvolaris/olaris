@@ -473,7 +473,15 @@ tasks:
         HINT: | 
               Specifies nuvolaris controller Java options
         VAL: "{{.__poolmemory}}"
-        DEF: "2048m"                   
+        DEF: "2048m"
+    - task: read
+      vars:
+        MSG: "Openwhisk Standalone Controller Activation Max Allowed Payload"
+        VAR: "OPENWHISK_ACTIVATION_MAX_ALLOWED_PAYLOAD"
+        HINT: | 
+              Specifies nuvolaris controller activation options (Defaults to 1Mb)
+        VAL: "{{.__activation_max_payload}}"
+        DEF: "1048576"                           
 
   use:
     silent: true

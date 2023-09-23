@@ -33,6 +33,11 @@ tasks:
 
         nuv -wsk project deploy --manifest $MANIFEST
       - |
+        if {{.__no_web}} 
+        then 
+          echo "Skipping web upload"
+          exit 0
+        fi
         if [ -d "$DEPATH/web" ]; then
           echo "Found web directory. Uploading..."
           nuv web upload $DEPATH/web

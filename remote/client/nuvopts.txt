@@ -3,7 +3,7 @@ Subcommand:
 
 Usage:
     client select <cloud>
-    client expand <host-selector>
-    client task <host-selector> <task> [<args>...]
-    client shell <host-selector>  [<command>...]
+    client task <host-selector> [<args>...]
+    client shell <host-selector> [<command>...]
+    
  

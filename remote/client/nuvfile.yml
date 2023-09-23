@@ -3,6 +3,7 @@ version: '3'
 tasks:
 
   upload-tasks:
+    silent: true
     cmds:
     - test -d "$NUV_PWD/olaris-ops" || die "we need an olaris-ops folder in current directory"
     - test -e _sel || die "no host selector"
@@ -13,7 +14,7 @@ tasks:
     - |
       export LAST="$(cat $NUV_TMP/nuvops/olaris-ops.last)"
       export CURR="$(cat $NUV_TMP/nuvops/olaris-ops.curr)"
-      echo "CURR=$CURR LAST=$LAST"
+      #echo "CURR=$CURR LAST=$LAST"
       if test "$LAST" != "$CURR"
       then
         ntfy publish \
@@ -21,11 +22,12 @@ tasks:
         --title "$(cat _sel)" \
         --tags upload \
         --file $NUV_TMP/nuvops/olaris-ops.tgz \
-        "$NUV_REMOTE_NTFY_TOPIC"
+        "$NUV_REMOTE_NTFY_TOPIC_IN"
         cp $NUV_TMP/nuvops/olaris-ops.curr $NUV_TMP/nuvops/olaris-ops.last
       fi
 
   select:
+    silent: true
     desc: cloud selection
     cmds:
     - config NUV_REMOTE_CLOUD={{._cloud_}}
@@ -50,41 +52,35 @@ tasks:
             }'
 
   task:
+    silent: true
     desc: client
     cmds:
     - task: expand
     - task: upload-tasks
     - > 
       ntfy publish
-      --token "$NUV_REMOTE_NTFY_TOKEN"
+      --no-firebase
       --title "$(cat _hostsel)"
       --tags command
-      "$NUV_REMOTE_NTFY_TOPIC" nuv ops "$(cat _cmd)" $ARGS
-    env:
-      ARGS: 
-        sh: a="{{._args_}}" ; echo "${a:1:-1}"
-
-  shell: 
-    cmds:
-    - task: expand
-    - > 
-      ntfy publish
       --token "$NUV_REMOTE_NTFY_TOKEN"
-      --title "$(cat _hostsel)"
-      --tags command
-      "$NUV_REMOTE_NTFY_TOPIC" 
+      "$NUV_REMOTE_NTFY_TOPIC_IN" 
       nuv ops "$(cat _cmd)" $ARGS
     env:
       ARGS: 
         sh: a="{{._args_}}" ; echo "${a:1:-1}"
-    vars:
-      HOST_SELECTOR:
-        sh: |
-            echo  "{{._host_selector_}}" | awk -F- '{
-              if($1 == "") $1="*";
-              if($2 == "") $2="*";
-              if($3 == "") $3="*";
-              print $1 "-" $2 "-" $3
-            }'
-
  
+  shell:
+    cmds:
+    - task: expand
+    - |
+      set -- $COMMAND
+      test "$1" = "'--'" && shift
+      ntfy publish \
+      --token "$NUV_REMOTE_NTFY_TOKEN" \
+      --title "$(cat _hostsel)" \
+      --tags command \
+      "$NUV_REMOTE_NTFY_TOPIC_IN" \
+      "$@"
+    env:
+      COMMAND: 
+        sh: a="{{._command_}}" ; echo "${a:1:-1}"

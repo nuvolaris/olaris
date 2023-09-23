@@ -24,9 +24,6 @@ tasks:
     cmds:
     - cat README.md
 
-  client:
-    desc: client subcommand
-
   logger:
     silent: true
     desc: reply logger
@@ -42,7 +39,8 @@ tasks:
   on_log:
     silent: true
     #desc: log one entry
-    cmds:            
+    cmds:    
+    #- echo "$NTFY_RAW" |jq .      
     - echo "=== [ $NTFY_TITLE ] $NTFY_MESSAGE"
     - curl -sL "$URL"
     - echo
@@ -50,13 +48,29 @@ tasks:
       URL: 
         sh: echo "$NTFY_RAW" | jq -r .attachment.url
 
+  notify:
+    silent: true
+    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
+    cmds: 
+      - |
+        export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
+        export NTFY_MESSAGE="$(cat _msg)"
+        cat _out | ntfy publish \
+        --no-firebase -p 1 \
+        --title "{{.HOSTNAME}}" \
+        --token "$NUV_REMOTE_NTFY_TOKEN" \
+        --file=- |\
+        jq -r '"REPLY: "+ .attachment.url'
+
   server:
     silent: true
     desc: remote server
     cmds:
     - task: prereq
     - mkdir -p "{{.BASEDIR}}/{{.HOSTNAME}}"
-    - echo "*** {{.HOSTNAME}} ***"
+    - echo 'JOIN:' '{{.HOSTNAME}}'  >{{.BASEDIR}}/{{.HOSTNAME}}/_msg
+    - echo welcome >"{{.BASEDIR}}/{{.HOSTNAME}}/_out"
+    - task: notify
     - >
       ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
@@ -88,19 +102,21 @@ tasks:
     dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
     cmds:
     - |
-      export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
       if [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]
-      then 
-           echo ">>> $NTFY_TITLE MATCH {{.HOSTNAME}}"
-           echo 'COMMAND:' $NTFY_MESSAGE 
-           echo "[running...]"
-           eval $NTFY_MESSAGE >_out 2>_err
-           export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-           cat _out _err | ntfy publish \
-           --no-firebase -p 1 \
-           --title "{{.HOSTNAME}}" \
-           --token "$NUV_REMOTE_NTFY_TOKEN" \
-           --file=- "$NTFY_MESSAGE" |\
-           jq -r '"REPLY: "+ .attachment.url' 
-      else echo ">>> $NTFY_TITLE skip {{.HOSTNAME}}"
+      then echo ">>> $NTFY_TITLE MATCH {{.HOSTNAME}}"
+      else die ">>> $NTFY_TITLE skip {{.HOSTNAME}}"
       fi
+    - |
+      export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
+      echo 'COMMAND:' $NTFY_MESSAGE 
+      echo "[running...]"
+      if eval $NTFY_MESSAGE >_stdout 2>_stderr
+      then echo "OK: $NTFY_MESSAGE" >_msg
+      else echo "FAIL: $NTFY_MESSAGE" >_msg
+      fi 
+      cat _msg
+      cat _stderr _stdout >_out  
+    - task: notify
+
+  client:
+    desc: client subcommand

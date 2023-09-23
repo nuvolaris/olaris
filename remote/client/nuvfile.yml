@@ -14,9 +14,9 @@ tasks:
       md5sum ${TEMPFILE}.tgz | awk '{print $1}' >${TEMPFILE}.curr
       export CURR="$(cat ${TEMPFILE}.curr)"
       export LAST="$(cat ${TEMPFILE}.last)"
+      echo "CURR=$CURR LAST=$LAST"
       if test "$LAST" != "$CURR"
       then
-        echo "CURR=$CURR LAST=$LAST"
         ntfy publish \
         --token "$NUV_REMOTE_NTFY_TOKEN" \
         --title "UPLOAD: checksum $CURR" \
@@ -32,6 +32,14 @@ tasks:
     cmds:
     - config NUV_REMOTE_CLOUD={{._cloud_}}
     - echo selected cloud "{{._cloud_}}"
+
+  refresh:
+    silent: true
+    desc: cloud selection
+    cmds:
+    - echo "0" >"$NUV_TMP/olaris-ops.curr"
+    - echo "1" >"$NUV_TMP/olaris-ops.last"
+    - task: upload-tasks
 
   expand:
     cmds:

@@ -12,7 +12,7 @@ You select the hosts to run the command, and then execute commands and task in t
 
 Hosts are named following a convention, have some environment variables configured and run `nuv remote server`
 
-You write the tasks to execute under the olaris-ops folder as a `nuv` , and they are immediately uploaded to the remote server that should execute them
+You write the tasks to execute under the olaris-ops folder as a `nuv` , and they are uploaded to all the remote server and executed remotely.
 
 There are some prerequisites and conventions to follow.
 
@@ -24,8 +24,10 @@ Topics:
 - how to name and select hosts
 - setup the server
 - setup the client
+- start the logger
 - execute remote shell commands
-- distribute and execute tasks
+- remote task distribution
+- remote task execution
 
 ## Select hosts
 
@@ -74,19 +76,17 @@ You should set those values as the environment variables in `/etc/environment`
 - `NUV_REMOTE_NTFY_TOPIC_IN=<ntfy token>`
 - `NUV_REMOTE_NTFY_TOPIC_OUT=<ntfy token>`
 
-
 Finally, install `nuv`, pull the tasks (`nuv -update`) and execute it in server mode as root:
 
 `nuv remote server`
 
 TODO: we should install a service actually
 
-
 # Setup the Client
 
 Now you can use the client to control the servers
 
-You should execute the client from the `saas` project home directory
+You should execute the client from the `saas` project home directory.
 
 You need to configure servers remote and tokes:
 
@@ -102,14 +102,17 @@ alias nrt="nuv remote client task"
 alias nrs="nuv remote client shell"
 alias nrsel="nuv remote client select"
 
+Commands are always restricted to one cloud, so you should select the cloud (that is a suffix for all the hostnames) you want to manage. 
 
-Commands are always restricted to one cloud, so you should select the cloud (that is a suffix for all the hostnames) you want to manage. Example:
+Example:
 
 ```
 nrsel aws
 ```
 
-Also to see the outputs you need to start a logger, so you will need two terminals: one to execute commands and one to see the output from the servers.
+## Start the logger
+
+To see all the outputs you need to start a logger, so you will need two terminals: you will execute commands from the cli but the result is asyncronous so to see the results you need to launch the logger in another terminal 
 
 Start in another terminal:
 
@@ -140,23 +143,39 @@ $ nrs mst -- df -h
 # execute `df -h` on all the `mst` hosts
 ```
 
+## Remote task distribution
+
+You can execute tasks in selected servers, distributing automatically a `nuv` plugin in all the servers.
+
+Distribution happens automatically before execution of a remote task when you change a task. 
+
+You can force a distribution with command `nuv refresh`.  
+
+The logger helps with the distriution. When it starts, it forces a referesh and also when a new server join a distribution.
+
+So to be sure the task distribution works, always run the logger before executing commands.
+
 ## Remote task execution
 
-You can execute task remotely, for example:
+You can execute task remotely with `nrt <host-selector> <tasks-with-parameters...>`
+
+It will let you to execute the task *using the subcommad corresponding to the host type*.
+
+For example:
 
 ```
 nrt wrk-1 check
 ```
 
-To execute commands, first the tasks under `olaris-ops` will be distributed.
+Then the host selector will be expanded: `wrk-1-*-aws` (we assume here cloud is `aws`)
 
-Then the host selector will be expandes: `wrk-1-*-aws` (if cloud is `aws`)
+Then the host `<type>` (in our case `wrk`) will be extracted.
 
-Then the host `<type>` (in our case `wrk`) will be extracted
+Then finally command: `nuv ops wrk check` will be executed in all the hosts matching the host selector (in this case all the `wrk` in `aws` of the group 1).
 
-Then finally command: `nuv ops wrk check` will be executed in all the hosts of the group 1.
+**Please note it will always use a subcommand corresponding to the node type.**
 
-Note that in a plugin (like `ops`) your tasks are grouped  by subcommand. For example
+In a plugin (like `ops`) your tasks are grouped  by subcommand. For example
 
 ```
 $ nuv ops
@@ -170,4 +189,3 @@ $ nuv ops
 When you invoke the remote task, it will execute tasks under the subcommand corresponding to the host type you selected.
 
 If you select all the hosts `-` then the `all` subcommand will be used instead.
-

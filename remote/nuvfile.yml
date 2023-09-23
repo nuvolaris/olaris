@@ -89,13 +89,18 @@ tasks:
     dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
     silent: true
     cmds:
-    - echo -n "[upload] files "
     - |
       URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
-      if curl -sL "$URL" -o _nuvops.tgz 
-      then /usr/bin/tar xzvf _nuvops.tgz | wc -l
-      else echo "ERROR in downloading updated tasks!"
+      echo 'UPLOAD:' >_msg
+      if curl -sL "$URL" -o _nuvops.tgz 2>_stderr
+      then 
+        if /usr/bin/tar xzvf _nuvops.tgz 2>_stderr
+        then md5sum _nuvops.tgz >_out
+        else cat _stderr >_out
+        fi
+      else cat _stderr >_out
       fi
+    - task: notify
 
   on_command:
     silent: true

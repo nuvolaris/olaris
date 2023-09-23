@@ -6,26 +6,26 @@ tasks:
     silent: true
     cmds:
     - test -d "$NUV_PWD/olaris-ops" || die "we need an olaris-ops folder in current directory"
-    - test -e _sel || die "no host selector"
     - |
-      cd $NUV_PWD 
-      /usr/bin/tar czvf $NUV_TMP/nuvops/olaris-ops.tgz olaris-ops
-      md5sum $NUV_TMP/nuvops/olaris-ops.tgz | awk '{print $1}' >$NUV_TMP/nuvops/olaris-ops.curr
-    - |
-      export LAST="$(cat $NUV_TMP/nuvops/olaris-ops.last)"
-      export CURR="$(cat $NUV_TMP/nuvops/olaris-ops.curr)"
-      #echo "CURR=$CURR LAST=$LAST"
+      export TEMPFILE="$NUV_TMP/olaris-ops"
+      echo $TEMPFILE
+      cd $NUV_PWD
+      /usr/bin/tar czf "${TEMPFILE}.tgz" olaris-ops
+      md5sum ${TEMPFILE}.tgz | awk '{print $1}' >${TEMPFILE}.curr
+      export CURR="$(cat ${TEMPFILE}.curr)"
+      export LAST="$(cat ${TEMPFILE}.last)"
       if test "$LAST" != "$CURR"
       then
+        echo "CURR=$CURR LAST=$LAST"
         ntfy publish \
         --token "$NUV_REMOTE_NTFY_TOKEN" \
-        --title "$(cat _sel)" \
+        --title "UPLOAD: checksum $CURR" \
         --tags upload \
-        --file $NUV_TMP/nuvops/olaris-ops.tgz \
+        --file "${TEMPFILE}.tgz" \
         "$NUV_REMOTE_NTFY_TOPIC_IN"
-        cp $NUV_TMP/nuvops/olaris-ops.curr $NUV_TMP/nuvops/olaris-ops.last
+        cp "$TEMPFILE.curr" "$TEMPFILE.last"
       fi
-
+  
   select:
     silent: true
     desc: cloud selection

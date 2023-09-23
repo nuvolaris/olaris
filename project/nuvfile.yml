@@ -34,6 +34,7 @@ tasks:
         nuv -wsk project deploy --manifest $MANIFEST
       - |
         if [ -d "$DEPATH/web" ]; then
+          echo "Found web directory. Uploading..."
           nuv web upload $DEPATH/web
         fi
     env:

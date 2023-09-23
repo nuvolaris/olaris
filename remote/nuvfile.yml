@@ -116,11 +116,12 @@ tasks:
       echo 'COMMAND:' $NTFY_MESSAGE 
       echo "[running...]"
       echo "$NTFY_MESSAGE" >_msg
-      if eval "$NTFY_MESSAGE" >_stdout 2>_stderr
-      then echo "OK" >_tag
-      else echo "FAIL" >_tag
-      fi
-      cat _stderr _stdout >_out  
+      eval "$NTFY_MESSAGE"
+      #if eval "$NTFY_MESSAGE" >_stdout 2>_stderr
+      #then echo "OK" >_tag
+      #else echo "FAIL" >_tag
+      #fi
+      #cat _stderr _stdout >_out  
     #- task: notify
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"

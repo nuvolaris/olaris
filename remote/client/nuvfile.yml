@@ -57,14 +57,15 @@ tasks:
     cmds:
     - task: expand
     - task: upload-tasks
-    - > 
+    - >
+      set -- $ARGS ;
       ntfy publish
       --no-firebase
       --title "$(cat _hostsel)"
       --tags command
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
-      nuv ops "$(cat _cmd)" $ARGS
+      nuv ops "$(cat _cmd)" $@
     env:
       ARGS: 
         sh: a="{{._args_}}" ; echo "${a:1:-1}"

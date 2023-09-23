@@ -1,0 +1,19 @@
+version: 3
+
+tasks:
+  microbots:
+    silent: true
+    desc: "Microbots demo"
+    cmds:
+      - |
+        git clone https://github.com/nuvolaris/microbots $(realpath ./microbots)
+        echo "Microbots demo cloned. Uploading frontend..."
+        nuv web upload $(realpath ./microbots/web/public) --quiet
+        nuv project deploy $(realpath ./microbots) --no-web
+        echo "Microbots demo uploaded. Visit http://localhost:80"
+
+  chess:
+    silent: true
+    desc: "Chess demo"
+    cmds:
+      - echo "Chess demo"

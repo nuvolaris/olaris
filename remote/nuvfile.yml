@@ -111,17 +111,15 @@ tasks:
     dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
     cmds:
     - |
-      echo ">>> $NTFY_TITLE MATCH {{.HOSTNAME}}"
+      echo "[ $NTFY_TITLE MATCH {{.HOSTNAME}} ]"
       export NUV_ROOT_PLUGIN='{{.BASEDIR}}/{{.HOSTNAME}}'
-      echo 'COMMAND:' $NTFY_MESSAGE 
-      echo "[running...]"
+      echo '>>>' $NTFY_MESSAGE 
       echo "$NTFY_MESSAGE" >_msg
-      eval "$NTFY_MESSAGE"
-      echo "[...done]"
-      #if eval "$NTFY_MESSAGE" >_stdout 2>_stderr
-      #then echo "OK" >_tag
-      #else echo "FAIL" >_tag
-      #fi
+      if eval "$NTFY_MESSAGE" 
+      then echo "OK" >_tag
+      else echo "FAIL" >_tag
+      fi
+      echo "<<< $(cat _tag)"
       #cat _stderr _stdout >_out  
     #- task: notify
     status:

@@ -7,7 +7,9 @@ tasks:
     cmds:
       - |
         git clone https://github.com/nuvolaris/microbots $(realpath ./microbots)
-        nuv web upload $(realpath ./microbots/web/public)
+        echo "Microbots demo cloned. Uploading frontend..."
+        nuv web upload $(realpath ./microbots/web/public) --quiet
+        nuv project deploy $(realpath ./microbots) --no-web
         echo "Microbots demo uploaded. Visit http://localhost:80"
 
   chess:

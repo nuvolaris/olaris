@@ -107,7 +107,7 @@ tasks:
       else die ">>> $NTFY_TITLE skip {{.HOSTNAME}}"
       fi
     - |
-      export NUV_PWD='{{.BASEDIR}}/{{.HOSTNAME}}'
+      export NUV_ROOT_PLUGIN='{{.BASEDIR}}/{{.HOSTNAME}}'
       echo 'COMMAND:' $NTFY_MESSAGE 
       echo "[running...]"
       if eval "$NTFY_MESSAGE" >_stdout 2>_stderr

@@ -82,7 +82,7 @@ spec:
   configs:
     limits:
       activations:
-        max_allowed_payload: "${OPENWHISK_ACTIVATION_MAX_ALLOWED_PAYLOAD:-1048576}"
+        max_allowed_payload: ${OPENWHISK_ACTIVATION_MAX_ALLOWED_PAYLOAD:-1048576}
       actions:
         sequence-maxLength: 50
         invokes-perMinute: 999

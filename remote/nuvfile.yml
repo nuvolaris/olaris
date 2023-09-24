@@ -36,10 +36,10 @@ tasks:
       echo '{{.HOSTNAME}}' >_msg
       uname -a >_out
     - ntfy pub
-      --delay 10s
-      --tags refresh -p 1
+      --delay 10s --tags refresh -p 1
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN"
+      true
     - ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 

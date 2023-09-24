@@ -1,0 +1,47 @@
+version: '3'
+
+vars:
+  BASEDIR: /tmp/nuvops
+  HOSTNAME:
+    sh: hostname
+
+tasks:
+ 
+  logger:
+    silent: true
+    desc: reply logger
+    cmds:
+    - nuv remote prereq
+    - echo "*** logger ***"
+    - >
+      ntfy sub
+      --token "$NUV_REMOTE_NTFY_TOKEN"
+      "$NUV_REMOTE_NTFY_TOPIC_OUT" 
+      "nuv remote on_log"
+
+  on_log:
+    silent: true
+    #desc: log one entry
+    cmds:    
+    #- echo "$NTFY_RAW" |jq .     
+    - echo "=== [ $NTFY_TITLE ] $NTFY_TAG"':'" $NTFY_MESSAGE"
+    - curl -sL "$URL"
+    - echo
+    env:
+      URL: 
+        sh: echo "$NTFY_RAW" | jq -r .attachment.url
+  
+
+  notify:
+    silent: true
+    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
+    cmds: 
+      - |
+        export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
+        export NTFY_TITLE="{{.HOSTNAME}}"
+        export NTFY_MESSAGE="$(cat _msg)"
+        export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+        cat _out \
+        | ntfy publish --no-firebase \
+        -p 1 --tags="$(cat _tag)" --file=- \
+        | jq -r '"REPLY: "+ .attachment.url'

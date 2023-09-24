@@ -24,45 +24,6 @@ tasks:
     cmds:
     - cat README.md
 
-  logger:
-    silent: true
-    desc: reply logger
-    cmds:
-    - task: prereq
-    - nuv remote client refresh
-    - echo "*** logger ***"
-    - >
-      ntfy sub
-      --token "$NUV_REMOTE_NTFY_TOKEN"
-      "$NUV_REMOTE_NTFY_TOPIC_OUT" 
-      "nuv remote on_log"
-
-  on_log:
-    silent: true
-    #desc: log one entry
-    cmds:    
-    #- echo "$NTFY_RAW" |jq .     
-    - echo "=== [ $NTFY_TITLE ] $NTFY_TAG"':'" $NTFY_MESSAGE"
-    - curl -sL "$URL"
-    - echo
-    env:
-      URL: 
-        sh: echo "$NTFY_RAW" | jq -r .attachment.url
-
-  notify:
-    silent: true
-    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
-    cmds: 
-      - |
-        export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-        export NTFY_TITLE="{{.HOSTNAME}}"
-        export NTFY_MESSAGE="$(cat _msg)"
-        export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
-        cat _out \
-        | ntfy publish --no-firebase \
-        -p 1 --tags="$(cat _tag)" --file=- \
-        | jq -r '"REPLY: "+ .attachment.url'
-
   server:
     silent: true
     desc: remote server
@@ -74,9 +35,11 @@ tasks:
       echo JOIN >_tag
       echo '{{.HOSTNAME}}' >_msg
       uname -a >_out
-    - task: notify
-    - >
-      ntfy sub
+    - ntfy pub
+      --tags refresh
+      --token "$NUV_REMOTE_NTFY_TOKEN"
+      "$NUV_REMOTE_NTFY_TOPIC_IN"
+    - ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
       "nuv remote on_message"
@@ -104,7 +67,9 @@ tasks:
         fi
       else cat _stderr >_out
       fi
-    - task: notify
+
+  on_refresh:
+    - nuv remote client refresh
 
   on_command:
     silent: true
@@ -121,9 +86,11 @@ tasks:
       fi
       echo "<<< $(cat _tag)"
       #cat _stderr _stdout >_out  
-    #- task: notify
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
 
   client:
     desc: client subcommand
+
+  log:
+    desc: log subcommand

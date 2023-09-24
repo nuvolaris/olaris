@@ -32,9 +32,7 @@ tasks:
     - |
       mkdir -p "{{.BASEDIR}}/{{.HOSTNAME}}"
       cd "{{.BASEDIR}}/{{.HOSTNAME}}"
-      echo JOIN >_tag
-      echo '{{.HOSTNAME}}' >_msg
-      uname -a >_out
+      echo '*** {{.HOSTNAME}} ***' 
     - ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
@@ -43,6 +41,7 @@ tasks:
   on_message:
     #desc: react on messages using the first tag
     cmds:
+    - echo "<<<{{.TAG}}>>>"
     - task: on_{{.TAG}}
     vars:
       TAG:

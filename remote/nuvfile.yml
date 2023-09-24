@@ -57,7 +57,7 @@ tasks:
       echo 'UPLOAD' >_tag
       if curl -sL "$URL" -o _nuvops.tgz 2>_stderr
       then 
-        if /usr/bin/tar xzvf _nuvops.tgz 2>_stderr
+        if /usr/bin/tar xzvf _nuvops.tgz >_stdout 2>_stderr
         then md5sum _nuvops.tgz >_out
         else cat _stderr >_out
         fi

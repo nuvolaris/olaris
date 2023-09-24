@@ -10,7 +10,7 @@ tasks:
       export TEMPFILE="$NUV_TMP/olaris-ops"
       echo $TEMPFILE
       cd $NUV_PWD
-      /usr/bin/tar czf "${TEMPFILE}.tgz" olaris-ops
+      /usr/bin/tar cvzf "${TEMPFILE}.tgz" olaris-ops
       md5sum ${TEMPFILE}.tgz | awk '{print $1}' >${TEMPFILE}.curr
       export CURR="$(cat ${TEMPFILE}.curr)"
       export LAST="$(cat ${TEMPFILE}.last)"

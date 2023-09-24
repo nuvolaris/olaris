@@ -35,11 +35,6 @@ tasks:
       echo JOIN >_tag
       echo '{{.HOSTNAME}}' >_msg
       uname -a >_out
-    - ntfy pub
-      --delay 10s --tags refresh -p 1
-      --token "$NUV_REMOTE_NTFY_TOKEN"
-      "$NUV_REMOTE_NTFY_TOPIC_IN"
-      true
     - ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
@@ -68,9 +63,6 @@ tasks:
         fi
       else cat _stderr >_out
       fi
-
-  on_refresh:
-    - nuv remote client refresh
 
   on_command:
     silent: true

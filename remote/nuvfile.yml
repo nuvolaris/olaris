@@ -1,89 +1,17 @@
 version: '3'
 
-dotenv:
-  - /etc/environment
-
-vars:
-  BASEDIR: /tmp/nuvops
-  HOSTNAME:
-    sh: hostname
-
 tasks:
-
-  prereq:
-    silent: true
-    cmds:
-    - test "{{OS}}" == "linux" || die "sorry this is only for linux for now"
-    - test  $(echo "{{.HOSTNAME}}" | awk -F- '{print NF}') == "4" || die "hostname should be in format <type>-<group>-<node>-<cloud>"
-    - test -n "$NUV_REMOTE_NTFY_TOPIC_IN" || die "configure NUV_REMOTE_NTFY_TOPIC_IN"
-    - test -n "$NUV_REMOTE_NTFY_TOPIC_OUT" || die "configure NUV_REMOTE_NTFY_TOPIC_OUT"
-    - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
-
+  
   readme:
     desc: README
     cmds:
     - cat README.md
 
-  server:
-    silent: true
-    desc: remote server
-    cmds:
-    - task: prereq
-    - |
-      mkdir -p "{{.BASEDIR}}/{{.HOSTNAME}}"
-      cd "{{.BASEDIR}}/{{.HOSTNAME}}"
-      echo '*** {{.HOSTNAME}} ***' 
-    - ntfy sub
-      --token "$NUV_REMOTE_NTFY_TOKEN"
-      "$NUV_REMOTE_NTFY_TOPIC_IN" 
-      "nuv remote on_message"
-
-  on_message:
-    #desc: react on messages using the first tag
-    cmds:
-    - echo "<<<{{.TAG}}>>>"
-    - task: on_{{.TAG}}
-    vars:
-      TAG:
-        sh: echo "$NTFY_TAGS"
-
-  on_upload:
-    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
-    silent: true
-    cmds:
-    - |
-      URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
-      echo 'UPLOAD' >_tag
-      if curl -sL "$URL" -o _nuvops.tgz 2>_stderr
-      then 
-        if /usr/bin/tar xzvf _nuvops.tgz >_stdout 2>_stderr
-        then md5sum _nuvops.tgz >_out
-             echo "*** upload: $(cat _out)"
-        else cat _stderr >_out
-        fi
-      else cat _stderr >_out
-      fi
-
-  on_command:
-    silent: true
-    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
-    cmds:
-    - |
-      echo "[ $NTFY_TITLE MATCH {{.HOSTNAME}} ]"
-      export NUV_ROOT_PLUGIN='{{.BASEDIR}}/{{.HOSTNAME}}'
-      echo '>>>' $NTFY_MESSAGE 
-      echo "$NTFY_MESSAGE" >_msg
-      if eval "$NTFY_MESSAGE" 
-      then echo "OK" >_tag
-      else echo "FAIL" >_tag
-      fi
-      echo "<<< $(cat _tag)"
-      #cat _stderr _stdout >_out  
-    status:
-      - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
-
   client:
     desc: client subcommand
 
-  log:
+  server:
+    desc: server subcommand
+
+  logger:
     desc: log subcommand

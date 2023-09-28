@@ -18,6 +18,18 @@
 version: "3"
 
 tasks:
+  user:
+    silent: true
+    desc: get user
+    cmds:
+      - wsk property get | awk '/whisk namespace/{print $3}'
+
+  apihost:
+    silent: true
+    desc: get apihost
+    cmds:
+      - wsk property get | awk '/whisk API host/{print $4}'
+
   detect:
     silent: true
     desc: detect project in directory

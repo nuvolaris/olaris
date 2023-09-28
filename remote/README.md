@@ -84,6 +84,10 @@ TODO: we should install a service actually
 
 # Setup the Client
 
+TODO: we should merge the .env and the nuv -config below
+
+First do: cd `olaris-ops`, copy the `.env.dist` in `.env`, edit it and fill the values. This is a shared secret file which wil be distributed to all the machines.
+
 Now you can use the client to control the servers
 
 You should execute the client from the `saas` project home directory.
@@ -109,6 +113,9 @@ Example:
 ```
 nrsel aws
 ```
+
+
+
 
 ## Start the logger
 

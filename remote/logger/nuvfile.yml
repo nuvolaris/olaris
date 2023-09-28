@@ -6,25 +6,36 @@ vars:
     sh: hostname
 
 tasks:
+
+  prereq:
+    silent: true
+    cmds:
+    - test -n "$NUV_REMOTE_NTFY_TOPIC_IN" || die "configure NUV_REMOTE_NTFY_TOPIC_IN"
+    - test -n "$NUV_REMOTE_NTFY_TOPIC_OUT" || die "configure NUV_REMOTE_NTFY_TOPIC_OUT"
+    - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
  
-  logger:
+  run:
     silent: true
     desc: reply logger
     cmds:
-    - nuv remote prereq
+    - task: prereq
     - echo "*** logger ***"
-    - >
-      ntfy sub
-      --token "$NUV_REMOTE_NTFY_TOKEN"
-      "$NUV_REMOTE_NTFY_TOPIC_OUT" 
-      "nuv remote on_log"
+    - |
+      export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+      ntfy sub "$NUV_REMOTE_NTFY_TOPIC_OUT" "nuv remote logger on_log"
 
   on_log:
+    desc: to be invoked by ntfy 
+    silent: true
+    cmds:
+     - echo "NTFY_RAW" | jq .
+
+  on_log1:
     silent: true
     #desc: log one entry
     cmds:    
     #- echo "$NTFY_RAW" |jq .     
-    - echo "=== [ $NTFY_TITLE ] $NTFY_TAG"':'" $NTFY_MESSAGE"
+    - echo "=== [ $NTFY_TITLE ] $NTFY_TAG - $NTFY_MESSAGE"
     - curl -sL "$URL"
     - echo
     env:

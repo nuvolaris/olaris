@@ -241,3 +241,14 @@ tasks:
       - >
         kubectl -n nuvolaris patch wsk/controller --type=merge 
         --patch '{"metadata": {"finalizers":[] } }'
+
+  operator-update:
+    silent: true
+    desc: update the operator using the latest version configured in nuvroot.json if it is different than the current deployed one
+    cmds:
+      - envsubst -i patch.yaml -o _patch.yaml
+      - kubectl -n nuvolaris patch pod/nuvolaris-operator --patch-file _patch.yaml
+      - kubectl -n nuvolaris get pod/nuvolaris-operator -oyaml | kubectl -n nuvolaris apply -f -
+    preconditions:      
+      - sh: '[ $IMAGES_OPERATOR != $(nuv debug operator:version) ]'
+        msg: "Current nuvolaris operator pod it is already updated to newest version. Request ignored."

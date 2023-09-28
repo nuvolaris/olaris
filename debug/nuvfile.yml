@@ -127,3 +127,9 @@ tasks:
     kubectl -n nuvolaris patch wsk/controller 
     --type=merge --patch '{"metadata": {"finalizers":[] } }'
 
+  operator:version:
+    desc: show operator versions
+    silent: true
+    cmds:
+      - kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris-operator_version}'    
+

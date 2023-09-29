@@ -89,3 +89,11 @@ tasks:
 
   testbed:
     - echo $(realpath $GCLOUD_SSHKEY)
+
+  check-operator-version:
+    silent: true
+    cmds:
+      - |
+        output=$(nuv debug operator:version)
+        tag=$(echo $output | awk -F: '{print $2}')
+        needupdate {{._version_}} $tag

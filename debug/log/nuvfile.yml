@@ -29,12 +29,12 @@ tasks:
   operator:
     desc: show nuvolaris operator logs
     cmds:
-      - kubectl -n nuvolaris logs po/nuvolaris-operator
+      - kubectl -n nuvolaris logs po/nuvolaris-operator-0
 
   foperator:
     desc: show nuvolaris operator logs following continuosly
     cmds:
-      - kubectl -n nuvolaris logs po/nuvolaris-operator -f
+      - kubectl -n nuvolaris logs po/nuvolaris-operator-0 -f
 
   certman:
     desc: show cert manager logs

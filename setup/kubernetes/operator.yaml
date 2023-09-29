@@ -15,24 +15,33 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   name: nuvolaris-operator
-  namespace: nuvolaris
-  labels:
+  namespace: nuvolaris  
+spec:  
+  replicas: 1
+  selector:
+    matchLabels:
       name: nuvolaris-operator
-  annotations:
-    whisks.nuvolaris.org/annotate-version: "true"    
-spec:
-  serviceAccount: nuvolaris-operator
-  containers:
-    - name: nuvolaris-operator
-      image: ${IMAGES_OPERATOR}
-      imagePullPolicy: Always
-      command: ["./run.sh"]
-      args: ["--verbose"]
-      securityContext:
-          capabilities:
-            drop:
-            - ALL  
+  template:
+    metadata:
+      labels:
+        name: nuvolaris-operator
+        app: nuvolaris-operator
+      annotations:
+        whisks.nuvolaris.org/annotate-version: "true"
+    spec:
+      serviceAccountName: nuvolaris-operator
+      restartPolicy: Always
+      containers:
+        - name: nuvolaris-operator
+          image: ${IMAGES_OPERATOR}
+          imagePullPolicy: Always
+          command: ["./run.sh"]
+          args: ["--verbose"]
+          securityContext:
+              capabilities:
+                drop:
+                - ALL  

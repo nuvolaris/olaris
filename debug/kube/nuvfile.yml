@@ -141,4 +141,4 @@ tasks:
   operator:
     desc: describe operator
     cmds:
-    - kubectl -n nuvolaris describe pod/nuvolaris-operator
+    - kubectl -n nuvolaris describe pod/nuvolaris-operator-0

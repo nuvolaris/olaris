@@ -139,7 +139,7 @@ tasks:
       - "kubectl apply -f _operator.yaml"
       - task: wait
         vars:
-          OBJECT: pod/nuvolaris-operator
+          OBJECT: pod/nuvolaris-operator-0
 
   whiskcrd:
     silent: true
@@ -220,7 +220,7 @@ tasks:
     desc: delete cluster
     cmds:
       - source forcedelete.src
-      - kubectl -n nuvolaris delete pod/nuvolaris-operator --grace-period=0
+      - kubectl -n nuvolaris delete sts/nuvolaris-operator --grace-period=0
       - kubectl -n nuvolaris delete po,sts,job,deploy,svc --all --grace-period=0
       - kubectl -n nuvolaris delete cm,secret,sa,role --all
       - kubectl -n nuvolaris delete pvc --all
@@ -246,9 +246,8 @@ tasks:
     silent: true
     desc: update the operator using the latest version configured in nuvroot.json if it is different than the current deployed one
     cmds:
-      - envsubst -i patch.yaml -o _patch.yaml
-      - kubectl -n nuvolaris patch pod/nuvolaris-operator --patch-file _patch.yaml
-      - kubectl -n nuvolaris get pod/nuvolaris-operator -oyaml | kubectl -n nuvolaris apply -f -
+      - task: operator
+      - kubectl -n nuvolaris rollout restart statefulset nuvolaris-operator
     preconditions:      
       - sh: '[ $IMAGES_OPERATOR != $(nuv debug operator:version) ]'
         msg: "Current nuvolaris operator pod it is already updated to newest version. Request ignored."

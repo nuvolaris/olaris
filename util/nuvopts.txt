@@ -11,6 +11,7 @@ Usage:
   util realpath <file>
   util notify <message>
   util testbed
+  util check-operator-version <version>
   
 Commands:
   util secrets              generate system secrets 

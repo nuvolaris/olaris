@@ -24,25 +24,24 @@ tasks:
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       ntfy sub "$NUV_REMOTE_NTFY_TOPIC_OUT" "nuv remote logger on_log"
 
-  on_log:
+  on_log_debug:
     desc: to be invoked by ntfy 
     silent: true
     cmds:
-     - echo "NTFY_RAW" | jq .
+     - echo "$NTFY_RAW" | jq .
 
-  on_log1:
+  on_log:
     silent: true
     #desc: log one entry
     cmds:    
     #- echo "$NTFY_RAW" |jq .     
-    - echo "=== [ $NTFY_TITLE ] $NTFY_TAG - $NTFY_MESSAGE"
-    - curl -sL "$URL"
-    - echo
+    - echo ">>> $NTFY_TITLE"
+    - echo "$NTFY_MESSAGE"
+    - echo "<<< $NTFY_TAGS"
     env:
       URL: 
         sh: echo "$NTFY_RAW" | jq -r .attachment.url
   
-
   notify:
     silent: true
     dir: "{{.BASEDIR}}/{{.HOSTNAME}}"

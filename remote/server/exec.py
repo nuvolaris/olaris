@@ -12,7 +12,7 @@ prefix = argv[2]
 cmd = " ".join(argv[3:])
 pid = os.getpid()
 os.chdir(dir)
-os.system("pwd ; ls -l")
+#os.system("pwd ; ls -l")
 
 # execute command and format output
 r = subprocess.run(cmd, shell=True, capture_output=True)

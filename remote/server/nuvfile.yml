@@ -62,6 +62,7 @@ tasks:
       fi
 
   on_command:
+    silent: true
     desc: execute commands
     vars:
       PREFIX: 
@@ -71,11 +72,10 @@ tasks:
     - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
     - |
       export PREFIX="{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
-      echo "[[{{.HOSTNAME}}]]"
-      echo ">>> $(cat {{.PATH}}_title)"
+      echo ">>> [{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
       echo "$(cat {{.PATH}}_message)"
       test -e "${PREFIX}_file" && cat {{.PATH}}_file
-      echo "<<< $(cat {{.PATH}}_tag)"
+      echo -n "<<< $(cat {{.PATH}}_tag) "
     - |
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
@@ -86,11 +86,11 @@ tasks:
       if test -e "{{.PATH}}_file"
       then export NTFY_FILENAME="{{.PATH}}_file" 
       fi
-      ntfy publish -F
+      ntfy publish -F | jq -r  .id
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
 
-  on_command1:
+  on_command_nomsg:
     desc: handle commands
     silent: true
     dir: "{{.BASEDIR}}/{{.HOSTNAME}}"

@@ -1,7 +1,6 @@
 import sys, os, subprocess
 
-
-argv = ["-", ".", "xxx", "ls", "-l"]
+#argv = ["-", ".", "xxx", "ls", "-l"]
 argv = sys.argv
 
 if len(argv) < 4:
@@ -10,11 +9,10 @@ if len(argv) < 4:
 
 dir = argv[1]
 prefix = argv[2]
-cmd = argv[3:]
+cmd = " ".join(argv[3:])
 pid = os.getpid()
 os.chdir(dir)
-
-title = " ".join(cmd)
+os.system("pwd ; ls -l")
 
 # execute command and format output
 r = subprocess.run(cmd, shell=True, capture_output=True)
@@ -35,7 +33,7 @@ if len(message) > 4000:
     message = "--- long ---"
 
 with open(f"{prefix}_title", "w") as f: 
-    f.write(title)
+    f.write(cmd)
 with open(f"{prefix}_tag", "w") as f: 
     f.write(tag)
 with open(f"{prefix}_message", "w") as f: 
@@ -43,14 +41,4 @@ with open(f"{prefix}_message", "w") as f:
 if len(file) >0:
     with open(f"{prefix}_file", "w") as f: 
         f.write(file)
-
-
-
-cmd = ["ls", "'-l'"]
-print("chdir ", sys.argv[1])
-os.chdir(dir)
-print("exec",  )
-
-
-# todo
 

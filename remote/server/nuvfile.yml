@@ -64,24 +64,27 @@ tasks:
   on_command:
     desc: execute commands
     vars:
-      PREFIX: random --str 8
+      PREFIX: 
+        sh: random --str 8
+      PATH: "{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
     cmds:
-    - python exec.py  "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
+    - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
     - |
+      export PREFIX="{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
       echo "[[{{.HOSTNAME}}]]"
-      echo ">>> $(cat {{.PREFIX}}_title)"
-      echo "$(cat _message)"
-      test -e "{{.PREFIX}}_file" && cat {{.PREFIX}}_file
-      echo "<<< $(cat {{.PREFIX}}_tag)"
+      echo ">>> $(cat {{.PATH}}_title)"
+      echo "$(cat {{.PATH}}_message)"
+      test -e "${PREFIX}_file" && cat {{.PATH}}_file
+      echo "<<< $(cat {{.PATH}}_tag)"
     - |
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-      export NTFY_TITLE="[[{{.HOSTNAME}}]] $(cat {{.PREFIX}}_title)"
-      export NTFY_TAGS="$(cat {{.PREFIX}}_tag)"
-      export NTFY_MESSAGE="$(cat _message)"
+      export NTFY_TITLE="[[{{.HOSTNAME}}]] $(cat {{.PATH}}_title)"
+      export NTFY_TAGS="$(cat {{.PATH}}_tag)"
+      export NTFY_MESSAGE="$(cat {{.PATH}}_message)"
       export NTFY_PRIORITY=3
-      if test -e "{{.PREFIX}}_file"
-      then export NTFY_FILENAME="{{.PREFIX}}_file" 
+      if test -e "{{.PATH}}_file"
+      then export NTFY_FILENAME="{{.PATH}}_file" 
       fi
       ntfy publish -F
     status:

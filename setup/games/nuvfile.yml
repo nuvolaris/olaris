@@ -16,4 +16,9 @@ tasks:
     silent: true
     desc: "Chess demo"
     cmds:
-      - echo "Chess demo"
+      - |
+        git clone https://github.com/nuvolaris/whisk-chess $(realpath ./whisk-chess)
+        echo "Chess demo cloned. Uploading frontend..."
+        nuv devel scan $(realpath ./whisk-chess)
+        nuv project deploy $(realpath ./whisk-chess)
+        echo "Chess demo uploaded. Visit http://localhost:80/chess"

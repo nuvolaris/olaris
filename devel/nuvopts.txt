@@ -6,11 +6,15 @@ Usage:
   devel detect [<path>]
   devel scan [<path>] [--force]
   devel deploy [<repo_or_path>]
+  devel apihost
+  devel user
 
 Commands:
   detect    Detect if in a directory there is a web and/or packages folders.
   scan      Scan a project directory and generate a manifest file.
   deploy    Deploy a project from a directory or from a git repository.
+  apihost   Print the API host URL of the latest deployment.
+  user      Print the current user name of the latest deployment.
 
 Options:
 

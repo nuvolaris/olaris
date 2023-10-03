@@ -37,7 +37,7 @@ tasks:
     desc: show current images
     silent: true
     cmds:
-      - kubectl -n nuvolaris get po nuvolaris-operator -o jsonpath='{.spec.containers[0].image}{"\n"}'
+      - kubectl -n nuvolaris get po nuvolaris-operator-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
       - kubectl -n nuvolaris get po controller-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
       - kubectl -n nuvolaris get po couchdb-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
 
@@ -126,4 +126,10 @@ tasks:
   - >
     kubectl -n nuvolaris patch wsk/controller 
     --type=merge --patch '{"metadata": {"finalizers":[] } }'
+
+  operator:version:
+    desc: show operator versions
+    silent: true
+    cmds:
+      - kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.nuvolaris-operator_version}'    
 

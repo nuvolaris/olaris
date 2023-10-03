@@ -41,6 +41,7 @@ tasks:
         if [ -d "$DEPATH/web" ]; then
           echo "Found web directory. Uploading..."
           nuv web upload $DEPATH/web
+          echo "Uploaded."
         fi
     env:
       DEPATH:

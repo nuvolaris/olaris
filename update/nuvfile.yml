@@ -127,3 +127,8 @@ tasks:
       - nuv setup kubernetes runtimes
       - nuv setup kubernetes instance
       - nuv setup nuvolaris login
+
+  operator:
+    desc: deploys latest version of operator
+    cmds:
+      - nuv setup kubernetes operator-update

@@ -65,6 +65,8 @@ tasks:
   on_command:
     silent: true
     desc: execute commands
+    env:
+      NUV_ROOT_PLUGIN: '{{.BASEDIR}}/{{.HOSTNAME}}'
     vars:
       PREFIX: 
         sh: random --str 8

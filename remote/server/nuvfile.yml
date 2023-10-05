@@ -70,6 +70,7 @@ tasks:
         sh: random --str 8
       PATH: "{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
     cmds:
+    - echo python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
     - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
     - |
       export PREFIX="{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"

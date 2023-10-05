@@ -37,7 +37,7 @@ tasks:
     desc: react on messages using the first tag
     silent: true
     cmds:
-    #- echo "<<<{{.TAG}}>>>"
+    - echo "<<<{{.TAG}}>>>"
     - task: on_{{.TAG}}
     vars:
       TAG:
@@ -49,11 +49,12 @@ tasks:
     silent: true
     cmds:
     - |
+      echo "upload: $(pwd)"
       URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
       echo 'UPLOAD' >_tag
       if curl -sL "$URL" -o _nuvops.tgz 2>_stderr
       then 
-        if /usr/bin/tar xzvf _nuvops.tgz >_stdout 2>_stderr
+        if /usr/bin/tar xzvf _nuvops.tgz 2>_stderr #>_stdout 
         then md5sum _nuvops.tgz >_out
              echo "*** upload: $(cat _out)"
         else cat _stderr >_out
@@ -87,6 +88,7 @@ tasks:
       then export NTFY_FILENAME="{{.PATH}}_file" 
       fi
       ntfy publish -F | jq -r  .id
+      rm "{{.PATH}}"_*
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
 

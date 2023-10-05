@@ -11,11 +11,12 @@ dir = argv[1]
 prefix = argv[2]
 cmd = " ".join(argv[3:])
 pid = os.getpid()
+env = os.environ.copy()
+env['NUV_ROOT_PLUGIN'] = dir
 os.chdir(dir)
-#os.system("pwd ; ls -l")
 
 # execute command and format output
-r = subprocess.run(cmd, shell=True, capture_output=True)
+r = subprocess.run(cmd, shell=True, capture_output=True, env=env)
 out = r.stdout.decode("UTF-8")
 if not out.endswith("\n"):
     out += "\n"

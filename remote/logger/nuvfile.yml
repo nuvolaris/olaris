@@ -35,13 +35,13 @@ tasks:
     #desc: log one entry
     cmds:    
     #- echo "$NTFY_RAW" |jq .     
-    - echo ">>> $NTFY_TITLE"
-    - echo "$NTFY_MESSAGE"
-    - echo "<<< $NTFY_TAGS"
     - | 
       if test "$NTFY_TAGS" = "JOIN" 
       then nuv remote client refresh
       fi
+    - echo ">>> $NTFY_TITLE"
+    - echo "$NTFY_MESSAGE"
+    - echo "<<< $NTFY_TAGS"
     env:
       URL: 
         sh: echo "$NTFY_RAW" | jq -r .attachment.url

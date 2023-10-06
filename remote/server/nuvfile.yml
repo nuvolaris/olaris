@@ -19,6 +19,20 @@ tasks:
     - test -n "$NUV_REMOTE_NTFY_TOPIC_OUT" || die "configure NUV_REMOTE_NTFY_TOPIC_OUT"
     - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
 
+  install:
+    desc: install
+    cmds:
+    - test -n "{{.CLOUD}}" || die "specify CLOUD=<cloud>"
+    - test -n "{{.TOKEN}}" || die "specify TOKEN=<ntfy-token>"
+    - test -n "{{.IN}}" || die "specify IN=<ntfy-topic-in>"
+    - test -n "{{.OUT}}" || die "specify OUT=<ntfy-topic-out>"
+    - | 
+      export CLOUD="{{.CLOUD}}" TOKEN="{{.TOKEN}}" IN="{{.IN}}" OUT="{{.OUT}}"
+      envsubst <nuv-remote.service | sudo tee /etc/systemd/system/nuv-remote.service
+    - sudo systemctl daemon-reload
+    - sudo systemctl enable nuv-remote
+    - sudo systemctl restart nuv-remote
+
   run:
     silent: true
     desc: run remote server
@@ -28,6 +42,14 @@ tasks:
       mkdir -p "{{.BASEDIR}}/{{.HOSTNAME}}"
       cd "{{.BASEDIR}}/{{.HOSTNAME}}"
       echo '*** {{.HOSTNAME}} ***' 
+    - |
+      export NTFY_TAGS="JOIN"
+      export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+      export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
+      export NTFY_TITLE="[{{.HOSTNAME}}]"
+      export NTFY_PRIORITY=3
+      export NTFY_MESSAGE="$(datefmt)"
+      ntfy publish -F | jq -r .id
     - ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
@@ -83,7 +105,7 @@ tasks:
     - |
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-      export NTFY_TITLE="[[{{.HOSTNAME}}]] $(cat {{.PATH}}_title)"
+      export NTFY_TITLE="[{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
       export NTFY_TAGS="$(cat {{.PATH}}_tag)"
       export NTFY_MESSAGE="$(cat {{.PATH}}_message)"
       export NTFY_PRIORITY=3

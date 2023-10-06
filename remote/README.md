@@ -1,6 +1,6 @@
 # nuv remote
 
-It works as a remote task executor and it is based on [nuv](https://github.com/nuvolaris/nuv)
+Nuv remote is a remote task executor and it is based on [nuv](https://github.com/nuvolaris/nuv)
 
 The basic idea is:
 
@@ -92,7 +92,7 @@ Now you can use the client to control the servers
 
 You should execute the client from the `saas` project home directory.
 
-You need to configure servers remote and tokes:
+You need to configure servers remote and tokens:
 
 ```
 nuv -config NUV_REMOTE_NFTY_TOKEN=xxx
@@ -113,9 +113,6 @@ Example:
 ```
 nrsel aws
 ```
-
-
-
 
 ## Start the logger
 

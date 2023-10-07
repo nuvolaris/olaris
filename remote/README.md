@@ -63,30 +63,16 @@ At the end `-` and the current cloud suffix will be added. If the current cloud 
 
 We use `ntfy.sh` to connect servers and clients.
 
-Setup an account on ntfy.sh (or self-host it) Then you can create two topics, one for sending commands, and another for retrieving rsults. 
+Setup an account on ntfy.sh (or self-host it) Then you can create two topics, one identified as `<out-topic>` for sending commands, and another identified as `<in-topic>` for retrieving results.  Then generate an authentication token `<ntfy-token>` able to read and write *privately* on those tokens
 
-Take note of the name and store in the variables `NUV_REMOTE_NTFY_TOPIC_IN` and ``NUV_REMOTE_NTFY_TOPIC_OUT`.  Make them private
+Connect to the server you want to use, download and install latest `nuv`,
+then install a service with
 
-Then generate an authentication token to be able to read and write in it. It will be the `NUV_REMOTE_NTFY_TOKEN`
-
-You should set those values as the environment variables in `/etc/environment`
-
-- `NUV_BRANCH=3.0.0-remote`
-- `NUV_REMOTE_NTFY_TOKEN=<ntfy topic>`
-- `NUV_REMOTE_NTFY_TOPIC_IN=<ntfy token>`
-- `NUV_REMOTE_NTFY_TOPIC_OUT=<ntfy token>`
-
-Finally, install `nuv`, pull the tasks (`nuv -update`) and execute it in server mode as root:
-
-`nuv remote server`
-
-TODO: we should install a service actually
+```
+nuv remote server install CLOUD=<cloud> TOKEN=<ntfy-token> IN=<in-topic> OUT=<out-topic>
+```
 
 # Setup the Client
-
-TODO: we should merge the .env and the nuv -config below
-
-First do: cd `olaris-ops`, copy the `.env.dist` in `.env`, edit it and fill the values. This is a shared secret file which wil be distributed to all the machines.
 
 Now you can use the client to control the servers
 
@@ -95,9 +81,9 @@ You should execute the client from the `saas` project home directory.
 You need to configure servers remote and tokens:
 
 ```
-nuv -config NUV_REMOTE_NFTY_TOKEN=xxx
-nuv -config NUV_REMOTE_NTFY_TOPIC_IN=xxx
-nuv -config NUV_REMOTE_NTFY_TOPIC_OUT=xxx
+nuv -config NUV_REMOTE_NFTY_TOKEN=<ntfy-token>
+nuv -config NUV_REMOTE_NTFY_TOPIC_IN=<in-topic>
+nuv -config NUV_REMOTE_NTFY_TOPIC_OUT=<out-topic>
 ```
 
 For simplicity of execution add the following aliases in .bashrc
@@ -153,7 +139,7 @@ You can execute tasks in selected servers, distributing automatically a `nuv` pl
 
 Distribution happens automatically before execution of a remote task when you change a task. 
 
-You can force a distribution with command `nuv refresh`.  
+You can force a distribution with command `nuv remote client refresh`.  
 
 The logger helps with the distriution. When it starts, it forces a referesh and also when a new server join a distribution.
 

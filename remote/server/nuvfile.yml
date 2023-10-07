@@ -20,7 +20,7 @@ tasks:
     - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
 
   install:
-    desc: install
+    desc: 'install the service, use CLOUD=<your-cloud> TOKEN=<ntfy-token> IN=<topic-in> OUT=<topic-out>'
     cmds:
     - test -n "{{.CLOUD}}" || die "specify CLOUD=<cloud>"
     - test -n "{{.TOKEN}}" || die "specify TOKEN=<ntfy-token>"
@@ -118,7 +118,7 @@ tasks:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
 
   on_command_nomsg:
-    desc: handle commands
+    #desc: legacy handle commands
     silent: true
     dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
     cmds:

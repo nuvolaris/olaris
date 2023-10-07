@@ -20,7 +20,7 @@ tasks:
     - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
 
   install:
-    desc: 'install the service, use CLOUD=<your-cloud> TOKEN=<ntfy-token> IN=<topic-in> OUT=<topic-out>'
+    desc: 'install the nuv-remote service, use CLOUD=<your-cloud> TOKEN=<ntfy-token> IN=<topic-in> OUT=<topic-out>'
     cmds:
     - test -n "{{.CLOUD}}" || die "specify CLOUD=<cloud>"
     - test -n "{{.TOKEN}}" || die "specify TOKEN=<ntfy-token>"
@@ -32,6 +32,14 @@ tasks:
     - sudo systemctl daemon-reload
     - sudo systemctl enable nuv-remote
     - sudo systemctl restart nuv-remote
+
+  uninstall:
+    desc: 'uninstall the nuv-remote service'
+    cmds:
+    - sudo systemctl stop nuv-remote
+    - sudo rm -f /etc/systemd/system/nuv-remote.service
+    - sudo systemctl daemon-reload
+    - sudo dpkg -r nuv
 
   run:
     silent: true

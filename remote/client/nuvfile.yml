@@ -75,8 +75,7 @@ tasks:
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
       nuv ops "$(cat _cmd)" $@ 
-      | jq -r .time
-    - jq -r '.time % 10000'
+      | jq -r '.time % 10000'
     env:
       ARGS: 
         sh: a="{{._args_}}" ; echo "${a:1:-1}"

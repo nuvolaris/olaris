@@ -40,7 +40,6 @@ tasks:
     - sudo /bin/rm -f /etc/systemd/system/nuv-remote.service
     - sudo /bin/rm -Rf "{{.BASEDIR}}"
     - sudo systemctl daemon-reload
-    - sudo dpkg -r nuv
 
   run:
     silent: true

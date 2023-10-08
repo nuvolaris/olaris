@@ -124,7 +124,7 @@ tasks:
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
       export NTFY_TITLE="$TIMEID:[{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
-      export NTFY_TAGS="$TIMEID:$(cat {{.PATH}}_tag)"
+      export NTFY_TAGS="LOG"
       export NTFY_MESSAGE="$(cat {{.PATH}}_message)"
       export NTFY_PRIORITY=3
       if test -e "{{.PATH}}_file"

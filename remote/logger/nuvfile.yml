@@ -22,26 +22,40 @@ tasks:
     - echo "*** logger ***"
     - |
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
-      ntfy sub "$NUV_REMOTE_NTFY_TOPIC_OUT" "nuv remote logger on_log"
+      ntfy sub "$NUV_REMOTE_NTFY_TOPIC_OUT" "nuv remote logger handle_message"
 
-  on_log_debug:
-    desc: to be invoked by ntfy 
+  handle_message:
+    desc: react on messages using the firt tag
     silent: true
     cmds:
-     - echo "$NTFY_RAW" | jq .
+    #- echo "$NTFY_RAW" | jq .
+    - task: on_{{.TAG}}
+    vars:
+      TAG:
+        sh: echo "$NTFY_TAGS"
+  
+  on_JOIN:
+    silent: true
+    cmds:
+    -  nuv remote client refresh
+    -  echo "JOIN:" "$NTFY_TITLE"
 
-  on_log:
+  on_upload:
+    silent: true
+
+  on_UPLOAD:
+    silent: true
+    cmds:
+    -  nuv remote client refresh
+    -  echo "UPLOAD:" "$NTFY_TITLE $NTFY_MESSAGE"
+
+  on_LOG:
     silent: true
     #desc: log one entry
     cmds:    
     #- echo "$NTFY_RAW" |jq .     
-    - | 
-      if test "$NTFY_TAGS" = "JOIN" 
-      then nuv remote client refresh
-      fi
     - echo "$NTFY_TITLE"
     - echo "$NTFY_MESSAGE"
-    - echo "$NTFY_TAGS"
     env:
       URL: 
         sh: echo "$NTFY_RAW" | jq -r .attachment.url

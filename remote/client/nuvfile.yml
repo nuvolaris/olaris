@@ -42,13 +42,14 @@ tasks:
     - task: upload-tasks
 
   expand:
+    silent: true
     cmds:
-      - echo {{.HOSTSEL}}
+      #- echo {{.HOSTSEL}}
       - test -n "$NUV_REMOTE_CLOUD" || die "select current cloud with 'select' subcommand"
       - |
         echo "{{.HOSTSEL}}-$NUV_REMOTE_CLOUD" >_hostsel
         echo "{{.HOSTSEL}}" | awk -F- '{if($1=="*") $1="all"; print($1)}' >_cmd
-        echo "$(cat _cmd) $(cat _hostsel)"
+      #- echo "$(cat _cmd) $(cat _hostsel)"
     vars:
       HOSTSEL:
         sh: |
@@ -73,12 +74,15 @@ tasks:
       --tags command
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
-      nuv ops "$(cat _cmd)" $@
+      nuv ops "$(cat _cmd)" $@ 
+      | jq -r .time
+    - jq -r '.time % 10000'
     env:
       ARGS: 
         sh: a="{{._args_}}" ; echo "${a:1:-1}"
  
   shell:
+    silent: true
     cmds:
     - task: expand
     - |
@@ -89,7 +93,7 @@ tasks:
       --title "$(cat _hostsel)" \
       --tags command \
       "$NUV_REMOTE_NTFY_TOPIC_IN" \
-      "$@"
+      "$@" | jq -r '.time % 10000'
     env:
       COMMAND: 
         sh: a="{{._command_}}" ; echo "${a:1:-1}"

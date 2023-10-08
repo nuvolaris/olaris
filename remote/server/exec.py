@@ -4,12 +4,13 @@ import sys, os, subprocess
 argv = sys.argv
 
 if len(argv) < 4:
-    print("usage: <directory> <prefix> <command>...")
+    print("usage: <directory> <prefix> <id> <command>...")
     os.exit(1)
 
 dir = argv[1]
 prefix = argv[2]
-cmd = " ".join(argv[3:])
+id = argv[3]
+cmd = " ".join(argv[4:])
 pid = os.getpid()
 env = os.environ.copy()
 env['NUV_ROOT_PLUGIN'] = dir
@@ -26,7 +27,7 @@ if len(err) >0:
 
 tag = "OK" if r.returncode == 0 else "FAIL"
 
-message = "\n".join([ f"[{pid}] {x}" for x in out.strip().split("\n")])
+message = "\n".join([ f"{id}:{x}" for x in out.strip().split("\n")])
 file = ""
 
 if len(message) > 4000:
@@ -42,4 +43,3 @@ with open(f"{prefix}_message", "w") as f:
 if len(file) >0:
     with open(f"{prefix}_file", "w") as f: 
         f.write(file)
-

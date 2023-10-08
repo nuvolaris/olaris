@@ -67,7 +67,7 @@ tasks:
     desc: react on messages using the first tag
     silent: true
     cmds:
-    - echo "<<<{{.TAG}}>>>"
+    - echo "$NTFY_RAW" | jq .
     - task: on_{{.TAG}}
     vars:
       TAG:
@@ -97,13 +97,15 @@ tasks:
     desc: execute commands
     env:
       NUV_ROOT_PLUGIN: '{{.BASEDIR}}/{{.HOSTNAME}}'
+      TIMEID: 
+        sh: echo "$(("$NTFY_TIME" % 10000))"
     vars:
       PREFIX: 
         sh: random --str 8
       PATH: "{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
     cmds:
-    - echo python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
-    - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
+    #- echo python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
+    - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" "$TIMEID" $NTFY_MESSAGE
     - |
       export PREFIX="{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
       echo ">>> [{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
@@ -113,35 +115,15 @@ tasks:
     - |
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-      export NTFY_TITLE="[{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
-      export NTFY_TAGS="$(cat {{.PATH}}_tag)"
+      export NTFY_TITLE="$TIMEID:[{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
+      export NTFY_TAGS="$TIMEID:$(cat {{.PATH}}_tag)"
       export NTFY_MESSAGE="$(cat {{.PATH}}_message)"
       export NTFY_PRIORITY=3
       if test -e "{{.PATH}}_file"
       then export NTFY_FILENAME="{{.PATH}}_file" 
       fi
-      ntfy publish -F | jq -r  .id
+      ntfy publish -F | jq -r .id
       rm "{{.PATH}}"_*
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
 
-  on_command_nomsg:
-    #desc: legacy handle commands
-    silent: true
-    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
-    cmds:
-    - |
-      echo "=== {{.HOSTNAME}} ~ $NTFY_TITLE" >_out
-      export NUV_ROOT_PLUGIN='{{.BASEDIR}}/{{.HOSTNAME}}'
-      echo '>>>' $NTFY_MESSAGE >> _out
-      echo "$NTFY_MESSAGE 2>_err >>_out" >_eval
-      source _eval
-      if [[ $? = 0 ]] 
-      then echo "OK" >_tag
-      else echo "FAIL" >_tag
-      fi
-      cat _err >>_out
-      echo "<<< $(cat _tag)" >>_out
-      cat _out
-    status:
-      - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"

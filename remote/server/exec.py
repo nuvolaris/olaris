@@ -29,7 +29,7 @@ if len(err) >0:
 if not out.endswith("\n"):
     out += "\n"
 
-if return.code != 0:
+if r.returncode != 0:
     out += "=== STATUS: %d\n" % r.returncode
 
 message = "\n".join([ f"{id}:{x}" for x in out.strip().split("\n")])

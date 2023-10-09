@@ -22,10 +22,9 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
+      password: $SECRET_NUVOLARIS_METADATA
       kube: ${NUVOLARIS_KUBE:-auto}
       apihost: ${NUVOLARIS_APIHOST}
-      #apiport: 80
-      #protocol: http
       storageclass: ${NUVOLARIS_STORAGECLASS:-auto}
       provisioner: ${NUVOLARIS_PROVISIONER:-auto}
       ingressclass: ${NUVOLARIS_INGRESSCLASS:-auto}

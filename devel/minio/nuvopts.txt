@@ -1,0 +1,23 @@
+Section:
+  nuv devel minio 
+
+Usage:
+  util secrets
+  util nosecrets
+  util user-secrets <username>
+  util no-user-secrets <username>
+  util detect
+  util poll
+  util realpath <file>
+  util notify <message>
+  util testbed
+  util check-operator-version <version>
+  
+Commands:
+  util secrets              generate system secrets 
+  util nosecrets            remove system secrets
+  util user-secrets         generate user secrets for the given user
+  util no-user-secrets      remove user secrets for the given user
+  util detect               detect the current kubernetes cluster
+  util poll                 run wsk poll
+  util realpath             return full path of specified file

@@ -10,11 +10,11 @@ tasks:
       export TEMPFILE="$NUV_TMP/olaris-ops"
       echo $TEMPFILE
       cd $NUV_PWD
-      /usr/bin/tar cvzf "${TEMPFILE}.tgz" olaris-ops
+      /usr/bin/tar czf "${TEMPFILE}.tgz" olaris-ops
       md5sum ${TEMPFILE}.tgz | awk '{print $1}' >${TEMPFILE}.curr
       export CURR="$(cat ${TEMPFILE}.curr)"
       export LAST="$(cat ${TEMPFILE}.last)"
-      echo "CURR=$CURR LAST=$LAST"
+      #echo "CURR=$CURR LAST=$LAST"
       if test "$LAST" != "$CURR"
       then
         ntfy publish \

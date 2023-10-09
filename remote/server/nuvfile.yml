@@ -41,6 +41,15 @@ tasks:
     - sudo /bin/rm -Rf "{{.BASEDIR}}"
     - sudo systemctl daemon-reload
 
+  b64config:
+    silent: true
+    desc: set a configuration value, passed as B64=<base640-encoded-arg> 
+    cmds:
+    - |
+      V="$(base64 -d {{.B64}})"
+      echo "setting ${V%%=*}" 
+      config "$V"
+
   run:
     silent: true
     desc: run remote server

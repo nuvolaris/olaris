@@ -20,16 +20,20 @@ const nuv = require('nuv');
 // *** Main ***
 main();
 
+function decode_and_norm(value) {
+    decoded = nuv.nuvExec("nuv","-base64","-d",value)
+    return decoded.replace(/(\r\n|\n|\r)/gm,"")
+}
+
 function main() {
-    const auth = process.env.AUTH
+    const auth = process.env.AUTHB64
     const develAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/ferretdb`;
 
     command = process.argv[2]    
 
     if ('find' == command) {
-        cmd = {}
-        c = nuv.nuvExec("nuv","-base64","-d",process.argv[3]);
-        collection = c.replace(/(\r\n|\n|\r)/gm,"");
+        cmd = {}        
+        collection = decode_and_norm(process.argv[3])
         cmd = `{"find":"${collection}"}`;
         console.log(JSON.stringify(cmd));
         let res = nuv.nuvExec("curl", `${develAddr}`,"-s","-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json","-d", `${cmd}`)
@@ -37,10 +41,13 @@ function main() {
     }
 
     if ('submit' == command) {        
-        f = nuv.nuvExec("nuv","-base64","-d",process.argv[3])
-        file = f.replace(/(\r\n|\n|\r)/gm,"")
-        let res = nuv.nuvExec("curl", `${develAddr}`,"-s", "-X", "PUT", "-T", file, "-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json")
-        console.log(res);
+        file = decode_and_norm(process.argv[3])
+        if( nuv.exists(file) ) {
+            let res = nuv.nuvExec("curl", `${develAddr}`,"-s", "-X", "PUT", "-T", file, "-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json")
+            console.log(res);    
+        } else {
+            console.log(`invalid filename ${file} provided`)
+        }
     }
 
 }

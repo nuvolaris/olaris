@@ -16,86 +16,77 @@
 # under the License.
 
 version: "3"
+env:
+  
+  KUBECONFIG:
+    sh: |
+      if test -e $(realpath "$NUV_TMP/kubeconfig")
+      then echo $(realpath "$NUV_TMP/kubeconfig")
+      else echo ~/.kube/config
+      fi
+  
+  APIHOST:
+        sh: wsk property get | awk '/whisk API host/{print $4}'
+        
+  AUTHB64:
+        sh: base64 -e $(wsk property get | awk '/whisk auth/{print $3}')
 
 tasks:
-  secrets:
-    desc: generate secrets
+  # read a value, empty is not accepted
+  readforce:
     silent: true
     cmds:
-      - config SECRET_OPENWHISK_SYSTEM="$(random --uuid):$(random --str 64)" SECRET_OPENWHISK_NUVOLARIS="$(random --uuid):$(random --str 64)"
-      - config SECRET_COUCHDB_ADMIN="$(random --str 12)" SECRET_COUCHDB_CONTROLLER="$(random --str 12)"  SECRET_COUCHDB_INVOKER="$(random --str 12)"
-      - config SECRET_REDIS_DEFAULT="$(random --str 12)" SECRET_REDIS_NUVOLARIS="$(random --str 12)"
-      - config SECRET_MONGODB_ADMIN="$(random --str 12)" SECRET_MONGODB_NUVOLARIS="$(random --str 12)"      
-      - config SECRET_MINIO_ADMIN="$(random --str 40)" SECRET_MINIO_NUVOLARIS="$(random --str 40)"
-      - config SECRET_POSTGRES_ADMIN="$(random --str 12)" SECRET_POSTGRES_REPLICA="$(random --str 12)" SECRET_POSTGRES_NUVOLARIS="$(random --str 12)"
-      - config SECRET_NUVOLARIS_METADATA="$(random --str 12)"
-      - echo "Generated $(config -d | grep SECRET_ | wc -l) secrets."
-
-  user-secrets:
-    desc: generate user secrets (auth, couchdb, redis, mongodb, minio, postgres)
-    silent: true
-    cmds:
+      - test -n "{{.VAR}}" || die "specify variable VAR="
+      - test -n "{{.MSG}}" || die "specify message MSG="
       - |
-        export USR={{._username_}}
-        config "${USR}_SECRET_OPENWHISK"="$(random --uuid):$(random --str 64)"
-        config "${USR}_SECRET_COUCHDB"="$(random --str 12)"
-        config "${USR}_SECRET_REDIS"="$(random --str 12)"
-        config "${USR}_SECRET_MONGODB"="$(random --str 12)"
-        config "${USR}_SECRET_MINIO"="$(random --str 40)"
-        config "${USR}_SECRET_POSTGRES"="$(random --str 12)"
-        echo "Generated ${USR} user secrets."
+        input="{{.VAL}}"
+        length=${#input}
+        while [ "$length" -eq "0" ]; do 
+          echo "*** Please, specify {{.MSG}} and press enter."
+          test -n "{{.HINT}}" && echo "{{.HINT}}"
+          {{if eq OS "windows"}} 
+            input=$(powershell "(Read-Host -Prompt '{{.MSG}}')")
+            input=${input%?} # For some reason, powershell adds a character (\n?) at the end
+          {{else}}
+            read -p "{{.MSG}}: " input
+          {{end}} 
+          length=${#input}
+          echo $length
+        done
+        config {{.VAR}}="$input"    
 
-  nosecrets:
-    desc: remove secrets
-    ignore_error: true
-    cmds:
-      - config -r SECRET_OPENWHISK_SYSTEM SECRET_OPENWHISK_NUVOLARIS
-      - config -r SECRET_COUCHDB_ADMIN SECRET_COUCHDB_CONTROLLER  SECRET_COUCHDB_INVOKER
-      - config -r SECRET_REDIS_DEFAULT SECRET_REDIS_NUVOLARIS
-      - config -r SECRET_MONGODB_ADMIN SECRET_MONGODB_NUVOLARIS
-      - config -r SECRET_MINIO_ADMIN SECRET_MINIO_NUVOLARIS
-      - config -r SECRET_POSTGRES_ADMIN SECRET_POSTGRES_REPLICA SECRET_POSTGRES_NUVOLARIS
-      - config -r SECRET_NUVOLARIS_METADATA
-      - config -d | grep SECRET_
-
-  no-user-secrets:
-    desc: remove user secrets
+  # the input command is encoded as base64 to avoid parsing issues with the nuv js wrapper
+  ls:
+    desc: get the list of user buckets
     silent: true
-    ignore_error: true
-    cmds:
-      - |
-        export USR={{._username_}}
-        config -r "${USR}_SECRET_OPENWHISK"
-        config -r "${USR}_SECRET_COUCHDB"
-        config -r "${USR}_SECRET_REDIS"
-        config -r "${USR}_SECRET_MONGODB"
-        config -r "${USR}_SECRET_MINIO"
-        config -r "${USR}_SECRET_POSTGRES"
-        echo "Removed ${USR} user secrets."
+    cmds:      
+      - js minio.js ls
 
-  poll:
-    desc: wsk poll
-    cmds:
-      - wsk activation poll
+  lsb:
+      desc: get the content of the specified bucket
+      silent: true
+      cmds:
+        - js minio.js lsb $(nuv -base64 -e "{{._bucket_}}")
+  rm:
+      desc: remove a file from the specified bucket
+      silent: true
+      cmds:
+        - js minio.js rm $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{._file_}}")
 
-  realpath:
-    - realpath {{._file_}}
+  mv:
+      desc: move a file between buckets renaming it
+      silent: true
+      cmds:
+        - js minio.js mv $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{._file_}}") $(nuv -base64 -e "{{._dest_bucket_}}") $(nuv -base64 -e "{{._dest_file_}}")
 
-  notify:
-    silent: true
-    cmds:
-      - |
-        if test -z "$DO_NOT_NOTIFY_NUVOLARIS" 
-        then curl -s -d "Installed '{{._message_}}'" https://ntfy.sh/nuvolaris-nir >/dev/null
-        fi
+  cp:
+      desc: copy a file between buckets renaming it
+      silent: true
+      cmds:
+        - js minio.js cp $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{._file_}}") $(nuv -base64 -e "{{._dest_bucket_}}") $(nuv -base64 -e "{{._dest_file_}}")
 
-  testbed:
-    - echo $(realpath $GCLOUD_SSHKEY)
-
-  check-operator-version:
-    silent: true
-    cmds:
-      - |
-        output=$(nuv debug operator:version)
-        tag=$(echo $output | awk -F: '{print $2}')
-        needupdate {{._version_}} $tag
+  put:
+      desc: upload a local file
+      silent: true
+      cmds:
+        - js minio.js put $(nuv -base64 -e "{{._localfile_}}") $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{._file_}}")

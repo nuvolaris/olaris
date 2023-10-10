@@ -24,8 +24,8 @@ env:
       then echo $(realpath "$NUV_TMP/kubeconfig")
       else echo ~/.kube/config
       fi
-  AUTH:
-        sh: wsk property get | awk '/whisk auth/{print $3}'
+  AUTHB64:
+        sh: base64 -e $(wsk property get | awk '/whisk auth/{print $3}')
 
   APIHOST:
         sh: wsk property get | awk '/whisk API host/{print $4}'

@@ -21,7 +21,7 @@ const nuv = require('nuv');
 main();
 
 function main() {
-    const auth = process.env.AUTH
+    const auth = process.env.AUTHB64
     const psqlAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/psql`;
 
     command = process.argv[2]

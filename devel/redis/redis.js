@@ -21,7 +21,7 @@ const nuv = require('nuv');
 main();
 
 function main() {
-    const auth = process.env.AUTH
+    const auth = process.env.AUTHB64
     const redisAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/redis`
 
     decoded = nuv.nuvExec("nuv","-base64","-d",process.argv[2])
@@ -30,5 +30,4 @@ function main() {
     
     let res = nuv.nuvExec("curl", `${redisAddr}`,"-s","-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json","-d", `${JSON.stringify(cmd)}`)
     console.log(res)
-
 }

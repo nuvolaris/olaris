@@ -90,3 +90,9 @@ tasks:
       silent: true
       cmds:
         - js minio.js put $(nuv -base64 -e "{{._localfile_}}") $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{._file_}}")
+
+  get:
+      desc: download a local file
+      silent: true
+      cmds:
+        - js minio.js get $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{._file_}}")

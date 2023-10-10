@@ -7,16 +7,18 @@ Usage:
   minio rm <bucket> <file>
   minio mv <bucket> <file> <dest_bucket> <dest_file>
   minio cp <bucket> <file> <dest_bucket> <dest_file>
-  minio put <localfile> <bucket> <file> 
+  minio put <localfile> <bucket> <file>
+  minio get <bucket> <file> 
 
 
 Commands:
-  ls    retrieve the list of all the user buckets
-  lsb   retrieve the content of the specified bucket (recursively)
-  rm    remove the given file from the specified bucket
-  mv    move a file from a bucket to another
-  cp    copy a file from a bucket to another
-  put   upload a localfile into the bucket/file
+  ls       retrieve the list of all the user buckets
+  lsb      retrieve the content of the specified bucket (recursively)
+  rm       remove the given file from the specified bucket
+  mv       move a file from a bucket to another
+  cp       copy a file from a bucket to another
+  put      upload a localfile into the bucket/file
+  get      download a bucket file locally
 
   
   

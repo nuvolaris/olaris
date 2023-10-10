@@ -37,8 +37,6 @@ function main() {
     if ('sql' == command) {
         cmd['command']=param
     }
-
-    console.log(JSON.stringify(cmd))
     
     let res = nuv.nuvExec("curl", `${psqlAddr}`,"-s","-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json","-d", `${JSON.stringify(cmd)}`);
     console.log(res);

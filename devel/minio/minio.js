@@ -29,6 +29,7 @@ function main() {
     const auth = process.env.AUTHB64
     const minioAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/minio`;
     const uploadAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/devel_upload`;
+    const downloadAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/devel_download`;
 
     command = process.argv[2]
 
@@ -75,21 +76,35 @@ function main() {
         localfile = decode_and_norm(process.argv[3])
         bucket = decode_and_norm(process.argv[4])
         file = decode_and_norm(process.argv[5])
-    }  
+    }
+    
+    if ('get' == command) {        
+        bucket = decode_and_norm(process.argv[3])
+        file = decode_and_norm(process.argv[4])
+    }
 
-    if ( command != "put" ) {
-        console.log(JSON.stringify(cmd))
-        let res = nuv.nuvExec("curl", `${minioAddr}`,"-s","-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json","-d", `${JSON.stringify(cmd)}`);
+    if ( command != "put"  && command != "get" ) {
+        let res = nuv.nuvExec("curl", `${minioAddr}`,"-s","-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json","-d", `${JSON.stringify(cmd)}`)
         console.log(res);         
         return
     } 
     
-
-    if ( nuv.exists(localfile) ) {
-        let res = nuv.nuvExec("curl", `${uploadAddr}/${bucket}/${file}`,"-s","-X", "PUT", "-T",`${localfile}`,"-H", `x-impersonate-auth: ${auth}`);
-        console.log(res);    
-    } else {
-        console.log(`invalid filename ${localfile} provided`)
+    if ( command == "put" ) {
+        if ( nuv.exists(localfile) ) {
+            let res = nuv.nuvExec("curl", `${uploadAddr}/${bucket}/${file}`,"-s","-X", "PUT", "-T",`${localfile}`,"-H", `x-impersonate-auth: ${auth}`)
+            console.log(res);    
+        } else {
+            console.log(`invalid filename ${localfile} provided`)
+        }
     }
+
+    if ( command == "get" ) {
+        let split = file.split("/")
+        let output_file = split[split.length -1]
+        console.log(output_file)
+        let res = nuv.nuvExec("curl", `${downloadAddr}/${bucket}/${file}`,"-v","-H", `x-impersonate-auth: ${auth}`, "-o", `${output_file}`)
+        console.log(res);
+    }
+
 
 }

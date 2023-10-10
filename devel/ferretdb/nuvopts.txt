@@ -7,5 +7,5 @@ Usage:
 
 Commands:
   find    find for documents into the given ferretbd/Mongodb collection
-  submit  use  {insert: <collection>,documents: [ <document>, <document>, <document>, ... ]} to insert documents into a collection. (@see https://www.mongodb.com/docs/manual/reference/command/), for a full reference. 
+  submit  submit a command (@see https://www.mongodb.com/docs/manual/reference/command/), e.g  {insert: <collection>,documents: [ <document>, <document>, <document>, ... ]} to insert documents into a collection. 
   

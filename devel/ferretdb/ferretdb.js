@@ -35,7 +35,6 @@ function main() {
         cmd = {}        
         collection = decode_and_norm(process.argv[3])
         cmd = `{"find":"${collection}"}`;
-        console.log(JSON.stringify(cmd));
         let res = nuv.nuvExec("curl", `${develAddr}`,"-s","-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json","-d", `${cmd}`)
         console.log(res)
     }

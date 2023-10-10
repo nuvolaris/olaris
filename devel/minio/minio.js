@@ -26,6 +26,7 @@ function decode_and_norm(value) {
 }
 
 function main() {
+    const nuvpwd = process.env.NUV_PWD
     const auth = process.env.AUTHB64
     const minioAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/minio`;
     const uploadAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/devel_upload`;
@@ -102,7 +103,7 @@ function main() {
         let split = file.split("/")
         let output_file = split[split.length -1]
         console.log(output_file)
-        let res = nuv.nuvExec("curl", `${downloadAddr}/${bucket}/${file}`,"-v","-H", `x-impersonate-auth: ${auth}`, "-o", `${output_file}`)
+        let res = nuv.nuvExec("curl", `${downloadAddr}/${bucket}/${file}`,"-s","-H", `x-impersonate-auth: ${auth}`, "-o", `${nuvpwd}/${output_file}`)
         console.log(res);
     }
 

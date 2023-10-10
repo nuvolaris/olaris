@@ -119,6 +119,7 @@ tasks:
       - config SECRET_POSTGRES_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.password}')"
       - config SECRET_POSTGRES_REPLICA="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.replica-password}')"
       - config SECRET_POSTGRES_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.postgres.nuvolaris.password}')"
+      - config SECRET_NUVOLARIS_METADATA="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.nuvolaris.password}')"
 
   apply:
     desc: apply updated config

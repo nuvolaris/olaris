@@ -8,7 +8,7 @@ tasks:
     - test -d "$NUV_PWD/olaris-ops" || die "we need an olaris-ops folder in current directory"
     - |
       export TEMPFILE="$NUV_TMP/olaris-ops"
-      echo $TEMPFILE
+      #echo $TEMPFILE
       cd $NUV_PWD
       /usr/bin/tar czf "${TEMPFILE}.tgz" olaris-ops
       md5sum ${TEMPFILE}.tgz | awk '{print $1}' >${TEMPFILE}.curr
@@ -22,7 +22,7 @@ tasks:
         --title "UPLOAD: checksum $CURR" \
         --tags upload \
         --file "${TEMPFILE}.tgz" \
-        "$NUV_REMOTE_NTFY_TOPIC_IN"
+        "$NUV_REMOTE_NTFY_TOPIC_IN" | jq -r .message
         cp "$TEMPFILE.curr" "$TEMPFILE.last"
       fi
   
@@ -66,16 +66,14 @@ tasks:
     cmds:
     - task: expand
     - task: upload-tasks
-    - >
-      set -- $ARGS ;
-      ntfy publish
-      --no-firebase
-      --title "$(cat _hostsel)"
-      --tags command
-      --token "$NUV_REMOTE_NTFY_TOKEN"
-      "$NUV_REMOTE_NTFY_TOPIC_IN" 
-      nuv ops "$(cat _cmd)" $@ 
-      | jq -r '.time % 10000'
+    - |
+      set -- $ARGS
+      export NTFY_MESSAGE="nuv ops $(cat _cmd) $@"
+      export NTFY_TITLE="$(cat _hostsel)"
+      export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+      export NTFY_TAGS=command
+      ntfy publish -F "$NUV_REMOTE_NTFY_TOPIC_IN" >_message
+    - datefmt -t "$(cat _message | jq -r '.time')" -f TimeOnly
     env:
       ARGS: 
         sh: a="{{._args_}}" ; echo "${a:1:-1}"
@@ -84,15 +82,17 @@ tasks:
     silent: true
     cmds:
     - task: expand
+    #- echo $COMMAND
+    #- env | grep NTFY_
     - |
       set -- $COMMAND
       test "$1" = "'--'" && shift
-      ntfy publish \
-      --token "$NUV_REMOTE_NTFY_TOKEN" \
-      --title "$(cat _hostsel)" \
-      --tags command \
-      "$NUV_REMOTE_NTFY_TOPIC_IN" \
-      "$@" | jq -r '.time % 10000'
+      export NTFY_MESSAGE="$@"
+      export NTFY_TITLE="$(cat _hostsel)"
+      export NTFY_TAGS=command
+      export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+      ntfy publish -F "$NUV_REMOTE_NTFY_TOPIC_IN" >_message 
+    - datefmt -t "$(cat _message | jq -r '.time')" -f TimeOnly
     env:
       COMMAND: 
         sh: a="{{._command_}}" ; echo "${a:1:-1}"

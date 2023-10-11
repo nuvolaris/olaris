@@ -47,7 +47,7 @@ tasks:
     cmds:
     - |
       if test -z "{{.B64}}"
-      then config -d
+      then config -d | awk -F= '{print $1}'
       else
         V="$(base64 -d {{.B64}})"
         echo "setting ${V%%=*}" 
@@ -69,8 +69,8 @@ tasks:
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
       export NTFY_TITLE="[{{.HOSTNAME}}]"
       export NTFY_PRIORITY=3
-      export NTFY_MESSAGE="$(datefmt)"
-      ntfy publish -F | jq -r .id
+      export NTFY_MESSAGE="joining at $(datefmt -f TimeOnly)"
+      ntfy publish -F | jq -r .message
     - ntfy sub
       --token "$NUV_REMOTE_NTFY_TOKEN"
       "$NUV_REMOTE_NTFY_TOPIC_IN" 
@@ -80,7 +80,8 @@ tasks:
     desc: react on messages using the first tag
     silent: true
     cmds:
-    - echo "$NTFY_RAW" | jq .
+    #- echo "$NTFY_RAW" | jq .
+    - echo "--- on_{{.TAG}} ---"
     - task: on_{{.TAG}}
     vars:
       TAG:
@@ -119,32 +120,31 @@ tasks:
     env:
       NUV_ROOT_PLUGIN: '{{.BASEDIR}}/{{.HOSTNAME}}'
       TIMEID: 
-        sh: echo "$(("$NTFY_TIME" % 10000))"
+        sh: datefmt -t "$NTFY_TIME" -f TimeOnly
     vars:
       PREFIX: 
         sh: random --str 8
       PATH: "{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
     cmds:
-    #- echo python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" $NTFY_MESSAGE
-    - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" "$TIMEID" $NTFY_MESSAGE
-    - |
-      export PREFIX="{{.BASEDIR}}/{{.HOSTNAME}}/{{.PREFIX}}"
-      echo ">>> [{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
-      echo "$(cat {{.PATH}}_message)"
-      test -e "${PREFIX}_file" && cat {{.PATH}}_file
-      echo -n "<<< $(cat {{.PATH}}_tag) "
-    - |
+    #- env | grep NTFY_
+    #- echo python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" "$TIMEID"
+    - echo 1
+    - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" "$TIMEID"
+    - echo 2
+    - |  
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-      export NTFY_TITLE="$TIMEID:[{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
+      export NTFY_TITLE="$TIMEID +-[{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
       export NTFY_TAGS="LOG"
       export NTFY_MESSAGE="$(cat {{.PATH}}_message)"
       export NTFY_PRIORITY=3
       if test -e "{{.PATH}}_file"
-      then export NTFY_FILENAME="{{.PATH}}_file" 
+      then export NTFY_FILENAME="{{.PATH}}_file"
+      else export NTFY_FILENAME=""
       fi
-      ntfy publish -F | jq -r .id
-      rm "{{.PATH}}"_*
+      ntfy publish -F | jq .
+    - echo 3
+    - rm "{{.PATH}}"_*
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"
 

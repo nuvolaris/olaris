@@ -41,18 +41,30 @@ tasks:
     - sudo /bin/rm -Rf "{{.BASEDIR}}"
     - sudo systemctl daemon-reload
 
-  b64config:
+  setvar:
     silent: true
-    desc: set a configuration value, passed as B64=<base640-encoded-arg> 
+    desc: set a configuration value, passed VAR=<name> VAL_B64=<base64-encoded-value> 
     cmds:
+    - test -n "{{.VAR}}" || die "no VAR specified"
+    - test -n "{{.VAL_B64}}" || die "no VAL_B64 specified"
     - |
-      if test -z "{{.B64}}"
-      then config -d | awk -F= '{print $1}'
-      else
-        V="$(base64 -d {{.B64}})"
-        echo "setting ${V%%=*}" 
-        config "$V"
+      if test -n "$VAL"
+      then echo "setting {{.VAR}}" 
+           config "{{.VAR}}=$VAL"
+      else echo "cannot set {{.VAR}}, did you provide a base64 encoded value?"
       fi
+    env:
+      VAL:
+        sh: base64 -d "{{.VAL_B64}}"
+
+
+  getvar:
+    silent: true
+    desc: get a configuration value
+    cmds:
+    - test -n "{{.VAR}}" || die "no VAR specified"
+    - echo {{.VAR}}="${{.VAR}}"
+
 
   run:
     silent: true

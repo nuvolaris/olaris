@@ -128,22 +128,22 @@ tasks:
     cmds:
     #- env | grep NTFY_
     #- echo python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" "$TIMEID"
-    - echo 1
     - python3 exec.py "{{.BASEDIR}}/{{.HOSTNAME}}" "{{.PREFIX}}" "$TIMEID"
-    - echo 2
+    #- ls -l "{{.PATH}}"_*
     - |  
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
       export NTFY_TITLE="$TIMEID +-[{{.HOSTNAME}}] $(cat {{.PATH}}_title)"
-      export NTFY_TAGS="LOG"
-      export NTFY_MESSAGE="$(cat {{.PATH}}_message)"
+      export NTFY_TAGS="LOG"      
       export NTFY_PRIORITY=3
       if test -e "{{.PATH}}_file"
-      then export NTFY_FILENAME="{{.PATH}}_file"
-      else export NTFY_FILENAME=""
+      then 
+          export NTFY_MESSAGE=""
+          ntfy publish -F --file "{{.PATH}}_file" | jq .
+      else
+          export NTFY_MESSAGE="$(cat {{.PATH}}_message)"
+          ntfy publish -F | jq .
       fi
-      ntfy publish -F | jq .
-    - echo 3
     - rm "{{.PATH}}"_*
     status:
       - "! [[ {{.HOSTNAME}} ==  $NTFY_TITLE ]]"

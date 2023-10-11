@@ -53,18 +53,20 @@ tasks:
   on_LOG:
     silent: true
     #desc: log one entry
-    cmds:    
-    #- echo "$NTFY_RAW" |jq . 
+    cmds:
     - |
       if ! test "$(cat _curr)" = "$NTFY_TIME"
       then echo "====================="
            echo "$NTFY_TIME" >_curr
       fi
     - echo "$NTFY_TITLE"
-    - echo "$NTFY_MESSAGE"
-    env:
-      URL: 
-        sh: echo "$NTFY_RAW" | jq -r .attachment.url
+    - |
+      URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
+      echo $URL
+      if test "$URL" = "null"
+      then echo "$NTFY_MESSAGE"
+      else curl -sL "$URL"
+      fi
   
   notify:
     silent: true

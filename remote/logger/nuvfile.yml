@@ -66,18 +66,7 @@ tasks:
       echo "$NTFY_TITLE"
       if test "$URL" != "null"
       then curl "$URL"
+           echo "=== EOF ==="
       else echo "$NTFY_MESSAGE"
       fi  
-  notify:
-    silent: true
-    dir: "{{.BASEDIR}}/{{.HOSTNAME}}"
-    cmds: 
-      - |
-        export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-        export NTFY_TITLE="{{.HOSTNAME}}"
-        export NTFY_MESSAGE="$(cat _msg)"
-        export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
-        cat _out \
-        | ntfy publish --no-firebase \
-        -p 1 --tags="$(cat _tag)" --file=- \
-        | jq -r '"REPLY: "+ .attachment.url'
+

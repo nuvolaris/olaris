@@ -107,7 +107,7 @@ tasks:
     env:
       NUV_ROOT_PLUGIN: '{{.BASEDIR}}/{{.HOSTNAME}}'
       TIMEID: 
-        sh: datefmt -t "$NTFY_TIME" -f TimeOnly
+        sh: TZ=GMT datefmt -t "$NTFY_TIME" -f TimeOnly
     vars:
       PREFIX: 
         sh: random --str 8

@@ -59,11 +59,12 @@ tasks:
     #desc: log one entry
     cmds:
     - |
-      if ! test "$(cat _curr)" = "$NTFY_TIME"
+      TIMEID=$(echo $NTFY_TITLE | awk '{print $1}')
+      if ! test "$(cat _curr)" = "$TIMEID"
       then echo "======================================"
-           echo "$NTFY_TIME" >_curr
+           echo "$TIMEID" >_curr
       fi
-    - 
+    #- echo "$NTFY_RAW" | jq .
     - |
       URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
       #echo $URL

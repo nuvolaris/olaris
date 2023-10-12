@@ -30,6 +30,34 @@ env:
       else echo ~/.kube/config
       fi
 
+# sets memory parameter for the controller invoker and corresponding pods
+  OPENWHISK_CONTROLLER_JAVA_OPTS: 
+    sh: |
+      if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ]
+      then echo -Xmx2G
+      else echo -Xmx"$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB"G
+      fi
+
+  OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY: 
+    sh: |
+      if [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
+      then echo 2048m
+      else pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((pool*1024))m
+      fi
+
+  OPENWHISK_CONTROLLER_RES_MIN_MEM: 
+    sh: | 
+      if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ] && [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
+      then echo 4G
+      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem+pool))G
+      fi  
+  OPENWHISK_CONTROLLER_RES_MAX_MEM: 
+    sh: | 
+      if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ] && [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
+      then echo 5G
+      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem+pool+1))G
+      fi       
+
 tasks:
   status:
     desc: show nuvolaris cluster status

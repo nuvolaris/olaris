@@ -22,9 +22,11 @@ vars:
   ARCH: '{{ARCH}}'
 
 tasks:
-  
   devcluster:
     silent: true
+    preconditions:
+      - sh: docker info 
+        msg: "You need to install docker before running this command."
     cmds:
     - |
       if {{.__status}}

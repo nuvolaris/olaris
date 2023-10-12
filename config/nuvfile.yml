@@ -461,19 +461,19 @@ tasks:
     - task: read
       vars:
         MSG: "Openwhisk Standalone Controller Java Options"
-        VAR: "OPENWHISK_CONTROLLER_JAVA_OPTS"
+        VAR: "OPENWHISK_CONTROLLER_JAVA_MEMORY_GB"
         HINT: | 
-              Specifies nuvolaris controller Java options
+              Specifies nuvolaris controller Java options in GB
         VAL: "{{.__javaopts}}"
-        DEF: "-Xmx2048M"
+        DEF: "2"
     - task: read
       vars:
         MSG: "Openwhisk Standalone Controller Pool Memory Settings"
-        VAR: "OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY"
+        VAR: "OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB"
         HINT: | 
-              Specifies nuvolaris controller Java options
+              Specifies nuvolaris controller pool memory Java options in GB
         VAL: "{{.__poolmemory}}"
-        DEF: "2048m"
+        DEF: "2"
     - task: read
       vars:
         MSG: "Openwhisk Standalone Controller Activation Max Allowed Payload"

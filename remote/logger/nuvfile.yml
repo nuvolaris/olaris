@@ -38,10 +38,14 @@ tasks:
   on_JOIN:
     silent: true
     cmds:
-    -  nuv remote client refresh
-    -  echo "JOIN:" "$NTFY_TITLE"
+    - echo "JOIN:" "$NTFY_TITLE"
+    - echo "0" >"$NUV_TMP/olaris-ops.curr"
+    - echo "1" >"$NUV_TMP/olaris-ops.last"
 
   on_upload:
+    silent: true
+
+  on_command:
     silent: true
 
   on_UPLOAD:

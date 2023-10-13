@@ -23,8 +23,8 @@ main();
 function main() {
     let path = process.argv[2];
     let quiet = process.argv[3];
-
-    let minioKey = `${process.env.NUVUSER.toUpperCase()}_SECRET_MINIO`;
+  
+    let minioKey = `MINIO_SECRET_KEY`;
     if (process.env.NUVUSER == 'nuvolaris') {
         minioKey = "SECRET_MINIO_NUVOLARIS"
     }
@@ -48,9 +48,8 @@ function main() {
                 fileAddr = fileAddr.substring(1);
             }
 
-
             let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${uploadAddr}/${fileAddr}`);
-            if (!quiet) {
+            if (!quiet || quiet === "false") {
                 console.log(res);
             }
         }

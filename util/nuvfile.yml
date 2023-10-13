@@ -87,8 +87,8 @@ tasks:
         then curl -s -d "Installed '{{._message_}}'" https://ntfy.sh/nuvolaris-nir >/dev/null
         fi
  
-  ntfy2slack:
-    desc: install a service to receive on slack notifications
+  install-notify-receiver:
+    desc: install a service to receive slack notifications of installation
 
   1password:
     desc: 1password support utils

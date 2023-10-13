@@ -49,7 +49,7 @@ function main() {
             }
 
             let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${uploadAddr}/${fileAddr}`);
-            if (!quiet || quiet === "false") {
+            if (!quiet) {
                 console.log(res);
             }
         }

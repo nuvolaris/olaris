@@ -73,7 +73,7 @@ tasks:
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TAGS=command
       ntfy publish -F "$NUV_REMOTE_NTFY_TOPIC_IN" >_message
-    - datefmt -t "$(cat _message | jq -r '.time')" -f TimeOnly
+    - TZ=GMT datefmt -t "$(cat _message | jq -r '.time')" -f TimeOnly
     env:
       ARGS: 
         sh: a="{{._args_}}" ; echo "${a:1:-1}"
@@ -92,7 +92,7 @@ tasks:
       export NTFY_TAGS=command
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       ntfy publish -F "$NUV_REMOTE_NTFY_TOPIC_IN" >_message 
-    - datefmt -t "$(cat _message | jq -r '.time')" -f TimeOnly
+    - TZ=GMT datefmt -t "$(cat _message | jq -r '.time')" -f TimeOnly
     env:
       COMMAND: 
         sh: a="{{._command_}}" ; echo "${a:1:-1}"

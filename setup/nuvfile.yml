@@ -26,7 +26,7 @@ tasks:
     silent: true
     preconditions:
       - sh: docker info 
-        msg: "You need to install docker before running this command."
+        msg: "You need docker installed and running for the devcluster deployment!"
     cmds:
     - |
       if {{.__status}}

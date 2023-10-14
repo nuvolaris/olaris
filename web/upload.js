@@ -32,6 +32,12 @@ function main() {
     const minioAuth = process.env[minioKey];
     const uploadAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/upload/${process.env.NUVUSER}`;
 
+    const pathFoundAsDir = nuv.isDir(path);
+    if (!pathFoundAsDir) {
+        console.log(`ERROR: ${path} is not a directory`);
+        return;
+    }
+
     nuv.scan(path, (folder) => {
         const entries = nuv.readDir(folder);
 
@@ -49,7 +55,7 @@ function main() {
             }
 
             let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${uploadAddr}/${fileAddr}`);
-            if (!quiet) {
+            if (!quiet || quiet === "false") {
                 console.log(res);
             }
         }

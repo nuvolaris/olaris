@@ -133,3 +133,8 @@ tasks:
     desc: deploys latest version of operator
     cmds:
       - nuv setup kubernetes operator-update
+
+  runtimes:
+    desc: deploys latest version of runtimes
+    cmds:
+      - nuv setup kubernetes runtimes

@@ -63,7 +63,7 @@
                 "image": {
                     "prefix": "ghcr.io/nuvolaris",
                     "name": "action-python-v311",
-                    "tag": "3.0.0-beta.231014155"
+                    "tag": "3.0.0-beta.2310141550"
                 },
                 "deprecated": false,
                 "attached": {
@@ -204,7 +204,7 @@
                     "name": "go-nuvolaris-metaflow",
                     "tag": "bc86ab6"
                 }
-            }             
+            }
         ],
         "dotnet": [
             {

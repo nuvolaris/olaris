@@ -20,6 +20,15 @@ const nuv = require('nuv');
 // *** Main ***
 main();
 
+function isRegExp(regExp){
+    try {
+          new RegExp(regExp);
+        } catch(e) {
+          return false
+        }
+   return true
+}
+
 function decode_and_norm(value) {
     decoded = nuv.nuvExec("nuv","-base64","-d",value)
     return decoded.replace(/(\r\n|\n|\r)/gm,"")
@@ -84,6 +93,22 @@ function main() {
         file = decode_and_norm(process.argv[4])
     }
 
+    if ('clean' == command) {
+        bucket = decode_and_norm(process.argv[3])
+        pattern = decode_and_norm(process.argv[4])
+        dry_run = decode_and_norm(process.argv[5])
+
+        console.log(`dryrun=${dry_run}`)
+
+        if (!isRegExp(pattern)) {
+            console.log(`pattern ${pattern} it is not a valid regular expression. Aborting execution`)
+            return
+        }
+
+        cmd['command']="clean"
+        cmd['args']=[bucket, pattern, dry_run]
+    }
+
     if ( command != "put"  && command != "get" ) {
         let res = nuv.nuvExec("curl", `${minioAddr}`,"-s","-H", `x-impersonate-auth: ${auth}`,"-H","Content-Type: application/json","-d", `${JSON.stringify(cmd)}`)
         console.log(res);         
@@ -106,6 +131,5 @@ function main() {
         let res = nuv.nuvExec("curl", `${downloadAddr}/${bucket}/${file}`,"-s","-H", `x-impersonate-auth: ${auth}`, "-o", `${nuvpwd}/${output_file}`)
         console.log(res);
     }
-
 
 }

@@ -22,7 +22,12 @@ main();
 
 function main() {
     let path = process.argv[2];
-    let quiet = process.argv[3];
+    let quietParam = process.argv[3];
+    let cleanParam = process.argv[4];
+
+    // extract quiet variable from process.argv[3] from the shape of quiet=<bool>
+    let quiet = extractBoolFromParam(quietParam); 
+    let clean = extractBoolFromParam(cleanParam);
   
     let minioKey = `MINIO_SECRET_KEY`;
     if (process.env.NUVUSER == 'nuvolaris') {
@@ -31,6 +36,12 @@ function main() {
 
     const minioAuth = process.env[minioKey];
     const uploadAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/upload/${process.env.NUVUSER}`;
+
+    const pathFoundAsDir = nuv.isDir(path);
+    if (!pathFoundAsDir) {
+        console.log(`ERROR: ${path} is not a directory`);
+        return;
+    }
 
     nuv.scan(path, (folder) => {
         const entries = nuv.readDir(folder);
@@ -48,10 +59,23 @@ function main() {
                 fileAddr = fileAddr.substring(1);
             }
 
+            if (clean) {
+                if (!quiet) {
+                }
+            } else {
             let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${uploadAddr}/${fileAddr}`);
             if (!quiet) {
                 console.log(res);
             }
         }
+        }
     })
 }
+function extractBoolFromParam(param) {
+    let quietBool = param.split("=")[1];
+    if (quietBool === "true") {
+        return true;
+    }
+    return false;
+}
+

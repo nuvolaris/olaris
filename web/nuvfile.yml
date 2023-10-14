@@ -21,7 +21,7 @@ tasks:
   upload:
     silent: true
     cmds:
-      - js upload.js $FOLDER_PATH {{.__quiet}}
+      - js upload.js $FOLDER_PATH quiet={{.__quiet}} clean={{.__clean}}
 
     env:
       FOLDER_PATH:

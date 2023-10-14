@@ -96,3 +96,23 @@ tasks:
       silent: true
       cmds:
         - js minio.js get $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{._file_}}")
+
+  clean:
+      desc: removes mathing file from the specified patterns
+      silent: true
+      vars:
+        PATTERN:
+          sh: |
+              if [ -z "{{._regexp_}}" ] 
+              then echo ".*"
+              else echo "{{._regexp_}}"
+              fi
+
+        DRY_RUN:
+          sh: |
+              if {{ .__dryrun }}
+              then echo "true"
+              else echo "false"
+              fi
+      cmds:
+        - js minio.js clean $(nuv -base64 -e "{{._bucket_}}") $(nuv -base64 -e "{{.PATTERN}}") $(nuv -base64 -e "{{.DRY_RUN}}")          

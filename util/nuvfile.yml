@@ -28,6 +28,7 @@ tasks:
       - config SECRET_MONGODB_ADMIN="$(random --str 12)" SECRET_MONGODB_NUVOLARIS="$(random --str 12)"
       - config SECRET_MINIO_ADMIN="$(random --str 40)" SECRET_MINIO_NUVOLARIS="$(random --str 40)"
       - config SECRET_POSTGRES_ADMIN="$(random --str 12)" SECRET_POSTGRES_REPLICA="$(random --str 12)" SECRET_POSTGRES_NUVOLARIS="$(random --str 12)"
+      - config SECRET_NUVOLARIS_METADATA="$(random --str 12)"
       - echo "Generated $(config -d | grep SECRET_ | wc -l) secrets."
 
   user-secrets:
@@ -54,6 +55,7 @@ tasks:
       - config -r SECRET_MONGODB_ADMIN SECRET_MONGODB_NUVOLARIS
       - config -r SECRET_MINIO_ADMIN SECRET_MINIO_NUVOLARIS
       - config -r SECRET_POSTGRES_ADMIN SECRET_POSTGRES_REPLICA SECRET_POSTGRES_NUVOLARIS
+      - config -r SECRET_NUVOLARIS_METADATA
       - config -d | grep SECRET_
 
   no-user-secrets:
@@ -87,8 +89,16 @@ tasks:
         then curl -s -d "Installed '{{._message_}}'" https://ntfy.sh/nuvolaris-nir >/dev/null
         fi
  
-  install-notify-receiver:
+  ntfy2slack:
     desc: install a service to receive slack notifications of installation
 
   1password:
     desc: 1password support utils
+
+  check-operator-version:
+    silent: true
+    cmds:
+      - |
+        output=$(nuv debug operator:version)
+        tag=$(echo $output | awk -F: '{print $2}')
+        needupdate {{._version_}} $tag

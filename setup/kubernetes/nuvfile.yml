@@ -233,7 +233,12 @@ tasks:
           fi
         msg: "cert-manager not found. Please install it before proceeding (only if not using kind)."
       # check cpu >= 8
-      - sh: kubectl get nodes -o json | jq -r '.items[].status.allocatable.cpu' | awk '{sum+=$1} END {print sum}' | awk '{if ($1 < 8) exit 1}'
+      - sh: >
+            test -n "$PREFL_NO_CPU_CHECK"
+            || kubectl get nodes -o json 
+            | jq -r '.items[].status.allocatable.cpu' 
+            | awk '{sum+=$1} END {print sum}' 
+            | awk '{if ($1 < 8 ) exit 1}'
         msg: "Not enough CPU resources. Please ensure that the cluster has at least 8 CPU cores before proceeding."
       # check memory >= 8 GB on at least one node
       - sh: |
@@ -246,7 +251,7 @@ tasks:
           if [ -z "$result" ]; then
             exit 0
           else 
-            exit 1
+            test -n "$PREFL_NO_MEM_CHECK" || exit 1
           fi
         msg: "Not all nodes have at least 6GB of memory. Please ensure that all nodes meet the memory requirement before proceeding."
     cmds:

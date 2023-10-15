@@ -242,19 +242,25 @@ tasks:
         msg: "Not enough CPU resources. Please ensure that the cluster has at least 8 CPU cores before proceeding."
       # check memory >= 8 GB on at least one node
       - sh: |
-          result=$(kubectl get nodes -o custom-columns=MEM:.status.allocatable.memory --no-headers | awk '{sub(/Ki$/, ""); if ($1 > 8000000) print "Above 8GB: " $1;}' | grep "Above 8GB")
-          if [ -z "$result" ]
+          if test -z "$PREFL_NO_MEM_CHECK"
           then 
-             test -n "$PREFL_NO_MEM_CHECK" || exit 1
+            result=$(kubectl get nodes -o custom-columns=MEM:.status.allocatable.memory --no-headers | awk '{sub(/Ki$/, ""); if ($1 > 8000000) print "Above 8GB: " $1;}' | grep "Above 8GB")
+            if [ -z "$result" ]
+            then 
+              exit 1
+            fi
           fi
         msg: "There is no node with at least 8GB of memory. Please ensure that at least one node meets the memory requirement before proceeding."
       # check memory >= 6 GB on all nodes
       - sh: |
-          result=$(kubectl get nodes -o custom-columns=MEM:.status.allocatable.memory --no-headers | awk '{sub(/Ki$/, ""); if ($1 < 6000000) print "Below 6GB: " $1;}')
-          if [ -z "$result" ]; then
-            exit 0
-          else 
-            test -n "$PREFL_NO_MEM_CHECK" || exit 1
+          if test -z "$PREFL_NO_MEM_CHECK"
+          then
+            result=$(kubectl get nodes -o custom-columns=MEM:.status.allocatable.memory --no-headers | awk '{sub(/Ki$/, ""); if ($1 < 6000000) print "Below 6GB: " $1;}')
+            if [ -z "$result" ]; then
+              exit 0
+            else 
+              exit 1
+            fi
           fi
         msg: "Not all nodes have at least 6GB of memory. Please ensure that all nodes meet the memory requirement before proceeding."
     cmds:

@@ -68,12 +68,15 @@ function main() {
 }
 
 function uploadContent(file, minioAuth, fileAddr, quiet) {
+    console.log(`Uploading ${fileAddr}...`);
     let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
     if (!quiet) {
         console.log(res);
     }
 }
+
 function deleteContent(minioAuth, fileAddr, quiet) {
+    console.log(`Deleting ${fileAddr}...`);
     let res = nuv.nuvExec("curl", "-X", "DELETE", "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
     if (!quiet) {
         console.log(res);

@@ -243,7 +243,10 @@ tasks:
       # check memory >= 8 GB on at least one node
       - sh: |
           result=$(kubectl get nodes -o custom-columns=MEM:.status.allocatable.memory --no-headers | awk '{sub(/Ki$/, ""); if ($1 > 8000000) print "Above 8GB: " $1;}' | grep "Above 8GB")
-          if [ -z "$result" ]; then exit 1; fi
+          if [ -z "$result" ]
+          then 
+             test -n "$PREFL_NO_MEM_CHECK" || exit 1
+          fi
         msg: "There is no node with at least 8GB of memory. Please ensure that at least one node meets the memory requirement before proceeding."
       # check memory >= 6 GB on all nodes
       - sh: |

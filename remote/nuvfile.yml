@@ -1,0 +1,41 @@
+version: '3'
+
+tasks:
+  
+  readme:
+    desc: README
+    cmds:
+    - cat README.md
+
+  client:
+    desc: client subcommand
+
+  server:
+    desc: server subcommand
+
+  logger:
+    desc: log subcommand
+
+  setvar:
+    silent: true
+    desc: set a configuration value, passed VAR=<name> VAL_B64=<base64-encoded-value> 
+    cmds:
+    - test -n "{{.VAR}}" || die "no VAR specified"
+    - test -n "{{.VAL_B64}}" || die "no VAL_B64 specified"
+    - |
+      if test -n "$VAL"
+      then echo "setting {{.VAR}}" 
+           config "{{.VAR}}=$VAL"
+      else echo "cannot set {{.VAR}}, did you provide a base64 encoded value?"
+      fi
+    env:
+      VAL:
+        sh: base64 -d "{{.VAL_B64}}"
+
+  getvar:
+    silent: true
+    desc: get a configuration value
+    cmds:
+    - test -n "{{.VAR}}" || die "no VAR specified"
+    - echo {{.VAR}}="${{.VAR}}"
+

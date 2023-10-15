@@ -1,0 +1,41 @@
+version: '3'
+
+tasks:
+
+  prereq:
+    silent: true
+    desc: prereq
+    cmds:
+    - which op || die "download from https://developer.1password.com/docs/cli/get-started/"
+    - test -n "$OP_VAULT" || die "please set the your vault with nuv -config OP_VAULT"
+
+  getenv:
+    desc: expand a .env.dist extracting '<VAR>=<secret>:' in the '<VAR> value from the <secret>'
+    silent: true
+    cmds:
+    - task: prereq
+    - test -e $NUV_PWD/.env.dist || die "cannot find a .env.dist to expand"
+    - |
+      echo "OVERWRITING .env, .env.src, .env.nuv after the pw, interrupt otherwise"
+      eval $(op signin)
+      rm $NUV_PWD/.env $NUV_PWD/.env.src $NUV_PWD/.env.nuv
+      cat $NUV_PWD/.env.dist | awk '{
+        if(match($1, /^.*=.*:/)) {
+            split($1, a, /=/)
+            split(a[2], b, /:/)
+            print a[1]" " b[1]
+        }
+      }' | while read VAR SEC 
+      do
+        OP="op://$OP_VAULT/$SEC/$VAR"
+        echo reading $OP
+        VAL="$(op read "$OP")"
+        echo "$VAR=$VAL" >>$NUV_PWD/.env
+        echo "export $VAR=\"$VAL\"" >>$NUV_PWD/.env.src
+        echo "nuv -config \"$VAR=$VAL\""  >>$NUV_PWD/.env.nuv
+      done
+    - echo "generated .env, .env.src, .env.nuv"
+    - echo "source .env.src to export as vars" 
+    - echo "source .env.nuv to import in nuv"  
+ 
+  

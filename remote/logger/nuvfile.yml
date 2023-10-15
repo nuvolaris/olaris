@@ -1,0 +1,77 @@
+version: '3'
+
+vars:
+  BASEDIR: /tmp/nuvops
+  HOSTNAME:
+    sh: hostname
+
+tasks:
+
+  prereq:
+    silent: true
+    cmds:
+    - test -n "$NUV_REMOTE_NTFY_TOPIC_IN" || die "configure NUV_REMOTE_NTFY_TOPIC_IN"
+    - test -n "$NUV_REMOTE_NTFY_TOPIC_OUT" || die "configure NUV_REMOTE_NTFY_TOPIC_OUT"
+    - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
+ 
+  run:
+    silent: true
+    desc: reply logger
+    cmds:
+    - task: prereq
+    - echo "*** logger ***"
+    - echo 0 >_curr
+    - |
+      export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+      ntfy sub "$NUV_REMOTE_NTFY_TOPIC_OUT" "nuv remote logger handle_message"
+
+  handle_message:
+    desc: react on messages using the firt tag
+    silent: true
+    cmds:
+    #- echo "$NTFY_RAW" | jq .
+    - task: on_{{.TAG}}
+    vars:
+      TAG:
+        sh: echo "$NTFY_TAGS"
+  
+  on_JOIN:
+    silent: true
+    cmds:
+    - echo "JOIN:" "$NTFY_TITLE"
+    - echo "0" >"$NUV_TMP/olaris-ops.curr"
+    - echo "1" >"$NUV_TMP/olaris-ops.last"
+
+  on_upload:
+    silent: true
+
+  on_command:
+    silent: true
+
+  on_UPLOAD:
+    silent: true
+    cmds:
+    -  nuv remote client refresh >/dev/null
+    -  echo "UPLOAD:" "$NTFY_TITLE $NTFY_MESSAGE"
+
+  on_LOG:
+    silent: true
+    #desc: log one entry
+    cmds:
+    - |
+      TIMEID=$(echo $NTFY_TITLE | awk '{print $1}')
+      if ! test "$(cat _curr)" = "$TIMEID"
+      then echo "======================================"
+           echo "$TIMEID" >_curr
+      fi
+    #- echo "$NTFY_RAW" | jq .
+    - |
+      URL="$(echo "$NTFY_RAW" | jq -r .attachment.url)"
+      #echo $URL
+      echo "$NTFY_TITLE"
+      if test "$URL" != "null"
+      then curl "$URL"
+           echo "=== EOF ==="
+      else echo "$NTFY_MESSAGE"
+      fi  
+

@@ -21,3 +21,5 @@ _*
 TODO.txt
 **/.env
 **/id_rsa*
+.task/
+attic.txt

@@ -1,6 +1,4 @@
-Section:
-  nuv util 
-
+Section: nuv util
 Usage:
   util secrets
   util nosecrets
@@ -9,15 +7,20 @@ Usage:
   util detect
   util poll
   util realpath <file>
+  util 1password
   util notify <message>
-  util testbed
+  util install-notify-receiver
   util check-operator-version <version>
-  
+
 Commands:
-  util secrets              generate system secrets 
-  util nosecrets            remove system secrets
-  util user-secrets         generate user secrets for the given user
-  util no-user-secrets      remove user secrets for the given user
-  util detect               detect the current kubernetes cluster
-  util poll                 run wsk poll
-  util realpath             return full path of specified file
+  secrets                 generate system secrets 
+  nosecrets               remove system secrets
+  user-secrets            generate user secrets for the given user
+  no-user-secrets         remove user secrets for the given user
+  detect                  detect the current kubernetes cluster
+  poll                    run wsk poll
+  realpath                return full path of specified file
+  notify                  notify installation
+  install-notify-receiver as described
+  1password               1password support
+  check-operator-version  as described

@@ -229,7 +229,9 @@ tasks:
       # check cert-manager only if not using kind
       - sh: |
           if [ "$STATUS_LAST" != "devcluster" ]; then
-            kubectl get ns cert-manager || exit 1
+              kubectl api-resources | grep route.openshift.io \
+              || kubectl get ns cert-manager \
+              || exit 1
           fi
         msg: "cert-manager not found. Please install it before proceeding (only if not using kind)."
       # check cpu >= 8

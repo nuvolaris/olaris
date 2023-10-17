@@ -55,8 +55,18 @@ tasks:
           echo "Installing..."
           if {{.CMD}} $TGT
           then  echo "{{.MSG}}"
-          else  echo "Someting went wrong, please download this file and install it manually:"
+          else
+              {{if eq OS "windows"}}
+                echo "I cannot update, most likeky because your execution policy is restricted."
+                echo "You can execute from powershell 'Set-ExecutionPolicy Unrestricted -Scope CurrentUser' and retry,"
+                echo "or execute the installer double clicking in the folder I opened,"
+                start "$NUV_TMP/download"
+                echo "or download and install from here:"
                 echo "$SRC"
+              {{else}}
+                echo "Someting went wrong, please download this file and install it manually:"
+                echo "$SRC"
+              {{end}}
           fi
         else
           echo "Cannot download the package, please download this file and install it manually:"

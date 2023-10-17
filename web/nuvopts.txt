@@ -3,11 +3,12 @@ Subcommand: nuv web
 Commands to upload and manage static content.
 
 Usage:
-  web upload [<folder>] [--quiet]
+  web upload <folder> [--quiet] [--clean]
 
 Commands:
-  upload   Uploads a folder to the web bucket in Nuvolaris.
+  upload <folder>  Uploads a folder to the web bucket in Nuvolaris.
 
 Options:
   --quiet   Do not print anything to stdout.
+  --clean   Remove all files from the web bucket instead.
   

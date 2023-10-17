@@ -17,20 +17,31 @@
 
 const nuv = require('nuv');
 
+const contentActionAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/content/${process.env.NUVUSER}`;
+
 // *** Main ***
 main();
 
 function main() {
     let path = process.argv[2];
-    let quiet = process.argv[3];
+    let quietParam = process.argv[3];
+    let cleanParam = process.argv[4];
 
-    let minioKey = `${process.env.NUVUSER.toUpperCase()}_SECRET_MINIO`;
+    let quiet = extractBoolFromParam(quietParam);
+    let clean = extractBoolFromParam(cleanParam);
+
+    let minioKey = `MINIO_SECRET_KEY`;
     if (process.env.NUVUSER == 'nuvolaris') {
         minioKey = "SECRET_MINIO_NUVOLARIS"
     }
 
     const minioAuth = process.env[minioKey];
-    const uploadAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/upload/${process.env.NUVUSER}`;
+
+    const pathFoundAsDir = nuv.isDir(path);
+    if (!pathFoundAsDir) {
+        console.log(`ERROR: ${path} is not a directory`);
+        return;
+    }
 
     nuv.scan(path, (folder) => {
         const entries = nuv.readDir(folder);
@@ -41,18 +52,42 @@ function main() {
             }
 
             const file = nuv.joinPath(folder, entry);
-
             // remove path from folder and prepend the result to entry
             let fileAddr = folder.replace(path, "") + "/" + entry;
             if (fileAddr.startsWith("/")) {
                 fileAddr = fileAddr.substring(1);
             }
 
-
-            let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${uploadAddr}/${fileAddr}`);
-            if (!quiet) {
-                console.log(res);
+            if (clean) {
+                deleteContent(minioAuth, fileAddr, quiet);
+            } else {
+                uploadContent(file, minioAuth, fileAddr, quiet);
             }
         }
     })
 }
+
+function uploadContent(file, minioAuth, fileAddr, quiet) {
+    console.log(`Uploading ${fileAddr}...`);
+    let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
+    if (!quiet) {
+        console.log(res);
+    }
+}
+
+function deleteContent(minioAuth, fileAddr, quiet) {
+    console.log(`Deleting ${fileAddr}...`);
+    let res = nuv.nuvExec("curl", "-X", "DELETE", "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
+    if (!quiet) {
+        console.log(res);
+    }
+}
+
+function extractBoolFromParam(param) {
+    let quietBool = param.split("=")[1];
+    if (quietBool === "true") {
+        return true;
+    }
+    return false;
+}
+

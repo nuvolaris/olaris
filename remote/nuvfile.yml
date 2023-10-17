@@ -15,23 +15,44 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: 3
+version: '3'
 
 tasks:
-  upload:
-    silent: true
+  
+  readme:
+    desc: README
     cmds:
-      - js upload.js $FOLDER_PATH quiet={{.__quiet}} clean={{.__clean}}
+    - cat README.md
 
+  client:
+    desc: client subcommand
+
+  server:
+    desc: server subcommand
+
+  logger:
+    desc: log subcommand
+
+  setvar:
+    silent: true
+    desc: set a configuration value, passed VAR=<name> VAL_B64=<base64-encoded-value> 
+    cmds:
+    - test -n "{{.VAR}}" || die "no VAR specified"
+    - test -n "{{.VAL_B64}}" || die "no VAL_B64 specified"
+    - |
+      if test -n "$VAL"
+      then echo "setting {{.VAR}}" 
+           config "{{.VAR}}=$VAL"
+      else echo "cannot set {{.VAR}}, did you provide a base64 encoded value?"
+      fi
     env:
-      FOLDER_PATH:
-        sh: |
-          P=$(realpath ./)
-          if [ ! -z {{._folder_}} ]; then
-            P=$(realpath {{._folder_}})
-          fi
-          echo $P
-      NUVUSER:
-        sh: wsk property get | awk '/whisk namespace/{print $3}'
-      APIHOST:
-        sh: wsk property get | awk '/whisk API host/{print $4}'
+      VAL:
+        sh: base64 -d "{{.VAL_B64}}"
+
+  getvar:
+    silent: true
+    desc: get a configuration value
+    cmds:
+    - test -n "{{.VAR}}" || die "no VAR specified"
+    - echo {{.VAR}}="${{.VAR}}"
+

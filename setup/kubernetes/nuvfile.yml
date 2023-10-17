@@ -30,6 +30,34 @@ env:
       else echo ~/.kube/config
       fi
 
+# sets memory parameter for the controller invoker and corresponding pods
+  OPENWHISK_CONTROLLER_JAVA_OPTS: 
+    sh: |
+      if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ]
+      then echo -Xmx2G
+      else echo -Xmx"$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB"G
+      fi
+
+  OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY: 
+    sh: |
+      if [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
+      then echo 2048m
+      else pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((pool*1024))m
+      fi
+
+  OPENWHISK_CONTROLLER_RES_MIN_MEM: 
+    sh: | 
+      if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ] && [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
+      then echo 4G
+      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem+pool))G
+      fi  
+  OPENWHISK_CONTROLLER_RES_MAX_MEM: 
+    sh: | 
+      if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ] && [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
+      then echo 5G
+      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem+pool+1))G
+      fi       
+
 tasks:
   status:
     desc: show nuvolaris cluster status
@@ -194,6 +222,49 @@ tasks:
   create:
     silent: true
     desc: create cluster
+    preconditions:
+      # check storage class
+      - sh: kubectl get sc
+        msg: "No storage class found. Please install one before proceeding."
+      # check cert-manager only if not using kind
+      - sh: |
+          if [ "$STATUS_LAST" != "devcluster" ]; then
+              kubectl api-resources | grep route.openshift.io \
+              || kubectl get ns cert-manager \
+              || exit 1
+          fi
+        msg: "cert-manager not found. Please install it before proceeding (only if not using kind)."
+      # check cpu >= 8
+      - sh: >
+            test -n "$PREFL_NO_CPU_CHECK"
+            || kubectl get nodes -o json 
+            | jq -r '.items[].status.allocatable.cpu' 
+            | awk '{sum+=$1} END {print sum}' 
+            | awk '{if ($1 < 8 ) exit 1}'
+        msg: "Not enough CPU resources. Please ensure that the cluster has at least 8 CPU cores before proceeding."
+      # check memory >= 8 GB on at least one node
+      - sh: |
+          if test -z "$PREFL_NO_MEM_CHECK"
+          then 
+            result=$(kubectl get nodes -o custom-columns=MEM:.status.allocatable.memory --no-headers | awk '{sub(/Ki$/, ""); if ($1 > 8000000) print "Above 8GB: " $1;}' | grep "Above 8GB")
+            if [ -z "$result" ]
+            then 
+              exit 1
+            fi
+          fi
+        msg: "There is no node with at least 8GB of memory. Please ensure that at least one node meets the memory requirement before proceeding."
+      # check memory >= 6 GB on all nodes
+      - sh: |
+          if test -z "$PREFL_NO_MEM_CHECK"
+          then
+            result=$(kubectl get nodes -o custom-columns=MEM:.status.allocatable.memory --no-headers | awk '{sub(/Ki$/, ""); if ($1 < 6000000) print "Below 6GB: " $1;}')
+            if [ -z "$result" ]; then
+              exit 0
+            else 
+              exit 1
+            fi
+          fi
+        msg: "Not all nodes have at least 6GB of memory. Please ensure that all nodes meet the memory requirement before proceeding."
     cmds:
       - task: permission
       - task: deploy

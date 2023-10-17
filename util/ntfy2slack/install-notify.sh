@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -15,23 +16,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: 3
-
-tasks:
-  upload:
-    silent: true
-    cmds:
-      - js upload.js $FOLDER_PATH quiet={{.__quiet}} clean={{.__clean}}
-
-    env:
-      FOLDER_PATH:
-        sh: |
-          P=$(realpath ./)
-          if [ ! -z {{._folder_}} ]; then
-            P=$(realpath {{._folder_}})
-          fi
-          echo $P
-      NUVUSER:
-        sh: wsk property get | awk '/whisk namespace/{print $3}'
-      APIHOST:
-        sh: wsk property get | awk '/whisk API host/{print $4}'
+echo '{ "text": "'"$$m"'"}' |\
+curl -X POST \
+     -H 'Content-type: application/json' \
+     -d @- "$NUV_NOTIFY_SLACK_URL"

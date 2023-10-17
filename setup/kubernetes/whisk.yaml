@@ -22,10 +22,9 @@ metadata:
   namespace: nuvolaris
 spec:
   nuvolaris:
+      password: $SECRET_NUVOLARIS_METADATA
       kube: ${NUVOLARIS_KUBE:-auto}
       apihost: ${NUVOLARIS_APIHOST}
-      #apiport: 80
-      #protocol: http
       storageclass: ${NUVOLARIS_STORAGECLASS:-auto}
       provisioner: ${NUVOLARIS_PROVISIONER:-auto}
       ingressclass: ${NUVOLARIS_INGRESSCLASS:-auto}
@@ -94,12 +93,17 @@ spec:
         limit-std: "${OPENWHISK_TIME_LIMIT_STD:-1min}"
         limit-max: "${OPENWHISK_TIME_LIMIT_STD:-5min}"
     controller:
-      javaOpts: "${OPENWHISK_CONTROLLER_JAVA_OPTS:- -Xmx2048M}"
+      javaOpts: "$OPENWHISK_CONTROLLER_JAVA_OPTS"
       loggingLevel: "INFO"
+      resources:
+        cpu-req: "500m"
+        cpu-lim: "1"
+        mem-req: "$OPENWHISK_CONTROLLER_RES_MIN_MEM"
+        mem-lim: "$OPENWHISK_CONTROLLER_RES_MAX_MEM"      
     invoker:
       loggingLevel: "INFO"
       containerPool:
-        userMemory: "${OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY:-2048m}"
+        userMemory: "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY"
   redis:
     persistence-enabled: ${REDIS_PERSISTENCE_ENABLED:-true}
     max-memory: ${REDIS_MAX_MEMORY:-1000mb}

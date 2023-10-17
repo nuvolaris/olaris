@@ -8,6 +8,10 @@ Usage:
   devel deploy [<repo_or_path>]
   devel apihost
   devel user
+  devel minio
+  devel psql
+  devel redis
+  devel ferretdb
 
 Commands:
   detect    Detect if in a directory there is a web and/or packages folders.
@@ -15,6 +19,10 @@ Commands:
   deploy    Deploy a project from a directory or from a git repository.
   apihost   Print the API host URL of the latest deployment.
   user      Print the current user name of the latest deployment.
+  minio     Devel support to interact with Minio
+  ferretdb  Devel support to interact with FerretDB
+  psql      Devel support to interact with Postgres
+  redis     Devel support to interace with Redis 
 
 Options:
 

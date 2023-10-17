@@ -31,4 +31,5 @@ header:
     - 'ingress-deploy.yaml'
     - 'runtimes.json'
     - '**/*.json'
+    - '**/*.service'
     - 'update/update.ps1' 

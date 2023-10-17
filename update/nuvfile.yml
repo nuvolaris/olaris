@@ -55,8 +55,16 @@ tasks:
           echo "Installing..."
           if {{.CMD}} $TGT
           then  echo "{{.MSG}}"
-          else  echo "Someting went wrong, please download this file and install it manually:"
+          else
+              {{if eq OS "windows"}}
+                echo "I cannot update, most likeky because your execution policy is restricted."
+                echo "You can execute from powershell 'Set-ExecutionPolicy Unrestricted -Scope CurrentUser' and retry,"                
+                echo "or download and install from here:"
                 echo "$SRC"
+              {{else}}
+                echo "Someting went wrong, please download this file and install it manually:"
+                echo "$SRC"
+              {{end}}
           fi
         else
           echo "Cannot download the package, please download this file and install it manually:"
@@ -119,6 +127,7 @@ tasks:
       - config SECRET_POSTGRES_ADMIN="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.password}')"
       - config SECRET_POSTGRES_REPLICA="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.postgres.admin.replica-password}')"
       - config SECRET_POSTGRES_NUVOLARIS="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.postgres.nuvolaris.password}')"
+      - config SECRET_NUVOLARIS_METADATA="$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.nuvolaris.password}')"
 
   apply:
     desc: apply updated config
@@ -132,3 +141,8 @@ tasks:
     desc: deploys latest version of operator
     cmds:
       - nuv setup kubernetes operator-update
+
+  runtimes:
+    desc: deploys latest version of runtimes
+    cmds:
+      - nuv setup kubernetes runtimes

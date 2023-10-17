@@ -22,9 +22,11 @@ vars:
   ARCH: '{{ARCH}}'
 
 tasks:
-  
   devcluster:
     silent: true
+    preconditions:
+      - sh: docker info 
+        msg: "You need docker installed and running for the devcluster deployment!"
     cmds:
     - |
       if {{.__status}}
@@ -33,9 +35,9 @@ tasks:
       then nuv setup docker delete
       else
           nuv setup docker create
+          config STATUS_LAST=devcluster
           nuv setup kubernetes create
           nuv setup nuvolaris login
-          config STATUS_LAST=devcluster
           nuv util notify "{{.TASK}}"
       fi
 

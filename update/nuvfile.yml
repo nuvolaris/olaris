@@ -60,7 +60,7 @@ tasks:
                 echo "I cannot update, most likeky because your execution policy is restricted."
                 echo "You can execute from powershell 'Set-ExecutionPolicy Unrestricted -Scope CurrentUser' and retry,"
                 echo "or execute the installer double clicking in the folder I opened,"
-                $COMSPEC //c start "$NUV_TMP/download"
+                $COMSPEC //c start "$HOMEDRIVE$HOMEPATH\\.nuv\\tmp\\download"
                 echo "or download and install from here:"
                 echo "$SRC"
               {{else}}

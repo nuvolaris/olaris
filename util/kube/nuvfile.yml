@@ -1,0 +1,58 @@
+version: '3'
+
+vars:
+  RETRY: 100
+  SLEEP: 20
+  TIMEOUT: 60
+
+env:
+  KUBECONFIG:
+    sh: |-
+      if test -e $NUV_TMP/kubeconfig
+      then echo $NUV_TMP/kubeconfig
+      else echo ~/.kube/config
+      fi
+
+tasks:
+
+  waitfor:
+    desc: wait for an object matching a condition 
+    silent: true
+    cmds:
+      - test -n "{{.OBJ}}" || die "use OBJ=<pod/pod-name>"
+      - test -n "{{.FOR}}" || die "use FOR=<kubernetes-for-condition>"
+      - |
+        N=0
+        RES=false
+        while [[ $N -lt {{.RETRY}} ]]
+        do           
+          if kubectl -n nuvolaris wait --for="{{.FOR}}" "{{.OBJ}}" --timeout="{{.TIMEOUT}}s"
+          then RES=true; break            
+          else echo "$((N++)) Waiting {{.OBJ}} for {{.FOR}}"
+               sleep "{{.SLEEP}}s"
+          fi
+        done
+        $RES 
+
+  wait:
+    desc: wait for a value matching the given jsonpath on the specific resources under the namespace nuvolaris
+    silent: true
+    cmds:
+      - test -n "{{.OBJECT}}" || die "use OBJECT=<pod/pod-name>"
+      - test -n "{{.JSONPATH}}" || die "use JSONPATH=<cm/config-jsonpath-lookup>"
+      - |
+        N=0
+        RES=false
+        while [[ $N -lt {{.RETRY}} ]]
+        do           
+          MATCHING_VALUE="$(kubectl -n nuvolaris get {{.OBJECT}} -o jsonpath='{{.JSONPATH}}')"
+          if [[ -z "$MATCHING_VALUE" ]]
+          then 
+            echo "$((N++)) Waiting for {{.JSONPATH}} to be non empty value"
+            sleep 5
+          else  
+            RES=true; break
+          fi
+        done
+        $RES 
+

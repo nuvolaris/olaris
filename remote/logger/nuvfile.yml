@@ -27,6 +27,7 @@ tasks:
   prereq:
     silent: true
     cmds:
+    - test -n "$NUV_REMOTE_CLOUD" || die "select current cloud with 'select' subcommand"
     - test -n "$NUV_REMOTE_NTFY_TOPIC_IN" || die "configure NUV_REMOTE_NTFY_TOPIC_IN"
     - test -n "$NUV_REMOTE_NTFY_TOPIC_OUT" || die "configure NUV_REMOTE_NTFY_TOPIC_OUT"
     - test -n "$NUV_REMOTE_NTFY_TOKEN" || die "configure NUV_REMOTE_NTFY_TOKEN"
@@ -58,6 +59,7 @@ tasks:
     - echo "JOIN:" "$NTFY_TITLE"
     - echo "0" >"$NUV_TMP/olaris-ops.curr"
     - echo "1" >"$NUV_TMP/olaris-ops.last"
+    - task: configure
 
   on_upload:
     silent: true
@@ -70,6 +72,7 @@ tasks:
     cmds:
     -  nuv remote client refresh >/dev/null
     -  echo "UPLOAD:" "$NTFY_TITLE $NTFY_MESSAGE"
+    - task: configure
 
   on_LOG:
     silent: true
@@ -92,3 +95,8 @@ tasks:
       else echo "$NTFY_MESSAGE"
       fi  
 
+  configure:
+    silent: true
+    cmds:
+    - echo configuring $NTFY_TITLE 
+    - echo cloud $NUV_REMOTE_CLOUD

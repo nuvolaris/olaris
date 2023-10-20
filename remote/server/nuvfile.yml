@@ -71,7 +71,7 @@ tasks:
       export NTFY_TAGS="JOIN"
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-      export NTFY_TITLE="[{{.HOSTNAME}}]"
+      export NTFY_TITLE="{{.HOSTNAME}}"
       export NTFY_PRIORITY=3
       export NTFY_MESSAGE="joining at $(datefmt -f TimeOnly)"
       ntfy publish -F | jq -r .message
@@ -113,7 +113,7 @@ tasks:
       export NTFY_TAGS="UPLOAD"
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_OUT"
-      export NTFY_TITLE="[{{.HOSTNAME}}]"
+      export NTFY_TITLE="{{.HOSTNAME}}"
       export NTFY_PRIORITY=3
       export NTFY_MESSAGE="$(cat _out)"
       ntfy publish -F | jq -r .id

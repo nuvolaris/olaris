@@ -140,4 +140,4 @@ tasks:
       cmd: |
           #echo "#{{.FILE}}"
           echo "{{.VALVAR}}" | awk '{print "SETVAR: {{.HOST}} " $1}'
-          nuv remote setvar {{.HOST}} {{.VALVAR}}
+          nuv remote shell {{.HOST}} nuv remote setvar {{.VALVAR}}

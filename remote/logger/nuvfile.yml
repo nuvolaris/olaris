@@ -59,7 +59,7 @@ tasks:
     - echo "JOIN:" "$NTFY_TITLE"
     - echo "0" >"$NUV_TMP/olaris-ops.curr"
     - echo "1" >"$NUV_TMP/olaris-ops.last"
-    - task: configure
+    - nuv remote logger configure HOST="$NTFY_TITLE"
 
   on_upload:
     silent: true
@@ -70,9 +70,9 @@ tasks:
   on_UPLOAD:
     silent: true
     cmds:
-    -  nuv remote client refresh >/dev/null
-    -  echo "UPLOAD:" "$NTFY_TITLE $NTFY_MESSAGE"
-    - task: configure
+    - nuv remote client refresh >/dev/null
+    - echo "UPLOAD:" "$NTFY_TITLE $NTFY_MESSAGE"
+    - nuv remote logger configure HOST="$NTFY_TITLE"
 
   on_LOG:
     silent: true
@@ -97,6 +97,47 @@ tasks:
 
   configure:
     silent: true
+    requires:
+      vars:
+      - HOST
+    vars:
+      CLOUD:
+        sh: echo $NUV_REMOTE_CLOUD
+      ENVS: 
+        sh: ls $NUV_PWD/env/$NUV_REMOTE_CLOUD/*.json
     cmds:
-    - echo configuring $NTFY_TITLE 
-    - echo cloud $NUV_REMOTE_CLOUD
+    - for: { var: ENVS, as: ENV }
+      cmd: |
+        FILE="{{.ENV}}"
+        ENV="${FILE%%.*}"
+        if test "$ENV" = "all"
+        then ENV=""
+        fi
+        HOSTSEL=$(echo $ENV | awk -F- '{
+          if($1 == "") $1="*";
+          if($2 == "") $2="*";
+          if($3 == "") $3="*";
+          if($4 == "") $4="{{.CLOUD}}";
+          print $1 "-" $2 "-" $3 "-" $4
+        }')
+        #echo $HOSTSEL
+        FULLFILE="$NUV_PWD/env/$NUV_REMOTE_CLOUD/$FILE"
+        if [[ {{.HOST}} == $HOSTSEL ]]
+        then nuv remote logger setvars FILE="$FULLFILE" HOST="{{.HOST}}"
+        fi
+
+  setvars:
+    silent: true
+    requires:
+      vars:
+      - FILE
+      - HOST
+    vars:
+      VALVARS:
+        sh: jq -r 'to_entries[] | "VAR=\(.key) VAL_B64=\(.value | @base64)"' {{.FILE}}
+    cmds:
+    - for: { var: VALVARS, as: VALVAR, split: '\n' }
+      cmd: |
+          #echo "#{{.FILE}}"
+          echo "{{.VALVAR}}" | awk '{print "SETVAR: {{.HOST}} " $1}'
+          nuv remote setvar {{.HOST}} {{.VALVAR}}

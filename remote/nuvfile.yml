@@ -35,24 +35,24 @@ tasks:
 
   setvar:
     silent: true
-    desc: set a configuration value, passed VAR=<name> VAL_B64=<base64-encoded-value> 
+    desc: set a configuration value, passed VAR=<name> VAL_B64=<base64-encoded-value> or VAL=<value>
     cmds:
     - test -n "{{.VAR}}" || die "no VAR specified"
-    - test -n "{{.VAL_B64}}" || die "no VAL_B64 specified"
     - |
-      if test -n "$VAL"
-      then echo "setting {{.VAR}}" 
-           config "{{.VAR}}=$VAL"
-      else echo "cannot set {{.VAR}}, did you provide a base64 encoded value?"
+      if test -n "{{.VAL_B64}}"
+      then config "{{.VAR}}=$(base64 -d '{{.VAL_B64}}')"
+           echo "setting {{.VAR}}"
+      elif test -n "{{.VAL}}"
+      then config '{{.VAR}}'='{{.VAL}}'
+           echo "setting {{.VAR}}"
+      else echo "no VAL nor VAL_B64 specified"
+           false
       fi
-    env:
-      VAL:
-        sh: base64 -d "{{.VAL_B64}}"
 
   getvar:
     silent: true
     desc: get a configuration value
     cmds:
     - test -n "{{.VAR}}" || die "no VAR specified"
-    - echo {{.VAR}}="${{.VAR}}"
+    - config {{.VAR}}
 

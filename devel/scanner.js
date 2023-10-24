@@ -64,23 +64,17 @@ function main() {
     let path = process.argv[2];
 
     let manifest = scanPackages(path);
-
     manifest = scanEnv(manifest);
 
     let manifestYaml = nuv.toYaml(manifest);
-
     const manifestPath = nuv.joinPath(process.env.NUV_TMP, "manifest.yaml");
-
     nuv.writeFile(manifestPath, manifestYaml);
     console.log("Manifest file generated.");
 }
 
 function scanEnv(manifest) {
     console.log('Adding secrets...');
-
     let config = nuv.nuvExec('nuv', '-config', '-d');
-
-
     const lines = config.split('\n');
     lines.forEach(function (line) {
         const parts = line.split('=');
@@ -89,7 +83,6 @@ function scanEnv(manifest) {
             if (!key.startsWith('SECRET_')) {
                 return;
             }
-
             for (const packageName in manifest.packages) {
                 if (!manifest.packages[packageName].inputs) {
                     manifest.packages[packageName].inputs = {};

@@ -32,7 +32,7 @@ tasks:
 
   detect:
     silent: true
-    desc: detect project in directory
+    desc: detect project in folders
     env:
       PACKAGES_PATH:
         sh: |
@@ -52,23 +52,23 @@ tasks:
     cmds:
       - |
         if [ -d "$PACKAGES_PATH" ] && [ -d "$WEB_PATH" ]; then
-          echo "Packages and web directory present."  
+          echo "Packages and web present."  
           exit 0
         fi
 
         if [ ! -d "$PACKAGES_PATH" ]; then
-          echo "No project detected (missing packages directory)."
+          echo "No project detected (missing packages folder)."
           exit 1
         fi
         if [ ! -d "$WEB_PATH" ]; then
-          echo "Project detected: packages directory found."
+          echo "Project detected: packages folder found."
           exit 0
         fi
-        die "No project detected (missing packages and web directory)."
+        die "No project detected (missing packages and web folder)."
 
   scan:
     silent: true
-    desc: scan directory and generate nuvolaris manifest files
+    desc: scan projects and generate nuvolaris manifest files
     cmds:
       - task: detect
       - |
@@ -93,6 +93,8 @@ tasks:
             P=$(realpath {{._path_}})
           fi
           echo $P
+      NUV_APIHOST:
+        sh: nuv devel apihost
 
   deploy:
     silent: true

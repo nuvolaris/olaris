@@ -56,3 +56,9 @@ tasks:
     - test -n "{{.VAR}}" || die "no VAR specified"
     - config {{.VAR}}
 
+  delvar:
+    silent: true
+    desc: get a configuration value
+    cmds:
+    - test -n "{{.VAR}}" || die "no VAR specified"
+    - config -r {{.VAR}}

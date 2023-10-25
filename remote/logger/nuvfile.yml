@@ -59,7 +59,9 @@ tasks:
     - echo "JOIN:" "$NTFY_TITLE"
     - echo "0" >"$NUV_TMP/olaris-ops.curr"
     - echo "1" >"$NUV_TMP/olaris-ops.last"
-    - nuv remote logger configure HOST="$NTFY_TITLE"
+    - task: sendvars 
+      vars:
+        HOST: "$NTFY_TITLE"
 
   on_upload:
     silent: true
@@ -72,7 +74,9 @@ tasks:
     cmds:
     - nuv remote client refresh >/dev/null
     - echo "UPLOAD:" "$NTFY_TITLE $NTFY_MESSAGE"
-    - nuv remote logger configure HOST="$NTFY_TITLE"
+    - task: sendvars 
+      vars:
+        HOST: "$NTFY_TITLE"
 
   on_LOG:
     silent: true
@@ -94,6 +98,24 @@ tasks:
            echo "=== EOF ==="
       else echo "$NTFY_MESSAGE"
       fi  
+
+# -----------
+  
+  sendvars:
+    silent: true
+    cmds:
+      - echo "TODO:" "sendvars:" "{{.HOST}}"
+
+  sendmessage:
+    silent: true
+    cmds:
+    - |
+      export NTFY_MESSAGE="echo hello from {{.HOST}}"
+      export NTFY_TITLE="{{.HOST}}"
+      export NTFY_TAGS=command
+      export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+      export NTFY_TOPIC="$NUV_REMOTE_NTFY_TOPIC_IN"
+      ntfy publish -F 
 
   configure:
     silent: true
@@ -125,8 +147,8 @@ tasks:
         if [[ {{.HOST}} == $HOSTSEL ]]
         then nuv remote logger setvars FILE="$FULLFILE" HOST="{{.HOST}}"
         fi
-
-  setvars:
+  
+  setvars_old:
     silent: true
     requires:
       vars:
@@ -134,10 +156,34 @@ tasks:
       - HOST
     vars:
       VALVARS:
-        sh: jq -r 'to_entries[] | "VAR=\(.key) VAL_B64=\(.value | @base64)"' {{.FILE}}
+        sh:
     cmds:
-    - for: { var: VALVARS, as: VALVAR, split: '\n' }
-      cmd: |
-          #echo "#{{.FILE}}"
-          echo "{{.VALVAR}}" | awk '{print "SETVAR: {{.HOST}} " $1}'
-          echo nuv remote client shell {{.HOST}} nuv remote setvar {{.VALVAR}}
+    - >
+      jq -r 'to_entries[] | "VAR=\(.key) VAL_B64=\(.value | @base64)"' 
+      {{.FILE}} >_vars
+    - |
+      cat _vars | while read line
+      do  echo "set ${line%% *}"
+          echo nuv remote client shell {{.HOST}} nuv remote setvar $line
+      done
+ 
+  setvars:
+    silent: true
+    requires:
+      vars:
+      - FILE
+      - HOST
+    cmds:
+    - echo nuv remote client shell '{{.HOST}}' echo hi
+    
+  boh:  
+    - |
+      export NTFY_MESSAGE="echo hello from {{.HOST}}"
+      export NTFY_TITLE="{{.HOST}}"
+      export NTFY_TAGS=command
+      export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
+      ntfy publish -F "$NUV_REMOTE_NTFY_TOPIC_IN"
+
+
+
+

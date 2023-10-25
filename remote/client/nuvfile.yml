@@ -110,6 +110,7 @@ tasks:
       export NTFY_TOKEN="$NUV_REMOTE_NTFY_TOKEN"
       ntfy publish -F "$NUV_REMOTE_NTFY_TOPIC_IN" >_message 
     - TZ=GMT datefmt -t "$(cat _message | jq -r '.time')" -f TimeOnly
+    - cat _message
     env:
       COMMAND: 
         sh: a="{{._command_}}" ; echo "${a:1:-1}"

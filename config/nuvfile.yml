@@ -34,11 +34,11 @@ tasks:
         fi
       - |
         if test -n "{{.__protocol}}" 
-        then config NUVOLARIS_APIHOST_PROTOCOL="{{.__protocol}}"
-        else config NUVOLARIS_APIHOST_PROTOCOL="auto"
+        then config NUVOLARIS_HOST_PROTOCOL="{{.__protocol}}"
+        else config NUVOLARIS_HOST_PROTOCOL="auto"
         fi        
       - config -dump | grep NUVOLARIS_TLS
-      - config -dump | grep NUVOLARIS_APIHOST_PROTOCOL
+      - config -dump | grep NUVOLARIS_HOST_PROTOCOL
 
   enable:
     silent: true

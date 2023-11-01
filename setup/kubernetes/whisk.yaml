@@ -29,6 +29,7 @@ spec:
       provisioner: ${NUVOLARIS_PROVISIONER:-auto}
       ingressclass: ${NUVOLARIS_INGRESSCLASS:-auto}
       ingresslb: ${NUVOLARIS_INGRESSLB:-auto}
+      protocol: ${NUVOLARIS_APIHOST_PROTOCOL:-auto}
   controller:
     image: "$IMAGES_CONTROLLER" 
   components:

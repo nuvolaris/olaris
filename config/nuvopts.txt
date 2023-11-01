@@ -2,7 +2,7 @@ Section:
   nuv config
 
 Usage:
-  config apihost (<apihost>|auto) [--tls=<email>]
+  config apihost (<apihost>|auto) [--tls=<email>] [--protocol=<http/https>|auto]
   config runtimes [<runtimesjson>]
   config (enable|disable) [--all] [--redis] [--mongodb] [--minio] [--cron] [--static] [--postgres]
   config standalone [--javaopts=<javaopts>] [--poolmemory=<poolmemory>] [--activation_max_payload=<activation_max_payload>]

@@ -13,7 +13,7 @@
       "postgres": false
     },
     "images": {
-      "operator": "ghcr.io/nuvolaris/nuvolaris-operator:3.0.0-beta.2310141719",
+      "operator": "ghcr.io/nuvolaris/nuvolaris-operator:3.0.0-beta.2311011128",
       "controller": "ghcr.io/nuvolaris/openwhisk-controller:0.3.0-morpheus.22122609"
     },
     "server": {

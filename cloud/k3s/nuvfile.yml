@@ -40,7 +40,7 @@ tasks:
     cmds:
       - test -n "{{.SERVER}}" || die "required SERVER=<ip or host>"
       - >
-        k3sup install
+        k3sup install --k3s-version=1.26.10+k3s1
         --host="{{.SERVER}}" --user="{{.USERNAME}}"
         --local-path=$NUV_TMP/kubeconfig
     vars:

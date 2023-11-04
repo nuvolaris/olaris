@@ -32,7 +32,13 @@ tasks:
         then config NUVOLARIS_TLSEMAIL="{{.__tls}}" NUVOLARIS_TLS=true
         else config NUVOLARIS_TLSEMAIL="none" NUVOLARIS_TLS=false
         fi
+      - |
+        if test -n "{{.__protocol}}" 
+        then config NUVOLARIS_HOST_PROTOCOL="{{.__protocol}}"
+        else config NUVOLARIS_HOST_PROTOCOL="auto"
+        fi        
       - config -dump | grep NUVOLARIS_TLS
+      - config -dump | grep NUVOLARIS_HOST_PROTOCOL
 
   enable:
     silent: true

@@ -61,6 +61,7 @@ spec:
                       enum:
                       - http
                       - https
+                      - auto
                     kube:
                       description: label representing the kubernetes runtime used to implement specific logic (kind, eks, aks, lks, microk8s, k3s, openshift). Defaulted to auto which is causing the operator to autodetect the k8s runtime.
                       type: string

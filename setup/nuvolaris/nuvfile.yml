@@ -81,11 +81,14 @@ tasks:
     #desc: configuring nuvolaris
     silent: true
     cmds:
-    - | 
-      APIHOST=$(kubectl -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}')
-      AUTH=$(kubectl -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}')
-      {{.RUN}} retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "$APIHOST" --auth "$AUTH" namespace list
-      {{.RUN}} wsk property set --apihost "$APIHOST"  --auth "$AUTH"
+    - |
+      echo export KUBECONFIG=$KUBECONFIG
+      APIHOST=$(kubectl --kubeconfig="$KUBECONFIG" -n nuvolaris get cm/config -o jsonpath='{.metadata.annotations.apihost}')
+      AUTH=$(kubectl --kubeconfig="$KUBECONFIG" -n nuvolaris get wsk/controller -ojsonpath='{.spec.openwhisk.namespaces.nuvolaris}')
+      echo export $APIHOST
+      echo export $AUTH
+      retry -t 100 -m 600 nuv -wsk {{.ETC}} --apihost "$APIHOST" --auth "$AUTH" namespace list
+      wsk property set --apihost "$APIHOST"  --auth "$AUTH"
       
   login:
     silent: true

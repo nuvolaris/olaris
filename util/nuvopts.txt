@@ -1,4 +1,5 @@
 Section: nuv util
+
 Usage:
   util secrets
   util nosecrets
@@ -11,6 +12,8 @@ Usage:
   util notify <message>
   util install-notify-receiver
   util check-operator-version <version>
+  util kubectl <args>...
+  util boh <args>...
 
 Commands:
   secrets                 generate system secrets 
@@ -24,3 +27,4 @@ Commands:
   install-notify-receiver as described
   1password               1password support
   check-operator-version  as described
+  kubectl                 execute kubectl on current kubeconfig

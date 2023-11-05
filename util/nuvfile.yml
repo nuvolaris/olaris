@@ -103,14 +103,6 @@ tasks:
         tag=$(echo $output | awk -F: '{print $2}')
         needupdate {{._version_}} $tag
 
-
-  boh: 
-   - | 
-     echo '{{._args_}}'
-     a={{._args_}}
-     echo a[2]=${a[2]}
-     echo "${a[@]}"
-
   kubectl:
     silent: true
     cmds:
@@ -130,3 +122,23 @@ tasks:
           then echo $NUV_TMP/kubeconfig
           else echo ~/.kube/config
           fi
+
+  kubeconfig:
+    silent: true
+    prompt: are you sure? I am overwriting your ~/.kube/config
+    desc: exporting kubeconfig to ~/.kube/config - WARNING IT OWERWRITES IT
+    cmds:
+      - |
+        if test -e "$NUV_TMP/kubeconfig"
+        then  
+          if test -e ~/.kube/config
+          then BKP=~/.kube/config.$(datefmt -f ms)
+               mv ~/.kube/config $(realpath $BKP)
+               BKP="renamed old to $BKP"
+          fi
+          cp "$NUV_TMP/kubeconfig" ~/.kube/config
+          echo exported current kubeconfig to ~/.kube/config
+          echo $BKP
+          kubectl cluster-info
+        else echo "No kubeconfig to export"
+        fi

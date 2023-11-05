@@ -41,24 +41,6 @@ tasks:
       - kubectl -n nuvolaris get po controller-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
       - kubectl -n nuvolaris get po couchdb-0 -o jsonpath='{.spec.containers[0].image}{"\n"}'
 
-  kubeconfig:
-    silent: true
-    desc: exporting kubeconfig to ~/.kube/config - WARNING IT OWERWRITES IT
-    cmds:
-      - |
-        if test -e "$NUV_TMP/kubeconfig"
-        then  
-          if test -e ~/.kube/config
-          then BKP=~/.kube/config.$(datefmt -f ms)
-               mv ~/.kube/config $(realpath $BKP)
-               BKP="renamed old to $BKP"
-          fi
-          cp "$NUV_TMP/kubeconfig" ~/.kube/config
-          echo exported current kubeconfig to ~/.kube/config
-          echo $BKP
-          kubectl cluster-info
-        else echo "No kubeconfig to export"
-        fi
 
   lb:
     desc: show ingress load balancer

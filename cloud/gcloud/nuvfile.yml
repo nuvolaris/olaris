@@ -61,7 +61,7 @@ tasks:
         create "{{._name_}}" --zone="$GCLOUD_REGION"
         --machine-type="$GCLOUD_VM"
         --boot-disk-size="$GCLOUD_DISK"GB
-        --image-family=ubuntu-minimal-2204-lts
+        --image-family="$GCLOUD_IMAGE"
         --image-project=ubuntu-os-cloud
         --tags=nuvolaris-vm
         --labels=nuv=true

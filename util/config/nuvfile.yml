@@ -1,0 +1,9 @@
+version: '3'
+
+tasks:
+
+  reload:
+    desc: reload config from kubernetes
+    cmds:
+    - config NUVOLARIS_APIHOST="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.nuvolaris.apihost}')"
+    -

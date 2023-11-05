@@ -101,7 +101,7 @@ tasks:
   status:
     silent: true
     cmds:
-      - cmd: config -dump | grep NUVOLARIS_
+      - cmd: config -dump | grep NUVOLARIS_ | grep -v SECRET_
         ignore_error: true
       - cmd: config -dump | grep AKS_
         ignore_error: true
@@ -488,6 +488,7 @@ tasks:
               Specifies nuvolaris controller activation options (Defaults to 1Mb)
         VAL: "{{.__activation_max_payload}}"
         DEF: "1048576"                           
+
 
   use:
     silent: true

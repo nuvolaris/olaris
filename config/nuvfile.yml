@@ -339,10 +339,10 @@ tasks:
           DEF: "~/.ssh/id_rsa.pub"
       - task: read
         vars:
-          MSG: "GCloud VM inage"
+          MSG: "GCloud VM image"
           VAR: "GCLOUD_IMAGE"
           VAL: "{{.__image}}"
-          DEF: "ubuntu-minimal-2204-lts"          
+          DEF: "ubuntu-minimal-2204-lts"        
       - config -d | grep GCLOUD_
 
   gke:

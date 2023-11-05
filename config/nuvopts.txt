@@ -49,3 +49,4 @@ Options:
   --key=<key>           specify ssh key name
   --kubever=<kubever>   specify kubernetes version
   --delete              delete the selected kubeconfig
+  --image               specify gcp image type (default to ubuntu-minimal-2204-lts. Passing ubuntu-minimal-2204-lts-arm64 will create ARM based VM)

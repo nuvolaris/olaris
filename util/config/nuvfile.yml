@@ -1,9 +1,15 @@
 version: '3'
 
 tasks:
-
   reload:
     desc: reload config from kubernetes
     cmds:
-    - config NUVOLARIS_APIHOST="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.nuvolaris.apihost}')"
-    -
+      - config NUVOLARIS_APIHOST="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.nuvolaris.apihost}')"
+      - config NUVOLARIS_POSTGRES="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.components.postgres}')"
+      - config NUVOLARIS_MINIO="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.components.minio}')"
+      - config NUVOLARIS_MONGODB="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.components.mongodb}')"
+      - config NUVOLARIS_REDIS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.components.redis}')"
+      - config NUVOLARIS_STATIC="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.components.static}')"
+      - config NUVOLARIS_TLS="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.components.tls}')"
+      - config NUVOLARIS_TLSEMAIL="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.tls.acme-registered-email}')"
+      - config NUVOLARIS_CRON="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.components.cron}')"

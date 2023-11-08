@@ -1,7 +1,7 @@
 Subcommand: nuv admin
 
 Usage:
-  admin adduser <username> <email> <password> [--all] [--redis] [--mongodb] [--minio] [--postgres]
+  admin adduser <username> <email> <password> [--all] [--redis] [--mongodb] [--minio] [--postgres] [--storagequota=<quota>|auto]
   admin deleteuser <username>
 
 Commands:
@@ -9,8 +9,9 @@ Commands:
   admin deleteuser    delete a user from the Nuvolaris installation via the username provided
 
 Options:
-  --all         enable all services
-  --redis       enable redis
-  --mongodb     enable mongodb
-  --minio       enable minio
-  --postgres    enable postgres  
+  --all                   enable all services
+  --redis                 enable redis
+  --mongodb               enable mongodb
+  --minio                 enable minio
+  --postgres              enable postgres
+  --storagequota=<quota>

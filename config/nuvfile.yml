@@ -67,7 +67,7 @@ tasks:
         fi
         if {{.__postgres}} || {{.__all}}
         then config NUVOLARIS_POSTGRES=true
-        fi
+        fi      
       - task: status
 
   disable:

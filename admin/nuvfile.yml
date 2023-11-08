@@ -88,6 +88,7 @@ tasks:
         export MINIO_DATA_ENABLED=false
         export MINIO_STATIC_ENABLED=false
         export POSTGRES_ENABLED=false
+        export MINIO_STORAGE_QUOTA=auto
 
         if {{.__redis}} || {{.__all}}
         then 
@@ -120,6 +121,10 @@ tasks:
           fi
         fi
 
+        if test -n "{{.__storagequota}}"
+        then MINIO_STORAGE_QUOTA={{.__storagequota}}
+        fi         
+
         if {{.__postgres}} || {{.__all}}
         then 
           if $NUVOLARIS_POSTGRES
@@ -128,7 +133,7 @@ tasks:
           else
             nuv -die "Error! Postgres is not enabled in Nuvolaris"
           fi
-        fi      
+        fi
 
         envsubst -i user-crd.yaml -o _user-crd.yaml
       - |

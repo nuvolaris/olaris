@@ -40,6 +40,7 @@ spec:
     password: ${USER_SECRET_POSTGRES}
   object-storage:        
     password: ${USER_SECRET_MINIO}
+    quota: "${MINIO_STORAGE_QUOTA:-auto}"
     data:
       enabled: ${MINIO_DATA_ENABLED}
       bucket: ${USERNAME}-data

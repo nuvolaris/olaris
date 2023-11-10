@@ -1,0 +1,19 @@
+name: Code Verification on Ubuntu
+
+on: [push]
+
+jobs:
+  verify_code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run Verification Script
+        run: |
+          curl -o nuv.deb https://github.com/nuvolaris/nuv/releases/download/3.0.1-beta.2310201736/nuv_3.0.1-beta.2310201736_amd64.deb
+          dpkg -i nuv.deb
+          curl -o cmdlint -s https://raw.githubusercontent.com/javanile/cmdlint/main/bin/cmdlint
+          chmod +x cmdlint
+          ./cmdlint nuv        
+          

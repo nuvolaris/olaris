@@ -91,3 +91,9 @@ nodes:
   - containerPort: 32091
     hostPort: 9090
     protocol: TCP            
+  - containerPort: 9080
+    hostPort: 9080
+    protocol: TCP            
+  - containerPort: 9010
+    hostPort: 9010
+    protocol: TCP            

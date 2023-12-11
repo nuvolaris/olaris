@@ -241,7 +241,7 @@ tasks:
             | jq -r '.items[].status.allocatable.cpu' 
             | awk '{sum+=$1} END {print sum}' 
             | awk '{if ($1 < 8 ) exit 1}'
-        msg: "Not enough CPU resources. Please ensure that the cluster has at least 8 CPU cores before proceeding."
+        msg: "Not enough CPU resources. Please ensure that the cluster has at least 8 CPU cores before proceeding. You can disable this check with 'export PREFL_NO_CPU_CHECK=1'"
       # check memory >= 8 GB on at least one node
       - sh: |
           if test -z "$PREFL_NO_MEM_CHECK"
@@ -252,7 +252,7 @@ tasks:
               exit 1
             fi
           fi
-        msg: "There is no node with at least 8GB of memory. Please ensure that at least one node meets the memory requirement before proceeding."
+        msg: "There is no node with at least 8GB of memory. Please ensure that at least one node meets the memory requirement before proceeding. You can disable this check with 'export PREFL_NO_MEM_CHECK=1'."
       # check memory >= 6 GB on all nodes
       - sh: |
           if test -z "$PREFL_NO_MEM_CHECK"
@@ -264,7 +264,7 @@ tasks:
               exit 1
             fi
           fi
-        msg: "Not all nodes have at least 6GB of memory. Please ensure that all nodes meet the memory requirement before proceeding."
+        msg: "Not all nodes have at least 6GB of memory. Please ensure that all nodes meet the memory requirement before proceeding. You can disable this check with 'export PREFL_NO_MEM_CHECK=1'"
     cmds:
       - task: permission
       - task: deploy

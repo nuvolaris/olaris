@@ -31,9 +31,6 @@ function main() {
     let clean = extractBoolFromParam(cleanParam);
 
     let minioKey = `MINIO_SECRET_KEY`;
-    if (process.env.NUVUSER == 'nuvolaris') {
-        minioKey = "SECRET_MINIO_NUVOLARIS"
-    }
 
     const minioAuth = process.env[minioKey];
 

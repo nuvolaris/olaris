@@ -83,7 +83,6 @@ tasks:
 
   vm-delete:
     cmds:
-    - task: vm-add-sshkey
     - > 
       gcloud compute instances 
       delete "{{._name_}}" 

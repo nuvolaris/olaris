@@ -1,9 +1,17 @@
 version: '3'
 
 tasks:
-
   reload:
     desc: reload config from kubernetes
     cmds:
-    - config NUVOLARIS_APIHOST="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.nuvolaris.apihost}')"
-    -
+      - config NUVOLARIS_APIHOST="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.nuvolaris.apihost}')"
+      - config NUVOLARIS_TLSEMAIL="$(kubectl -n nuvolaris get wsk/controller -o jsonpath='{.spec.tls.acme-registered-email}')"
+      - |
+        for variable in postgres minio mongodb redis static tls cron; do
+          original_value="NUVOLARIS_$variable"
+          if [ "$(kubectl -n nuvolaris get wsk/controller -o jsonpath="{.spec.components.${variable}}")" = "true" ]; then
+            config $original_value="1"
+           else
+            config -r $original_value>/dev/null || true
+          fi
+        done

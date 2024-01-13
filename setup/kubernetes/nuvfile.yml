@@ -157,6 +157,7 @@ tasks:
     cmds:
       #- "cat common/*.yaml roles/*.yaml crds/*.yaml"
       - "kubectl apply  -f common -f roles -f crds"
+      - "kubectl apply  -f operator-pvc.yaml"
 
   operator:
     #desc: deploy operator

@@ -30,6 +30,10 @@ env:
       else echo ~/.kube/config
       fi
 
+  OPERATOR_VOLUME_STORAGE_CLASS:
+    sh: |
+      echo $(kubectl get storageclass -ojsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class=='true')].metadata.name}")      
+
 # sets memory parameter for the controller invoker and corresponding pods
   OPENWHISK_CONTROLLER_JAVA_OPTS: 
     sh: |
@@ -157,15 +161,15 @@ tasks:
     cmds:
       #- "cat common/*.yaml roles/*.yaml crds/*.yaml"
       - "kubectl apply  -f common -f roles -f crds"
-      - "kubectl apply  -f operator-pvc.yaml"
 
   operator:
     #desc: deploy operator
     silent: true
     cmds:
+      - envsubst -i operator-pvc.yaml -o _operator-pvc.yaml
       - envsubst -i operator.yaml -o _operator.yaml
       #- "cat _operator.yaml"
-      - "kubectl apply -f _operator.yaml"
+      - "kubectl apply -f _operator-pvc.yaml -f _operator.yaml"
       - task: wait
         vars:
           OBJECT: pod/nuvolaris-operator-0

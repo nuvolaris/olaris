@@ -19,14 +19,14 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nuvolaris-operator-pv-claim
+  name: nuvolaris-operator-deploy-pvc
   namespace: nuvolaris
   labels:
     app: nuvolaris-operator-storage-claim
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: standard
+  storageClassName: ${OPERATOR_VOLUME_STORAGE_CLASS:-standard}
   resources:
     requests:
       storage: 512M

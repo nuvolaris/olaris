@@ -38,7 +38,7 @@ spec:
       volumes:
       - name: deploy
         persistentVolumeClaim:
-          claimName: nuvolaris-operator-pv-claim      
+          claimName: nuvolaris-operator-deploy-pvc      
       containers:
         - name: nuvolaris-operator
           image: ${IMAGES_OPERATOR}

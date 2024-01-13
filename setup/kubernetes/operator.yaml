@@ -35,6 +35,9 @@ spec:
     spec:
       serviceAccountName: nuvolaris-operator
       restartPolicy: Always
+      securityContext:
+          runAsUser: 1001
+          fsGroup: 1001      
       volumes:
       - name: deploy
         persistentVolumeClaim:

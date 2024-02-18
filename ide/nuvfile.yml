@@ -1,5 +1,7 @@
 version: '3'
 
+vars:
+  F: ""
 
 tasks:
 
@@ -58,19 +60,6 @@ tasks:
     - config -d | grep NUVDEV_
     - echo SOMEThING=$SOMETHING
 
-  build:
-    desc: build an action
-    requires: { vars: [DIR]}
-    cmds:
-    - |
-      cd $NUV_PWD
-      if test -e "{{.DIR}}/requirements.txt"
-      then nuv ide py build DIR=$(realpath "{{.DIR}}")
-      elif test -e "{{.DIR}}/packages.json"
-      then nuv ide js build DIR=$(realpath "{{.DIR}}")
-      elif test -e "{{.DIR}}/go.mod"
-      then nuv ide go build DIR=$(realpath "{{.DIR}}")
-      fi
 
   deploy:
     desc: deploy a project or a single action (with A=<dir-or-file>)
@@ -78,8 +67,8 @@ tasks:
       - |
         set -a ; source $NUV_PWD/.env
         if test -z "{{.A}}"
-        then python -m deploy "$NUV_PWD" -d
-        else python -m deploy "$NUV_PWD" -s "{{.A}}"
+        then python -m deploy "$NUV_PWD" -d "{{.F}}"
+        else python -m deploy "$NUV_PWD" -s "{{.A}}" "{{.F}}"
         fi
 
   devel:
@@ -88,3 +77,47 @@ tasks:
       - |
         set -a ; source $NUV_PWD/.env
         python -m deploy "$NUV_PWD" -d
+
+
+  environment:
+    desc: build an action environment
+    requires: { vars: [DIR]}
+    cmds:
+    - |
+      cd $NUV_PWD
+      if test -e "{{.DIR}}/requirements.txt"
+      then nuv ide python environment DIR=$(realpath "{{.DIR}}")
+      elif test -e "{{.DIR}}/packages.json"
+      then nuv ide nodejs build DIR=$(realpath "{{.DIR}}")
+      else echo "*** unknown enviroment"
+      fi
+
+  compile:
+    desc: compile an action and put in its environment
+    requires: { vars: [DIR]}
+    cmds:
+    - |
+      cd $NUV_PWD
+      if test -e "{{.DIR}}/__main__.py"
+      then nuv ide python compile DIR=$(realpath "{{.DIR}}")
+      elif test -e "{{.DIR}}/index.js"
+      then nuv ide nodejs compile DIR=$(realpath "{{.DIR}}")
+      else echo "*** main"
+      fi
+
+
+  undeploy:
+    desc: undeploy
+    cmds:
+    - >
+      nuv action list
+      | awk  'NR>1 { print $1}' 
+      | while read action ;
+      do nuv action delete "$action" ;
+      done
+    - >
+      nuv package list
+      | awk  'NR>1 { print $1}'
+      | while read package ;
+      do nuv package delete "$package" ;
+      done

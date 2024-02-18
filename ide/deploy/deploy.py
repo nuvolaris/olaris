@@ -1,8 +1,10 @@
+MAINS = ["__main__.py", "index.js"]
+
 import os
 from  os.path import exists, isdir
 from subprocess import Popen
 
-dry_run = True
+dry_run = False
 
 def set_dry_run(b):
     global dry_run
@@ -17,7 +19,8 @@ def exec(cmd):
 def extract_args(files):
     res = []
     for file in files:
-        print(f": inspecting {file}")
+        #if dry_run:
+        #    print(f": inspecting {file}")
         if exists(file):
             with open(file, "r") as f:
                 for line in f.readlines():
@@ -26,13 +29,6 @@ def extract_args(files):
                     if line.startswith("//-"):
                         res.append(line.strip()[2:])
     return res
-
-# root _dir and _file (split)
-# def deploy_web(_dir, _file):
-#    dir = "/".join(_dir)
-#    file = "/".join(_file)
-#    print(f"cd {dir}")
-#    print(f"TODO: upload {file} {_dir[-2]}/{file}")
 
 package_done = set()
 
@@ -47,13 +43,13 @@ def deploy_package(package):
         package_done.add(cmd)
 
 def build_zip(sp):
-    exec(f"task build:zip A={sp[1]}/{sp[2]}")
+    exec(f"nuv ide enviromment A={sp[1]}/{sp[2]}")
     res = sp[:-1]
     res[-1] += ".zip"
     return res
 
 def build_action(sp):
-    exec(f"task build:action A={sp[1]}/{sp[2]}")
+    exec(f"nuv ide compile A={sp[1]}/{sp[2]}")
     res = sp[:-1]
     res[-1] += ".zip"
     return res
@@ -68,13 +64,12 @@ def deploy_action(sp):
 
     if typ == "zip":
         base = artifact[:-4]
-        to_inspect = [f"{base}/__main__.py", f"{base}/index.js"]
+        to_inspect = [f"{base}/{x}" for x in MAINS]
     else:
         to_inspect = [artifact]
     
     args = " ".join(extract_args(to_inspect))
     exec(f"nuv action update {package}/{name} {artifact} {args}")
-
 
 """
 file = "packages/deploy/hello.py"
@@ -85,12 +80,13 @@ file = "packages/deploy/multi/requirements.txt"
 def deploy(file):
     print(f"*** {file}")
     if isdir(file):
-        for start in ['__main__.py', 'index.js']:
+        for start in MAINS:
             sub = f"{file}/{start}"
             if exists(sub):
                 file = sub
                 break
     sp = file.split("/")
     if len(sp) > 3:
+        build_zip(sp)
         sp = build_action(sp)
     deploy_action(sp)

@@ -1,4 +1,5 @@
 ALLOWED = set(["py", "js", "txt", "json" ])
+
 import os, time
 from subprocess import Popen
 from watchdog.observers import Observer
@@ -42,4 +43,4 @@ def watch():
 
 # serve web area
 def serve():
-    Popen("task serve", shell=True, env=os.environ)
+    Popen("nuv ide serve", shell=True, env=os.environ)

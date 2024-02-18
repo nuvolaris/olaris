@@ -1,7 +1,7 @@
 from glob import glob
 from .deploy import *
 
-def scan(config):
+def scan():
     # first look for requirements.txt and build the venv (add in set)
     deployments = set()
     packages = set()

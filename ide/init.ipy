@@ -1,0 +1,11 @@
+# invoked by ipython from the root folder
+from pathlib import Path
+
+try:
+    lines = Path(".env").read_text().splitlines()
+    args = { line.split("=",1)[0]: line.split("=",1)[-1]  for line in lines}
+except:
+    args = {}
+
+%load_ext autoreload
+%autoreload 2

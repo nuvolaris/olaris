@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+
+  clean:
+    desc: clean
+    requires: {var: [DIR]}
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - /usr/bin/rm -Rvf {{.DIR}}/virtualenv {{.DIR}}.zip
+
+  environment:
+    desc: environment
+    requires: {var: [DIR]}
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - |
+      if test -f "{{.DIR}}/requirements.txt"
+      then bash build-venv.sh "{{.DIR}}" "{{.DIR}}.zip"
+      fi
+    sources:
+    - "{{.DIR}}/requirements.txt"
+    generates:
+    - "{{.DIR}}/virtualenv/bin/activate"
+
+  compile:
+    desc: compile
+    requires: {var: [DIR]}
+    dir: "{{.DIR}}"
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - |
+      /usr/bin/zip -r {{.DIR}}.zip * -x "virtualenv/*" -x requirements.txt 

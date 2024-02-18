@@ -23,11 +23,11 @@ tasks:
     silent: true
     desc: prereq
     cmds:
-    - which op || die "download from https://developer.1password.com/docs/cli/get-started/"
+    - which op | grep op || die "op missing - download from https://developer.1password.com/docs/cli/get-started/"
     - test -n "$OP_VAULT" || die "please set the your vault with nuv -config OP_VAULT"
 
   getenv:
-    desc: expand a .env.dist extracting '<VAR>=<secret>:' in the '<VAR> value from the <secret>'
+    desc: "expand a .env.dist - example: 'GITHUB_TOKEN=github: github token',  looks (in the vault configured) for the field 'GITHUB_TOKEN' in the secret 'github' and replace with itsvalue."
     silent: true
     cmds:
     - task: prereq

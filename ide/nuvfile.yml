@@ -1,0 +1,90 @@
+version: '3'
+
+
+tasks:
+
+  setup:
+    desc: login
+    cmds:
+    - |
+      clear
+      while ! test -e ~/.wskprops
+      do nuv ide login
+      done
+      echo "**************************************************************************************"
+      echo "*** Type 'deploy' to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
+      echo "*** Type 'devel'  to start incremental development mode"
+      echo "*** Type 'login'  to login again"
+      echo "**************************************************************************************"
+
+  login:
+    silent: true
+    desc: setup
+    cmds:
+    - | 
+      echo "*** Configuring Access to nuvolaris.dev with Azure OpenAI ***"
+      echo -n "Enter Username: "
+      read NUVDEV_USERNAME
+      if nuv -login https://nuvolaris.dev "$NUVDEV_USERNAME"
+      then
+          config NUVDEV_USERNAME=$NUVDEV_USERNAME
+          config NUVDEV_HOST="https://$NUVDEV_USERNAME.nuvolaris.dev"
+          source ~/.wskprops
+          config OPENAI_API_HOST=https://openai.nuvolaris.io
+          config OPENAI_API_KEY="$(echo "$AUTH" | awk -F: '{print $1 }')"
+      fi
+
+  serve:
+    silent: true
+    desc: local web server
+    ignore_error: true
+    cmds:
+    - bash http-serve.sh "$NUV_PWD/web"
+
+  cli:
+    silent: true
+    desc: python cli
+    cmds:
+    - |
+      find "$NUV_PWD" -name requirements.txt -execdir pip install -r {} \;
+      set -a ; source "$NUV_PWD/.env"
+      ipython -i init.ipy
+
+  info:
+    silent: true
+    desc: info
+    cmds:
+    - config -d | grep OPENAI_
+    - config -d | grep NUVDEV_
+    - echo SOMEThING=$SOMETHING
+
+  build:
+    desc: build an action
+    requires: { vars: [DIR]}
+    cmds:
+    - |
+      cd $NUV_PWD
+      if test -e "{{.DIR}}/requirements.txt"
+      then nuv ide py build DIR=$(realpath "{{.DIR}}")
+      elif test -e "{{.DIR}}/packages.json"
+      then nuv ide js build DIR=$(realpath "{{.DIR}}")
+      elif test -e "{{.DIR}}/go.mod"
+      then nuv ide go build DIR=$(realpath "{{.DIR}}")
+      fi
+
+  deploy:
+    desc: deploy a project or a single action (with A=<dir-or-file>)
+    cmds:
+      - |
+        set -a ; source $NUV_PWD/.env
+        if test -z "{{.A}}"
+        then python -m deploy "$NUV_PWD" -d
+        else python -m deploy "$NUV_PWD" -s "{{.A}}"
+        fi
+
+  devel:
+    desc: start interactive development mode files
+    cmds:
+      - |
+        set -a ; source $NUV_PWD/.env
+        python -m deploy "$NUV_PWD" -d

@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+
+  clean:
+    desc: clean
+    requires: {var: [DIR]}
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - /usr/bin/rm -Rvf {{.DIR}}/node_modules {{.DIR}}.zip
+
+  environment:
+    desc: environment
+    requires: {var: [DIR]}
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - |
+      if test -f "{{.DIR}}/package.json"
+      then bash build-node.sh "{{.DIR}}" "{{.DIR}}.zip"
+      fi
+    sources:
+    - "{{.DIR}}/package.json"
+    generates:
+    - "{{.DIR}}/node_modules/.package-lock.json"
+
+  compile:
+    desc: compile
+    requires: {var: [DIR]}
+    dir: "{{.DIR}}"
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - |
+      /usr/bin/zip -r {{.DIR}}.zip * -x "node_modules/*" 

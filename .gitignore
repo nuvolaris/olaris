@@ -16,6 +16,7 @@
 # under the License.
 
 _*
+!ide/deploy/__main__.py
 .vscode/
 .git-hooks/
 TODO.txt

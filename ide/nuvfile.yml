@@ -1,12 +1,13 @@
 version: '3'
 
 vars:
-  F: ""
+  FL: ""
 
 tasks:
 
   setup:
-    desc: login
+    silent: true
+    desc: setup nuvolaris.dev ide
     cmds:
     - |
       clear
@@ -21,9 +22,9 @@ tasks:
 
   login:
     silent: true
-    desc: setup
+    desc: login in nuvolaris.dev with Azure OpenAI access
     cmds:
-    - | 
+    - |
       echo "*** Configuring Access to nuvolaris.dev with Azure OpenAI ***"
       echo -n "Enter Username: "
       read NUVDEV_USERNAME
@@ -52,62 +53,77 @@ tasks:
       set -a ; source "$NUV_PWD/.env"
       ipython -i init.ipy
 
-  info:
+  _info:
     silent: true
-    desc: info
+    #desc: info
     cmds:
     - config -d | grep OPENAI_
     - config -d | grep NUVDEV_
-    - echo SOMEThING=$SOMETHING
-
 
   deploy:
+    silent: true
     desc: deploy a project or a single action (with A=<dir-or-file>)
     cmds:
       - |
         set -a ; source $NUV_PWD/.env
         if test -z "{{.A}}"
-        then python -m deploy "$NUV_PWD" -d "{{.F}}"
-        else python -m deploy "$NUV_PWD" -s "{{.A}}" "{{.F}}"
+        then python -m deploy "$NUV_PWD" -d {{.FL}}
+        else python -m deploy "$NUV_PWD" -s "{{.A}}" {{.FL}}
         fi
 
   devel:
+    silent: true
     desc: start interactive development mode files
     cmds:
       - |
         set -a ; source $NUV_PWD/.env
-        python -m deploy "$NUV_PWD" -d
+        python -m deploy "$NUV_PWD" -w {{.FL}}
 
-
-  environment:
-    desc: build an action environment
-    requires: { vars: [DIR]}
+  _zip:
+    #desc: build an action enviroment zip file (A=action)
+    silent: true
+    requires: { vars: [A]}
     cmds:
     - |
       cd $NUV_PWD
-      if test -e "{{.DIR}}/requirements.txt"
-      then nuv ide python environment DIR=$(realpath "{{.DIR}}")
-      elif test -e "{{.DIR}}/packages.json"
-      then nuv ide nodejs build DIR=$(realpath "{{.DIR}}")
-      else echo "*** unknown enviroment"
+      if test -e "packages/{{.A}}/requirements.txt"
+      then nuv ide python zip DIR="$(realpath "packages/{{.A}}")"
+      elif test -e "packages/{{.A}}/package.json"
+      then nuv ide nodejs zip DIR="$(realpath "packages/{{.A}}")"
+      else echo "no zip environemnt"
       fi
 
-  compile:
-    desc: compile an action and put in its environment
-    requires: { vars: [DIR]}
+  _action:
+    #desc: build an action filling its zip file 
+    silent: true
+    requires: { vars: [A]}
     cmds:
     - |
       cd $NUV_PWD
-      if test -e "{{.DIR}}/__main__.py"
-      then nuv ide python compile DIR=$(realpath "{{.DIR}}")
-      elif test -e "{{.DIR}}/index.js"
-      then nuv ide nodejs compile DIR=$(realpath "{{.DIR}}")
-      else echo "*** main"
+      if test -e "packages/{{.A}}/__main__.py"
+      then nuv ide python action DIR="$(realpath "packages/{{.A}}")"
+      elif test -e "packages/{{.A}}/index.js"
+      then nuv ide nodejs action DIR="$(realpath "packages/{{.A}}")"
+      else die "*** unknow action type"
       fi
 
+  _clean:
+    #desc: clean an action build
+    silent: true
+    requires: { vars: [A]}
+    cmds:
+    - |
+      cd $NUV_PWD
+      if test -d "packages/{{.A}}/virtualenv"
+      then nuv ide python clean DIR="$(realpath "packages/{{.A}}")"
+      elif test -d "{{.A}}/node_modules"
+      then nuv ide nodejs clean DIR="$(realpath "packages/{{.A}}")"
+      else echo "nothing to clean"
+      fi
 
   undeploy:
-    desc: undeploy
+    desc: undeploy all the actions
+    silent: true
     cmds:
     - >
       nuv action list
@@ -121,3 +137,5 @@ tasks:
       | while read package ;
       do nuv package delete "$package" ;
       done
+
+ 

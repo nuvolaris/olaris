@@ -43,19 +43,18 @@ def deploy_package(package):
         package_done.add(cmd)
 
 def build_zip(sp):
-    exec(f"nuv ide enviromment A={sp[1]}/{sp[2]}")
+    exec(f"nuv ide _zip A={sp[1]}/{sp[2]}")
     res = sp[:-1]
     res[-1] += ".zip"
     return res
 
 def build_action(sp):
-    exec(f"nuv ide compile A={sp[1]}/{sp[2]}")
+    exec(f"nuv ide _action A={sp[1]}/{sp[2]}")
     res = sp[:-1]
     res[-1] += ".zip"
     return res
 
 def deploy_action(sp):
-    
     artifact = "/".join(sp)
     [name, typ] = sp[-1].rsplit(".", 1)
     package = sp[1]

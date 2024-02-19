@@ -3,13 +3,15 @@ version: '3'
 tasks:
 
   clean:
+    silent: true
     desc: clean
     requires: {var: [DIR]}
     cmds:
     - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
     - /usr/bin/rm -Rvf {{.DIR}}/virtualenv {{.DIR}}.zip
 
-  environment:
+  zip:
+    silent: true
     desc: environment
     requires: {var: [DIR]}
     cmds:
@@ -23,7 +25,8 @@ tasks:
     generates:
     - "{{.DIR}}/virtualenv/bin/activate"
 
-  compile:
+  action:
+    silent: true
     desc: compile
     requires: {var: [DIR]}
     dir: "{{.DIR}}"

@@ -1,4 +1,4 @@
-ALLOWED = set(["py", "js", "txt", "json" ])
+SKIPDIR = ["virtualenv", "node_modules", "__pycache__"]
 
 import os, time
 from subprocess import Popen
@@ -13,18 +13,24 @@ class ChangeHandler(FileSystemEventHandler):
     last_modified = {}
 
     def on_any_event(self, event):
+        
+        ## filter what is needed
+        # only modified
         if event.event_type != "modified": return
+        # no directories
         if event.is_directory: return
         src = event.src_path
+        # no missing files
+        if not os.path.exists(src): return
+        # no generated directories
+        for dir in src.split("/")[:-1]:
+            if dir in SKIPDIR: return
+        # no generated files
+        if src.endswith(".zip"): return
 
-        rs = src.rsplit(".", -1)
-        if len(rs) < 2: return
-        if not rs[-1] in ALLOWED: return
-
-        cur = time.time()
-        last = self.last_modified.get(src, 0)
-        #print(event, cur, last)
-        if cur - last  < 1:
+        # cache last modified to do only once
+        cur = os.path.getmtime(src)
+        if self.last_modified.get(src, 0) == cur:
             return
         self.last_modified[src] = cur
         deploy(src)

@@ -3,14 +3,16 @@ version: '3'
 tasks:
 
   clean:
+    silent: true
     desc: clean
     requires: {var: [DIR]}
     cmds:
     - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
     - /usr/bin/rm -Rvf {{.DIR}}/node_modules {{.DIR}}.zip
 
-  environment:
-    desc: environment
+  zip:
+    silent: true
+    desc: build a zip environment
     requires: {var: [DIR]}
     cmds:
     - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
@@ -23,8 +25,9 @@ tasks:
     generates:
     - "{{.DIR}}/node_modules/.package-lock.json"
 
-  compile:
-    desc: compile
+  action:
+    silent: true
+    desc: build the action updating the zip
     requires: {var: [DIR]}
     dir: "{{.DIR}}"
     cmds:

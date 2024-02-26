@@ -6,6 +6,7 @@ vars:
 tasks:
 
   setup:
+    ignore_errors: true
     silent: true
     desc: setup nuvolaris.dev ide
     cmds:

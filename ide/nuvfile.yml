@@ -18,7 +18,7 @@ tasks:
       ignore_error: true
     - |
       echo "**************************************************************************************"
-      echo "*** Open the terminal (Menu >> Terminal >> New Terminal) and type:
+      echo "*** Open the terminal (Menu >> Terminal >> New Terminal) and type:"
       echo "*** 'deploy' to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
       echo "*** 'devel'  to start incremental development mode"
       echo "*** 'login'  to login again with a different user"

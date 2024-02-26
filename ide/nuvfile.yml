@@ -6,7 +6,6 @@ vars:
 tasks:
 
   setup:
-    ignore_errors: true
     silent: true
     desc: setup nuvolaris.dev ide
     cmds:
@@ -16,6 +15,7 @@ tasks:
       do nuv ide login
       done
     - task: ask-devel
+      ignore_error: true
     - |
       echo "**************************************************************************************"
       echo "*** Type 'deploy' to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
@@ -24,9 +24,14 @@ tasks:
       echo "**************************************************************************************"
 
   ask-devel:
-    prompt: Do you want to start in development mode?
+    silent: true
     cmds:
-      - nuv ide devel
+      - |  
+        echo -n "Do you want to start in development mode [y=yes, enter=no]: "
+        read ANSWER
+        if [ "$ANSWER" == "y" ]
+        then nuv ide devel
+        fi
 
   login:
     silent: true

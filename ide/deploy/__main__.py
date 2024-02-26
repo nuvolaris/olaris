@@ -1,4 +1,4 @@
-import argparse, json, sys, os
+import argparse, json, sys, os, socket
 from os.path import isdir, exists
 from pathlib import Path
 from .scan import scan
@@ -6,6 +6,12 @@ from .watch import watch
 from .deploy import set_dry_run, deploy
 
 def main():
+    # check port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if s.connect_ex(("127.0.0.1", 8080)) == 0:
+            print("deployment mode already active")
+            return
+
     parser = argparse.ArgumentParser(description='Deployer')
     parser.add_argument('directory', help='The mandatory first argument')
     parser.add_argument('-n', '--dry-run', action='store_true', help='Dry Run', required=False)

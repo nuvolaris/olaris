@@ -14,11 +14,18 @@ tasks:
       while ! test -e ~/.wskprops
       do nuv ide login
       done
+    - task: ask-devel
+    - |
       echo "**************************************************************************************"
       echo "*** Type 'deploy' to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
       echo "*** Type 'devel'  to start incremental development mode"
       echo "*** Type 'login'  to login again"
       echo "**************************************************************************************"
+
+  ask-devel:
+    prompt: Do you want to start in development mode?
+    cmds:
+      - nuv ide devel
 
   login:
     silent: true
@@ -43,7 +50,6 @@ tasks:
     ignore_error: true
     cmds:
     - bash http-serve.sh "$NUV_PWD/web"
-
 
   _info:
     silent: true

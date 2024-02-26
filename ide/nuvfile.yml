@@ -44,14 +44,6 @@ tasks:
     cmds:
     - bash http-serve.sh "$NUV_PWD/web"
 
-  cli:
-    silent: true
-    desc: python cli
-    cmds:
-    - |
-      find "$NUV_PWD" -name requirements.txt -execdir pip install -r {} \;
-      set -a ; source "$NUV_PWD/.env"
-      ipython -i init.ipy
 
   _info:
     silent: true
@@ -65,19 +57,47 @@ tasks:
     desc: deploy a project or a single action (with A=<dir-or-file>)
     cmds:
       - |
-        set -a ; source $NUV_PWD/.env
-        if test -z "{{.A}}"
-        then python -m deploy "$NUV_PWD" -d {{.FL}}
-        else python -m deploy "$NUV_PWD" -s "{{.A}}" {{.FL}}
+        set -a
+        if test -e $NUV_PWD/.env
+        then source $NUV_PWD/.env
         fi
+        if test -z "{{.A}}"
+        then python3 -m deploy "$NUV_PWD" -d {{.FL}}
+        else python3 -m deploy "$NUV_PWD" -s "{{.A}}" {{.FL}}
+        fi
+
+  init:
+    desc: init a runtime running in localhost:8080 (with A=<dir-or-file>)
+    requires: {vars: [A]}
+    silent: false
+    cmds:
+      - |
+        if test -d "$NUV_PWD/packages/{{.A}}"
+        then
+          nuv ide _zip A="{{.A}}"
+          nuv ide _action A="{{.A}}"
+          python3 invoke.py init "$NUV_PWD/packages/{{.A}}.zip"
+        elif test -f "$NUV_PWD/packages/{{.A}}"
+        then python3 invoke.py init "$NUV_PWD/packages/{{.A}}" 
+        else echo "not found {{.A}}"
+        fi
+
+  run:
+    desc: run a runtime running in localhost:8080 with A=<dir-or-file> J=<json-payload>
+    silent: false
+    cmds:
+    - python3 invoke.py run '{{.J}}'
 
   devel:
     silent: true
     desc: start interactive development mode files
     cmds:
       - |
-        set -a ; source $NUV_PWD/.env
-        python -m deploy "$NUV_PWD" -w {{.FL}}
+        set -a
+        if test -e $NUV_PWD/.env
+        then source $NUV_PWD/.env
+        fi
+        python3 -m deploy "$NUV_PWD" -w {{.FL}}
 
   _zip:
     #desc: build an action enviroment zip file (A=action)
@@ -116,9 +136,12 @@ tasks:
       cd $NUV_PWD
       if test -d "packages/{{.A}}/virtualenv"
       then nuv ide python clean DIR="$(realpath "packages/{{.A}}")"
-      elif test -d "{{.A}}/node_modules"
+      elif test -d "packages/{{.A}}/node_modules"
       then nuv ide nodejs clean DIR="$(realpath "packages/{{.A}}")"
       else echo "nothing to clean"
+      fi
+      if test -e "packages/{{.A}}.zip"
+      then rm "packages/{{.A}}.zip"
       fi
 
   undeploy:
@@ -138,4 +161,8 @@ tasks:
       do nuv package delete "$package" ;
       done
 
- 
+  python:
+    desc: python subcommand
+
+  nodejs:
+    desc: nodejs subcommand

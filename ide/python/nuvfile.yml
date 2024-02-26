@@ -33,4 +33,16 @@ tasks:
     cmds:
     - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
     - |
-      /usr/bin/zip -r {{.DIR}}.zip * -x "virtualenv/*" -x requirements.txt 
+      /usr/bin/zip -r {{.DIR}}.zip * -x "virtualenv/*" -x requirements.txt
+
+  cli:
+    silent: true
+    desc: python cli
+    cmds:
+    - |
+      pip install ipython
+      find "$NUV_PWD" -name requirements.txt -execdir pip install -r {} \;
+      if test -e "$NUV_PWD/.env"
+      then set -a ; source "$NUV_PWD/.env"
+      fi
+      ipython -i init.ipy

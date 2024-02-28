@@ -9,6 +9,8 @@ tasks:
     silent: true
     desc: setup nuvolaris.dev ide
     cmds:
+    - nuv -update
+    - python3 -m pip install watchdog
     - |
       clear
       while ! test -e ~/.wskprops

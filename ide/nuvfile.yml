@@ -38,6 +38,7 @@ tasks:
       echo "*** Available Commands on Terminal:"
       echo "*** 'deploy' to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
       echo "*** 'devel'  to start incremental development mode"
+      echo "*** 'login'  to login as a different user"
       echo "**************************************************************************************"
 
   ask-devel:

@@ -92,9 +92,13 @@ tasks:
         then source $NUV_PWD/.env
         fi
         if test -z "{{.A}}"
-        then python3 -m deploy "$NUV_PWD" -d {{.FL}}
+        then 
+             python3 -m deploy "$NUV_PWD" -d {{.FL}}
+             nuv web upload web
+             echo "Deployed on:" "$NUVDEV_HOST"
         else python3 -m deploy "$NUV_PWD" -s "{{.A}}" {{.FL}}
         fi
+
 
   init:
     desc: init a runtime running in localhost:8080 (with A=<dir-or-file>)

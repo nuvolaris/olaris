@@ -28,7 +28,6 @@ $ nuv package update mastrogpt
 $ nuv action update mastrogpt/index packages/mastrogpt/index.py --web true
 nuv ide deploy A=mastrogpt/index.py
 
-
 nuv ide _clean A=mastrogpt/display
 nuv ide deploy A=mastrogpt/display FL=-n
 $ nuv ide _zip A=mastrogpt/display

@@ -40,7 +40,7 @@ tasks:
     sources:
     - "{{.DIR}}/requirements.txt"
     generates:
-    - "{{.DIR}}/virtualenv/bin/activate"
+    - "{{.DIR}}/virtualenv/date"
 
   action:
     silent: true
@@ -49,8 +49,7 @@ tasks:
     dir: "{{.DIR}}"
     cmds:
     - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
-    - |
-      /usr/bin/zip -r {{.DIR}}.zip * -x "virtualenv/*" -x requirements.txt
+    - /usr/bin/zip -r {{.DIR}}.zip * -x "virtualenv/*" -x requirements.txt
 
   cli:
     silent: true

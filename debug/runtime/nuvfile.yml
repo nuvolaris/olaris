@@ -1,0 +1,26 @@
+version: 3
+
+tasks:
+
+  init:
+    desc: init a runtime running in localhost:8080 (with A=<dir-or-file>)
+    requires: {vars: [A]}
+    silent: false
+    cmds:
+      - |
+        if test -d "$NUV_PWD/packages/{{.A}}"
+        then
+          nuv ide _zip A="{{.A}}"
+          nuv ide _action A="{{.A}}"
+          python3 invoke.py init "$NUV_PWD/packages/{{.A}}.zip"
+        elif test -f "$NUV_PWD/packages/{{.A}}"
+        then python3 invoke.py init "$NUV_PWD/packages/{{.A}}" 
+        else echo "not found {{.A}}"
+        fi
+
+  run:
+    desc: run a runtime running in localhost:8080 with A=<dir-or-file> J=<json-payload>
+    silent: false
+    cmds:
+    - python3 invoke.py run '{{.J}}'
+

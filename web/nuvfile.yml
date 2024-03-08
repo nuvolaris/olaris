@@ -22,13 +22,12 @@ tasks:
     silent: true
     cmds:
       - js upload.js $FOLDER_PATH quiet={{.__quiet}} clean={{.__clean}}
-
     env:
       FOLDER_PATH:
         sh: |
-          P=$(realpath ./)
-          if [ ! -z {{._folder_}} ]; then
-            P=$(realpath {{._folder_}})
+          P="$(realpath ./)"
+          if test -n "{{._folder_}}" 
+          then P="$(realpath {{._folder_}})"
           fi
           echo $P
       NUVUSER:

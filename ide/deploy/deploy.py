@@ -59,20 +59,16 @@ def deploy_package(package):
         exec(cmd)
         package_done.add(cmd)
 
-def build_zip(sp):
-    exec(f"nuv ide _zip A={sp[1]}/{sp[2]}")
-    res = sp[:-1]
-    res[-1] += ".zip"
-    return res
+def build_zip(package, action):
+    exec(f"nuv ide util zip A={package}/{action}")
+    return f"packages/{package}/{action}.zip"
 
-def build_action(sp):
-    exec(f"nuv ide _action A={sp[1]}/{sp[2]}")
-    res = sp[:-1]
-    res[-1] += ".zip"
-    return res
+def build_action(package, action):
+    exec(f"nuv ide util action A={package}/{action}")
+    return f"packages/{package}/{action}.zip"
 
-def deploy_action(sp):
-    artifact = "/".join(sp)
+def deploy_action(artifact):
+    sp = artifact.split("/")
     [name, typ] = sp[-1].rsplit(".", 1)
     package = sp[1]
 
@@ -103,6 +99,6 @@ def deploy(file):
                 break
     sp = file.split("/")
     if len(sp) > 3:
-        build_zip(sp)
-        sp = build_action(sp)
-    deploy_action(sp)
+        build_zip(sp[1], sp[2])
+        file = build_action(sp[1], sp[2])
+    deploy_action(file)

@@ -41,16 +41,6 @@ tasks:
       echo "*** 'login'  to login as a different user"
       echo "**************************************************************************************"
 
-  ask-devel:
-    silent: true
-    cmds:
-      - |  
-        echo -n "Do you want to start in development mode [y=yes, enter=no]: "
-        read ANSWER
-        if [ "$ANSWER" == "y" ]
-        then nuv ide devel
-        fi
-
   login:
     silent: true
     desc: login in nuvolaris.dev with Azure OpenAI access
@@ -82,117 +72,81 @@ tasks:
     - config -d | grep OPENAI_
     - config -d | grep NUVDEV_
 
+  _venv:
+    cmds:
+    - python3 -V || die "I need python3 in the path"
+    - python3 -m venv venv
+    - |
+      source venv/bin/activate
+      pip install watchdog
+    status:
+    - test -d venv
+
   deploy:
     silent: true
-    desc: deploy a project or a single action (with A=<dir-or-file>)
+    desc: deploy a project or a single action (with _action_=<dir-or-file>)
     cmds:
+      - test -e ~/.wskprops || die "please login first"
+      - test -d "$NUV_PWD/packages" || die "no packages in current directory"
+      - task: _venv
       - |
         set -a
         if test -e $NUV_PWD/.env
         then source $NUV_PWD/.env
         fi
-        if test -z "{{.A}}"
+        if {{.__dry_run}}
+        then DRY="--dry-run" ; ECHO='echo'
+        else DRY="" ; ECHO=""
+        fi
+        source venv/bin/activate
+        if test -z "{{._action_}}"
         then 
-             python3 -m deploy "$NUV_PWD" -d {{.FL}}
-             nuv web upload web
-             echo "Deployed on:" "$NUVDEV_HOST"
-        else python3 -m deploy "$NUV_PWD" -s "{{.A}}" {{.FL}}
+             python3 -m deploy "$NUV_PWD" -d $DRY
+             $ECHO nuv web upload web
+             echo "URL: $NUVDEV_HOST"
+        else 
+            python3 -m deploy "$NUV_PWD" -s "{{._action_}}" $DRY
         fi
-
-
-  init:
-    desc: init a runtime running in localhost:8080 (with A=<dir-or-file>)
-    requires: {vars: [A]}
-    silent: false
-    cmds:
-      - |
-        if test -d "$NUV_PWD/packages/{{.A}}"
-        then
-          nuv ide _zip A="{{.A}}"
-          nuv ide _action A="{{.A}}"
-          python3 invoke.py init "$NUV_PWD/packages/{{.A}}.zip"
-        elif test -f "$NUV_PWD/packages/{{.A}}"
-        then python3 invoke.py init "$NUV_PWD/packages/{{.A}}" 
-        else echo "not found {{.A}}"
-        fi
-
-  run:
-    desc: run a runtime running in localhost:8080 with A=<dir-or-file> J=<json-payload>
-    silent: false
-    cmds:
-    - python3 invoke.py run '{{.J}}'
 
   devel:
     silent: true
     desc: start interactive development mode files
     cmds:
+      - test -e ~/.wskprops || die "please login first"
+      - test -d "$NUV_PWD/packages" || die "no packages in current directory"
       - |
         set -a
         if test -e $NUV_PWD/.env
         then source $NUV_PWD/.env
         fi
-        python3 -m deploy "$NUV_PWD" -w {{.FL}}
-
-  _zip:
-    #desc: build an action enviroment zip file (A=action)
-    silent: true
-    requires: { vars: [A]}
-    cmds:
-    - |
-      cd $NUV_PWD
-      if test -e "packages/{{.A}}/requirements.txt"
-      then nuv ide python zip DIR="$(realpath "packages/{{.A}}")"
-      elif test -e "packages/{{.A}}/package.json"
-      then nuv ide nodejs zip DIR="$(realpath "packages/{{.A}}")"
-      else echo "no zip environemnt"
-      fi
-
-  _action:
-    #desc: build an action filling its zip file 
-    silent: true
-    requires: { vars: [A]}
-    cmds:
-    - |
-      cd $NUV_PWD
-      if test -e "packages/{{.A}}/__main__.py"
-      then nuv ide python action DIR="$(realpath "packages/{{.A}}")"
-      elif test -e "packages/{{.A}}/index.js"
-      then nuv ide nodejs action DIR="$(realpath "packages/{{.A}}")"
-      else die "*** unknow action type"
-      fi
-
-  _clean:
-    #desc: clean an action build
-    silent: true
-    requires: { vars: [A]}
-    cmds:
-    - |
-      cd $NUV_PWD
-      if test -d "packages/{{.A}}/virtualenv"
-      then nuv ide python clean DIR="$(realpath "packages/{{.A}}")"
-      elif test -d "packages/{{.A}}/node_modules"
-      then nuv ide nodejs clean DIR="$(realpath "packages/{{.A}}")"
-      else echo "nothing to clean"
-      fi
-      if test -e "packages/{{.A}}.zip"
-      then rm "packages/{{.A}}.zip"
-      fi
+        if {{.__dry_run}}
+        then DRY="--dry-run" ; ECHO='echo'
+        else DRY="" ; ECHO=""
+        fi
+        python3 -m deploy "$NUV_PWD" -w $DRY
 
   undeploy:
     desc: undeploy all the actions
+    prompt: "are you sure you want to remove all actions and packages?"
     silent: true
     cmds:
     - >
       nuv action list
       | awk  'NR>1 { print $1}' 
       | while read action ;
-      do nuv action delete "$action" ;
+      do if {{.__dry_run}}
+         then echo '$' nuv action delete "$action"
+         else nuv action delete "$action"
+         fi
       done
     - >
       nuv package list
       | awk  'NR>1 { print $1}'
       | while read package ;
-      do nuv package delete "$package" ;
+      do if {{.__dry_run}}
+         then echo '$' nuv package delete "$package" 
+         else nuv package delete "$package" 
+         fi
       done
 
   python:

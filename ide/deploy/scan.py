@@ -30,8 +30,8 @@ def scan():
     for req in reqs:
         print(">", req)
         sp = req.split("/")
-        sp = build_zip(sp)
-        deployments.add("/".join(sp))
+        act = build_zip(sp[1],sp[2])
+        deployments.add(act)
         packages.add(sp[1])
         
     mains = glob("packages/*/*/index.js") + glob("packages/*/*/__main__.py")
@@ -39,8 +39,8 @@ def scan():
     for main in mains: 
         print(">", main)
         sp = main.split("/")
-        sp = build_action(sp)
-        deployments.add("/".join(sp))
+        act = build_action(sp[1],sp[2])
+        deployments.add(act)
         packages.add(sp[1])    
 
     singles = glob("packages/*/*.py") +  glob("packages/*/*.js")
@@ -58,4 +58,4 @@ def scan():
     
     for action in deployments:
         print("^", action)
-        deploy_action(action.split("/"))
+        deploy_action(action)

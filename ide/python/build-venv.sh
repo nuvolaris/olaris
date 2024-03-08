@@ -30,4 +30,6 @@ then rm "$ZIP"
 fi
 zip -r "$ZIP" virtualenv >/dev/null
 ls -l $ZIP
+date >virtualenv/date
+
 

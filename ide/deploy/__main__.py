@@ -30,13 +30,10 @@ def main():
     #  sys.exit(1)
     
     if args.watch:
-        print(">>> Scanning:")
         scan()
-        print(">>> Watching:")
         watch()
         return
     elif args.deploy:
-        print(">>> Scanning:")
         scan()
         return
     elif args.single != "":        

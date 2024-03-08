@@ -1,0 +1,49 @@
+version: 3
+
+tasks:
+
+  zip:
+    desc: build an action enviroment zip file (A=action)
+    silent: true
+    requires: { vars: [A]}
+    cmds:
+    - |
+      cd $NUV_PWD
+      if test -e "packages/{{.A}}/requirements.txt"
+      then nuv ide python zip DIR="$(realpath "packages/{{.A}}")"
+      elif test -e "packages/{{.A}}/package.json"
+      then nuv ide nodejs zip DIR="$(realpath "packages/{{.A}}")"
+      else echo "no zip environemnt"
+      fi
+
+  action:
+    desc: build an action filling its zip file 
+    silent: true
+    requires: { vars: [A]}
+    cmds:
+    - |
+      cd $NUV_PWD
+      if test -e "packages/{{.A}}/__main__.py"
+      then nuv ide python action DIR="$(realpath "packages/{{.A}}")"
+      elif test -e "packages/{{.A}}/index.js"
+      then nuv ide nodejs action DIR="$(realpath "packages/{{.A}}")"
+      else die "*** unknow action type"
+      fi
+
+  clean:
+    desc: clean an action build
+    silent: true
+    requires: { vars: [A]}
+    cmds:
+    - |
+      cd $NUV_PWD
+      if test -d "packages/{{.A}}/virtualenv"
+      then nuv ide python clean DIR="$(realpath "packages/{{.A}}")"
+      elif test -d "packages/{{.A}}/node_modules"
+      then nuv ide nodejs clean DIR="$(realpath "packages/{{.A}}")"
+      else echo "nothing to clean"
+      fi
+      if test -e "packages/{{.A}}.zip"
+      then rm "packages/{{.A}}.zip"
+      fi
+

@@ -19,7 +19,9 @@
 DIR="${1:?directory}"
 ZIP="${2:?zip file}"
 cd "$DIR"
-virtualenv virtualenv
+if ! test -d virtualenv
+then virtualenv virtualenv
+fi
 source virtualenv/bin/activate
 pip install --upgrade pip
 pip install -r  requirements.txt

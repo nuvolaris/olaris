@@ -27,7 +27,6 @@ tasks:
     desc: setup nuvolaris.dev ide
     cmds:
     - nuv -update
-    - python3 -m pip install watchdog
     - |
       clear
       while ! test -e ~/.wskprops
@@ -88,7 +87,6 @@ tasks:
     cmds:
       - test -e ~/.wskprops || die "please login first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
-      - task: _venv
       - |
         set -a
         if test -e $NUV_PWD/.env
@@ -98,7 +96,6 @@ tasks:
         then DRY="--dry-run" ; ECHO='echo'
         else DRY="" ; ECHO=""
         fi
-        source venv/bin/activate
         if test -z "{{._action_}}"
         then 
              python3 -m deploy "$NUV_PWD" -d $DRY
@@ -148,6 +145,20 @@ tasks:
          else nuv package delete "$package" 
          fi
       done
+
+  clean:
+    cmds:
+     - |
+       if test -d "$NUV_PWD/packages" 
+       then 
+          echo "*** removing virtualenv"
+          /bin/rm -rvf "$NUV_PWD"/packages/*/*/virtualenv/
+          echo "*** removing node_modules"
+          /bin/rm -rvf "$NUV_PWD"/packages/*/*/node_modules/
+          echo "*** removing .zip"
+          /bin/rm -vf "$NUV_PWD"/packages/*/*.zip 
+       else die "no packages in current directory"
+       fi
 
   python:
     desc: python subcommand

@@ -17,7 +17,7 @@
 
 SKIPDIR = ["virtualenv", "node_modules", "__pycache__"]
 
-import os, time
+import os
 from subprocess import Popen
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler

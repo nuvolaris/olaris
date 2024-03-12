@@ -9,7 +9,7 @@ def main():
     # check port
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         if s.connect_ex(("127.0.0.1", 8080)) == 0:
-            print("deployment mode already active")
+            print("deployment mode already active (or something listening in 127.0.0.1:8080)")
             return
 
     parser = argparse.ArgumentParser(description='Deployer')

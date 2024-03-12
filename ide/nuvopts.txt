@@ -4,6 +4,7 @@ Usage:
     ide devel [--dry-run]
     ide deploy [<action>] [--dry-run]
     ide undeploy [<action>] [--dry-run]
+    ide clean
     ide setup 
     ide login
     ide serve
@@ -14,7 +15,7 @@ Commands:
     ide devel               activate development mode
     ide deploy              deploy everything or just one action
     ide undeploy            undeploy everything or just one action
-    ide clean               cleanup temporary files
+    ide clean               clean the temporay files
     ide setup               setup the ide 
     ide login               login in nuvolaris.dev
     ide serve               web server

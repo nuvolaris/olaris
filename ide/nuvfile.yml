@@ -85,7 +85,8 @@ tasks:
     silent: true
     desc: deploy a project or a single action (with _action_=<dir-or-file>)
     cmds:
-      - test -e ~/.wskprops || die "please login first"
+      - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
+      - test -e ~/.wskprops || die "please run 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
       - |
         set -a
@@ -109,7 +110,8 @@ tasks:
     silent: true
     desc: start interactive development mode files
     cmds:
-      - test -e ~/.wskprops || die "please login first"
+      - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
+      - test -e ~/.wskprops || die "please 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
       - |
         set -a
@@ -127,6 +129,8 @@ tasks:
     prompt: "are you sure you want to remove all actions and packages?"
     silent: true
     cmds:
+    - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
+    - test -e ~/.wskprops || die "please 'nuv ide login' first"
     - >
       nuv action list
       | awk  'NR>1 { print $1}' 
@@ -148,6 +152,8 @@ tasks:
 
   clean:
     cmds:
+     - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
+     - test -e ~/.wskprops || die "please 'nuv ide login' first"
      - |
        if test -d "$NUV_PWD/packages" 
        then 

@@ -26,7 +26,6 @@ tasks:
     silent: true
     desc: setup nuvolaris.dev ide
     cmds:
-    - nuv -update
     - |
       clear
       while ! test -e ~/.wskprops
@@ -49,12 +48,22 @@ tasks:
       echo -n "Enter Username: "
       read NUVDEV_USERNAME
       if nuv -login https://nuvolaris.dev "$NUVDEV_USERNAME"
-      then
-          config NUVDEV_USERNAME=$NUVDEV_USERNAME
-          config NUVDEV_HOST="https://$NUVDEV_USERNAME.nuvolaris.dev"
-          source ~/.wskprops
-          config OPENAI_API_HOST=https://openai.nuvolaris.io
-          config OPENAI_API_KEY="$(echo "$AUTH" | awk -F: '{print $1 }')"
+      then nuv ide postlogin
+      fi
+
+  postlogin:
+    silent: true
+    cmds:
+    - |
+      NUVDEV_USERNAME="$(nuv -wsk property get  | awk '/whisk namespace/{print $3}')"
+      if test -z "$NUVDEV_USERNAME"
+      then echo "Please use 'nuv ide login' first"
+      else
+        config NUVDEV_USERNAME=$NUVDEV_USERNAME
+        config NUVDEV_HOST="https://$NUVDEV_USERNAME.nuvolaris.dev"
+        source ~/.wskprops
+        config OPENAI_API_HOST=https://openai.nuvolaris.io
+        config OPENAI_API_KEY="$(echo "$AUTH" | awk -F: '{print $1 }')"
       fi
 
   serve:
@@ -88,6 +97,7 @@ tasks:
       - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
       - test -e ~/.wskprops || die "please run 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
+      - task: postlogin
       - |
         set -a
         if test -e $NUV_PWD/.env
@@ -113,6 +123,7 @@ tasks:
       - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
       - test -e ~/.wskprops || die "please 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
+      - task: postlogin
       - |
         set -a
         if test -e $NUV_PWD/.env

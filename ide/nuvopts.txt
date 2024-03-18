@@ -7,6 +7,7 @@ Usage:
     ide clean
     ide setup 
     ide login
+    ide postlogin
     ide serve
     ide python
     ide nodejs
@@ -18,6 +19,7 @@ Commands:
     ide clean               clean the temporay files
     ide setup               setup the ide 
     ide login               login in nuvolaris.dev
+    ide postlogin           configuration post login
     ide serve               web server
     ide python              python subcommands
     ide nodejs              nodejs subcommands

@@ -1,9 +1,16 @@
-import argparse, json, sys, os, socket
-from os.path import isdir, exists
+import argparse, json, sys, os, socket, signal
+from os.path import isdir, exists, expanduser
 from pathlib import Path
 from .scan import scan
 from .watch import watch
 from .deploy import set_dry_run, deploy
+
+def signal_handler(sig, frame):
+    print('Termination requested.')
+    os.remove(expanduser("~/.nuv/tmp/deploy.pid"))
+    os.killpg(os.getpgrp(), signal.SIGKILL)
+    # should not be reached but just in case...
+    sys.exit(0)
 
 def main():
     # check port
@@ -11,6 +18,13 @@ def main():
         if s.connect_ex(("127.0.0.1", 8080)) == 0:
             print("deployment mode already active (or something listening in 127.0.0.1:8080)")
             return
+
+    # Register the signal handler for SIGTERM
+    os.setpgrp()
+    signal.signal(signal.SIGTERM, signal_handler)
+    os.makedirs(expanduser("~/.nuv/tmp"), exist_ok=True)
+    with open(expanduser("~/.nuv/tmp/deploy.pid"), "w") as f:
+        f.write(str(os.getpid())+"\n")
 
     parser = argparse.ArgumentParser(description='Deployer')
     parser.add_argument('directory', help='The mandatory first argument')

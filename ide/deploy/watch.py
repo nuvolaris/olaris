@@ -17,7 +17,7 @@
 
 SKIPDIR = ["virtualenv", "node_modules", "__pycache__"]
 
-import os
+import os, sys, signal, os.path
 from subprocess import Popen
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
@@ -30,7 +30,6 @@ class ChangeHandler(FileSystemEventHandler):
     last_modified = {}
 
     def on_any_event(self, event):
-        
         ## filter what is needed
         # only modified
         if event.event_type != "modified": return

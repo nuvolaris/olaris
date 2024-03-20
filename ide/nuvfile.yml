@@ -34,9 +34,11 @@ tasks:
     - |
       echo "**************************************************************************************"
       echo "*** Available Commands on Terminal:"
-      echo "*** 'deploy' to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
-      echo "*** 'devel'  to start incremental development mode"
-      echo "*** 'login'  to login as a different user"
+      echo "*** 'deploy' (alias for 'nuv ide deploy') to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
+      echo "*** 'devel'  (alias for 'nuv ide devel') to start incremental development mode"
+      echo "*** 'login'  (alias for 'nuv ide login')  to login as a different user"
+      echo "*** 'nuv ide' for more informations
+      echo "*** https://nuvolaris.github.io for online documentation"
       echo "**************************************************************************************"
 
   login:
@@ -44,22 +46,21 @@ tasks:
     desc: login in nuvolaris.dev with Azure OpenAI access
     cmds:
     - |
-      echo "*** Configuring Access to nuvolaris.dev with Azure OpenAI ***"
-      echo -n "Enter Username: "
-      read NUVDEV_USERNAME
-      if nuv -login https://nuvolaris.dev "$NUVDEV_USERNAME"
-      then nuv ide postlogin
+      if test -n "{{._apihost_}}"
+      then NUVDEV_APIHOST="{{._apihost_}}"
+      else NUVDEV_APIHOST="https://nuvolaris.dev"
       fi
-
-  postlogin:
-    silent: true
-    cmds:
-    - |
-      NUVDEV_USERNAME="$(nuv -wsk property get  | awk '/whisk namespace/{print $3}')"
-      if test -z "$NUVDEV_USERNAME"
-      then echo "Please use 'nuv ide login' first"
-      else
-        config NUVDEV_USERNAME=$NUVDEV_USERNAME
+      echo "*** Configuring Access to $NUVOLARIS_ with Azure OpenAI ***"
+      if test -z "{{._username_}}"
+      then  echo -n "Enter Username: "
+            read NUVDEV_USERNAME
+      else NUVDEV_USERNAME="{{._username_}}"
+      fi
+      echo apihost=$NUVDEV_APIHOST username=$NUVDEV_USERNAME
+      if nuv -login "$NUVDEV_APIHOST" "$NUVDEV_USERNAME"
+      then 
+        config NUVDEV_APIHOST="$NUVDEV_APIHOST"
+        config NUVDEV_USERNAME="$NUVDEV_USERNAME"
         config NUVDEV_HOST="https://$NUVDEV_USERNAME.nuvolaris.dev"
         source ~/.wskprops
         config OPENAI_API_HOST=https://openai.nuvolaris.io
@@ -97,7 +98,6 @@ tasks:
       - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
       - test -e ~/.wskprops || die "please run 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
-      - task: postlogin
       - |
         if test -e ~/.nuv/tmp/deploy.pid
         then kill "$(cat ~/.nuv/tmp/deploy.pid)" || true
@@ -113,9 +113,9 @@ tasks:
         fi
         if test -z "{{._action_}}"
         then 
-             python3 -m deploy "$NUV_PWD" -d $DRY
-             $ECHO nuv web upload web
-             echo "URL: $NUVDEV_HOST"
+            python3 -m deploy "$NUV_PWD" -d $DRY
+            $ECHO nuv web upload web
+            echo "URL: $NUVDEV_HOST"
         else 
             python3 -m deploy "$NUV_PWD" -s "{{._action_}}" $DRY
         fi
@@ -127,7 +127,6 @@ tasks:
       - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
       - test -e ~/.wskprops || die "please 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
-      - task: postlogin
       - |
         if test -e ~/.nuv/tmp/deploy.pid
         then kill "$(cat ~/.nuv/tmp/deploy.pid)" || true
@@ -155,10 +154,10 @@ tasks:
       nuv action list
       | awk  'NR>1 { print $1}' 
       | while read action ;
-      do if {{.__dry_run}}
-         then echo '$' nuv action delete "$action"
-         else nuv action delete "$action"
-         fi
+      do  if {{.__dry_run}}
+          then echo '$' nuv action delete "$action"
+          else nuv action delete "$action"
+          fi
       done
     - >
       nuv package list

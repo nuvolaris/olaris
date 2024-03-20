@@ -95,7 +95,7 @@ tasks:
     silent: true
     desc: deploy a project or a single action (with _action_=<dir-or-file>)
     cmds:
-      - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
+      - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
       - test -e ~/.wskprops || die "please run 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
       - |
@@ -124,7 +124,7 @@ tasks:
     silent: true
     desc: start interactive development mode files
     cmds:
-      - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
+      - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
       - test -e ~/.wskprops || die "please 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
       - |

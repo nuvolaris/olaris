@@ -65,6 +65,8 @@ tasks:
         source ~/.wskprops
         config OPENAI_API_HOST=https://openai.nuvolaris.io
         config OPENAI_API_KEY="$(echo "$AUTH" | awk -F: '{print $1 }')"
+      else 
+        false
       fi
 
   serve:

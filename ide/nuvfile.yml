@@ -96,8 +96,9 @@ tasks:
     desc: deploy a project or a single action (with _action_=<dir-or-file>)
     cmds:
       - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
-      - test -e ~/.wskprops || die "please run 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
+      - test -e ~/.wskprops || die "please run 'nuv ide login' first"
+      - test -n "$NUVDEV_HOST" || die "please run 'nuv ide login' first"
       - |
         if test -e ~/.nuv/tmp/deploy.pid
         then kill "$(cat ~/.nuv/tmp/deploy.pid)" || true
@@ -125,8 +126,9 @@ tasks:
     desc: start interactive development mode files
     cmds:
       - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
-      - test -e ~/.wskprops || die "please 'nuv ide login' first"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
+      - test -e ~/.wskprops || die "please run 'nuv ide login' first"
+      - test -n "$NUVDEV_HOST" || die "please run 'nuv ide login' first"
       - |
         if test -e ~/.nuv/tmp/deploy.pid
         then kill "$(cat ~/.nuv/tmp/deploy.pid)" || true

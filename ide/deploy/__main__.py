@@ -12,13 +12,14 @@ def signal_handler(sig, frame):
     # should not be reached but just in case...
     sys.exit(0)
 
-def main():
+def check_port():
     # check port
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         if s.connect_ex(("127.0.0.1", 8080)) == 0:
             print("deployment mode already active (or something listening in 127.0.0.1:8080)")
             return
 
+def main():
     # Register the signal handler for SIGTERM
     os.setpgrp()
     signal.signal(signal.SIGTERM, signal_handler)
@@ -36,14 +37,9 @@ def main():
     args = parser.parse_args()
     set_dry_run(args.dry_run)
     os.chdir(args.directory)
-    
-    #try: 
-    #  config = json.loads(Path("nuvolaris.json").read_text())
-    #except Exception as e:
-    #  print("cannot read nuvolaris.json current directory: %s" % e)
-    #  sys.exit(1)
-    
+        
     if args.watch:
+        check_port()
         scan()
         watch()
         return

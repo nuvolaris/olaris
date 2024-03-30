@@ -47,6 +47,7 @@ def scan():
     # single = singles[0]
     for single in singles:
         print(">", single)
+        sp = single.split("/")
         deployments.add(single)
         packages.add(sp[1])
 

@@ -103,7 +103,7 @@ tasks:
       - test -n "$NUVDEV_HOST" || die "please run 'nuv ide login' first"
       - |
         if test -e ~/.nuv/tmp/deploy.pid
-        then kill "$(cat ~/.nuv/tmp/deploy.pid)" || true
+        then kill "$(cat ~/.nuv/tmp/deploy.pid)" 2>/dev/null || true
         fi
       - |
         set -a
@@ -188,6 +188,12 @@ tasks:
           /bin/rm -vf "$NUV_PWD"/packages/*/*.zip 
        else die "no packages in current directory"
        fi
+
+  bash:
+    desc: open a bash shell with the current environment
+    interactive: true
+    cmds:
+    - bash
 
   python:
     desc: python subcommand

@@ -23,6 +23,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 from .deploy import deploy
+from .client import serve
 
 class ChangeHandler(FileSystemEventHandler):
     """Logs all the events captured."""
@@ -63,6 +64,3 @@ def watch():
         observer.stop()
     observer.join()
 
-# serve web area
-def serve():
-    Popen("nuv ide serve", shell=True, env=os.environ)

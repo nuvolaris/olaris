@@ -20,6 +20,5 @@ def serve():
 
 def build():
     deploy = get_nuvolaris_config("deploy")
-    if deploy is None:
-        deploy = "nuv ide serve"
-    Popen(deploy, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ)
+    if deploy is not None:
+        Popen(deploy, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ)

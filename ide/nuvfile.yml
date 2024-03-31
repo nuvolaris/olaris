@@ -189,11 +189,12 @@ tasks:
        else die "no packages in current directory"
        fi
 
-  bash:
+  shell:
     desc: open a bash shell with the current environment
     interactive: true
+    dir: $NUV_PWD
     cmds:
-    - bash
+    - bash 
 
   python:
     desc: python subcommand

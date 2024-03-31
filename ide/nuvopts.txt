@@ -8,7 +8,7 @@ Usage:
     ide clean
     ide setup 
     ide serve
-    ide bash
+    ide shell
     ide python
     ide nodejs
 
@@ -20,6 +20,6 @@ Commands:
     ide clean               clean the temporay files
     ide setup               setup the ide 
     ide serve               web server
-    ide bash                start a shell with current env
+    ide shell                start a shell with current env
     ide python              python subcommands
     ide nodejs              nodejs subcommands

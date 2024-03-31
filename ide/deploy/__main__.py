@@ -4,6 +4,7 @@ from pathlib import Path
 from .scan import scan
 from .watch import watch
 from .deploy import set_dry_run, deploy
+from .client import build
 
 def signal_handler(sig, frame):
     print('Termination requested.')
@@ -45,6 +46,7 @@ def main():
         return
     elif args.deploy:
         scan()
+        build()
         return
     elif args.single != "":        
         action = args.single

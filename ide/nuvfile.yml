@@ -106,6 +106,12 @@ tasks:
         then kill "$(cat ~/.nuv/tmp/deploy.pid)" 2>/dev/null || true
         fi
       - |
+        if test -e "$NUV_PWD/package.json"
+        then if ! test -d "$NUV_PWD/node_modules"
+             then cd $NUV_PWD ; npm install
+             fi
+        fi 
+      - |
         set -a
         if test -e $NUV_PWD/.env
         then source $NUV_PWD/.env
@@ -133,8 +139,14 @@ tasks:
       - test -n "$NUVDEV_HOST" || die "please run 'nuv ide login' first"
       - |
         if test -e ~/.nuv/tmp/deploy.pid
-        then kill "$(cat ~/.nuv/tmp/deploy.pid)" || true
+        then kill "$(cat ~/.nuv/tmp/deploy.pid)" 2>/dev/null|| true
         fi
+      - |
+        if test -e "$NUV_PWD/package.json"
+        then if ! test -d "$NUV_PWD/node_modules"
+             then cd $NUV_PWD ; npm install
+             fi
+        fi 
       - |
         set -a
         if test -e $NUV_PWD/.env

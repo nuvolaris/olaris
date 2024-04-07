@@ -116,6 +116,9 @@ tasks:
         if test -e $NUV_PWD/.env
         then source $NUV_PWD/.env
         fi
+        if test -e $NUV_PWD/packages/.env
+        then source $NUV_PWD/packages/.env
+        fi
         if {{.__dry_run}}
         then DRY="--dry-run" ; ECHO='echo'
         else DRY="" ; ECHO=""
@@ -151,6 +154,9 @@ tasks:
         set -a
         if test -e $NUV_PWD/.env
         then source $NUV_PWD/.env
+        fi
+        if test -e $NUV_PWD/packages/.env
+        then source $NUV_PWD/packages/.env
         fi
         if {{.__dry_run}}
         then DRY="--dry-run" ; ECHO='echo'

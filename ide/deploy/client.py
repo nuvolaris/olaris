@@ -33,7 +33,8 @@ def serve():
     devel = get_nuvolaris_config("devel")
     if devel is None:
         devel = "nuv ide serve"
-    Popen(devel, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ)
+    print(devel)
+    Popen(devel, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ).communicate()
 
 def build():
     deploy = get_nuvolaris_config("deploy")

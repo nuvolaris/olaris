@@ -68,9 +68,13 @@ def build_action(package, action):
     return f"packages/{package}/{action}.zip"
 
 def deploy_action(artifact):
-    sp = artifact.split("/")
-    [name, typ] = sp[-1].rsplit(".", 1)
-    package = sp[1]
+    try:
+        sp = artifact.split("/")
+        [name, typ] = sp[-1].rsplit(".", 1)
+        package = sp[1]
+    except:
+        print("! cannot deploy", artifact)
+        return
 
     deploy_package(package)
 

@@ -132,6 +132,7 @@ tasks:
             python3 -m deploy "$NUV_PWD" -s "{{._action_}}" $DRY
         fi
 
+ 
   devel:
     silent: true
     desc: start interactive development mode files
@@ -161,6 +162,9 @@ tasks:
         if {{.__dry_run}}
         then DRY="--dry-run" ; ECHO='echo'
         else DRY="" ; ECHO=""
+        fi
+        if ! pip list | grep watchfiles >/dev/null
+        then pip install watchfiles asyncio
         fi
         python3 -m deploy "$NUV_PWD" -w $DRY
         true

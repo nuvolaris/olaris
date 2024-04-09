@@ -62,3 +62,12 @@ tasks:
       then set -a ; source "$NUV_PWD/.env"
       fi
       ipython -i init.ipy
+
+
+  boh:
+    desc: boh
+    cmds:
+    - |
+      trap 'echo wakeup' EXIT
+      echo sleeping
+      sleep 100

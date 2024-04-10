@@ -18,6 +18,7 @@
 from pathlib import Path
 import os, os.path, json
 from subprocess import Popen
+import asyncio
 
 def get_nuvolaris_config(key):
     try:
@@ -29,12 +30,18 @@ def get_nuvolaris_config(key):
         return None
  
 # serve web area
-def serve():
+async def serve():
     devel = get_nuvolaris_config("devel")
     if devel is None:
         devel = "nuv ide serve"
     print(devel)
-    Popen(devel, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ)
+    #Popen(devel, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ)
+    pwd = os.environ.get("NUV_PWD")
+    cmd = f"cd '{pwd}' ; {devel}"
+    proc = await asyncio.create_subprocess_shell(cmd,
+        stdin=asyncio.subprocess.PIPE,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
 
 # build
 def build():

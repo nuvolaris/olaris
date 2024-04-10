@@ -41,15 +41,17 @@ async def redeploy():
 
 def watch():
     loop = asyncio.get_event_loop()
-    #task = loop.create_task(redeploy())
-    task = asyncio.ensure_future(redeploy())
+    task1 = loop.create_task(redeploy())
+    #task = asyncio.ensure_future(redeploy())
+    task2 = loop.create_task(serve())
     def end_loop():
         print("Ending task.")
-        task.cancel()
+        task1.cancel()
+        task2.cancel()
     loop.add_signal_handler(signal.SIGTERM, end_loop)
 
     try:
-        loop.run_until_complete(task)
+        loop.run_until_complete(task1)
     except asyncio.CancelledError:
         pass
     finally:

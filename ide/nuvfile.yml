@@ -74,7 +74,17 @@ tasks:
     desc: local web server
     ignore_error: true
     cmds:
-    - bash http-serve.sh "$NUV_PWD/web"
+     - >
+       http-server 
+       -a 127.0.0.1 "$NUV_PWD/web" 
+       -c-1 --mimetypes mime.types 
+       -P $NUVDEV_HOST
+
+  poll:
+    silent: true
+    desc: poll activation logs
+    cmds:
+    - nuv activation poll
 
   _info:
     silent: true
@@ -83,34 +93,62 @@ tasks:
     - config -d | grep OPENAI_
     - config -d | grep NUVDEV_
 
-  _venv:
-    cmds:
-    - python3 -V || die "I need python3 in the path"
-    - python3 -m venv venv
-    - |
-      source venv/bin/activate
-      pip install watchdog
-    status:
-    - test -d venv
-
-  deploy:
+  prereq:
     silent: true
-    desc: deploy a project or a single action (with _action_=<dir-or-file>)
     cmds:
-      - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
+      - test "$(python3 -V | awk -F. '{print $2}')" -ge 10 || die "python 3.10 or greater not available"
+      - test "$(node -v | awk -F. '{print substr($1,2) }')" -ge 18 || die "nodejs 18 or greater not available"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"
       - test -e ~/.wskprops || die "please run 'nuv ide login' first"
       - test -n "$NUVDEV_HOST" || die "please run 'nuv ide login' first"
-      - |
-        if test -e ~/.nuv/tmp/deploy.pid
-        then kill "$(cat ~/.nuv/tmp/deploy.pid)" 2>/dev/null || true
-        fi
       - |
         if test -e "$NUV_PWD/package.json"
         then if ! test -d "$NUV_PWD/node_modules"
              then cd $NUV_PWD ; npm install
              fi
-        fi 
+        fi
+      - |
+        if ! python3 -m pip list | grep watchfiles >/dev/null 2>/dev/null
+        then python3 -m pip install --user watchfiles asyncio
+        fi
+      - |
+        if ! which http-server >/dev/null 2>/dev/null
+        then npm install -g http-server
+        fi
+      - task: kill
+
+  kill:
+    silent: false
+    ignore: true
+    cmds:
+      - |
+        if test -e ~/.nuv/tmp/deploy.pgrp
+        then
+          PGRP="$(cat ~/.nuv/tmp/deploy.pgrp)"
+          #pstree $PID
+          LOOP=true
+          while $LOOP
+          do
+            LOOP=false
+            ps -a -o pgid,pid | while read GRP PID
+            do 
+              echo $GRP $PID
+              if test "$GRP" = "$PGRP"
+              then kill -9 "$PID" 
+                   LOOP=true
+              fi 
+            done
+            sleep 2
+          done
+          rm ~/.nuv/tmp/deploy.pgrp
+        fi
+
+  deploy:
+    silent: true
+    interactive: true
+    desc: deploy a project or a single action (with _action_=<dir-or-file>)
+    cmds:
+      - task: prereq
       - |
         set -a
         if test -e $NUV_PWD/.env
@@ -132,25 +170,12 @@ tasks:
             python3 -m deploy "$NUV_PWD" -s "{{._action_}}" $DRY
         fi
 
- 
   devel:
-    silent: true
+    interactive: true
+    silent: false
     desc: start interactive development mode files
     cmds:
-      - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
-      - test -d "$NUV_PWD/packages" || die "no packages in current directory"
-      - test -e ~/.wskprops || die "please run 'nuv ide login' first"
-      - test -n "$NUVDEV_HOST" || die "please run 'nuv ide login' first"
-      - |
-        if test -e ~/.nuv/tmp/deploy.pid
-        then kill "$(cat ~/.nuv/tmp/deploy.pid)" 2>/dev/null|| true
-        fi
-      - |
-        if test -e "$NUV_PWD/package.json"
-        then if ! test -d "$NUV_PWD/node_modules"
-             then cd $NUV_PWD ; npm install
-             fi
-        fi 
+      - task: prereq
       - |
         set -a
         if test -e $NUV_PWD/.env
@@ -163,10 +188,8 @@ tasks:
         then DRY="--dry-run" ; ECHO='echo'
         else DRY="" ; ECHO=""
         fi
-        if ! pip list | grep watchfiles >/dev/null
-        then pip install watchfiles asyncio
-        fi
         python3 -m deploy "$NUV_PWD" -w $DRY
+        #npm-run-all --parallel deploy serve
         true
 
   undeploy:

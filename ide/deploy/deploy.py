@@ -94,7 +94,7 @@ file = "packages/deploy/multi/__main__.py"
 file = "packages/deploy/multi/requirements.txt"
 """
 def deploy(file):
-    print(f"*** {file}")
+    #print(f"*** {file}")
     if isdir(file):
         for start in MAINS:
             sub = f"{file}/{start}"

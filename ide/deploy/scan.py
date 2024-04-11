@@ -23,12 +23,12 @@ def scan():
     deployments = set()
     packages = set()
 
-    print(">>> Scan:")
+    print("> Scan:")
     reqs =  glob("packages/*/*/requirements.txt") + glob("packages/*/*/package.json")
     # req = reqs[0]
     # from util.deploy.deploy import *
     for req in reqs:
-        print(">", req)
+        print(">> Requirements:", req)
         sp = req.split("/")
         act = build_zip(sp[1],sp[2])
         deployments.add(act)
@@ -37,7 +37,7 @@ def scan():
     mains = glob("packages/*/*/index.js") + glob("packages/*/*/__main__.py")
     # main = mains[2]
     for main in mains: 
-        print(">", main)
+        print(">> Main:", main)
         sp = main.split("/")
         act = build_action(sp[1],sp[2])
         deployments.add(act)
@@ -46,17 +46,17 @@ def scan():
     singles = glob("packages/*/*.py") +  glob("packages/*/*.js")
     # single = singles[0]
     for single in singles:
-        print(">", single)
+        print(">> Action:", single)
         sp = single.split("/")
         deployments.add(single)
         packages.add(sp[1])
 
-    print(">>> Deploying:")
+    print("> Deploying:")
 
     for package in packages:
-        print("%", package)
+        print(">> Package:", package)
         deploy_package(package)
     
     for action in deployments:
-        print("^", action)
+        print(">>> Action:", action)
         deploy_action(action)

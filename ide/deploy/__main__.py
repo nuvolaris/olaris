@@ -6,7 +6,6 @@ from .watch import watch
 from .deploy import set_dry_run, deploy
 from .client import build
 
-
 def signal_handler(sig, frame):
     print('Termination requested.')
     os.remove(expanduser("~/.nuv/tmp/deploy.pid"))
@@ -22,13 +21,16 @@ def check_port():
             return
 
 def main():
-    # Register the signal handler for SIGTERM
+    
     os.setpgrp()
+    pgrp = os.getpgrp()
+
     signal.signal(signal.SIGTERM, signal_handler)
-        
+    pidfile = expanduser("~/.nuv/tmp/deploy.pgrp")
+    print("PID GROUP", pgrp)
+
     os.makedirs(expanduser("~/.nuv/tmp"), exist_ok=True)
-    with open(expanduser("~/.nuv/tmp/deploy.pid"), "w") as f:
-        f.write(str(os.getpid())+"\n")
+    Path(pidfile).write_text(str(pgrp))
 
     parser = argparse.ArgumentParser(description='Deployer')
     parser.add_argument('directory', help='The mandatory first argument')

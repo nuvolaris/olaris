@@ -6,7 +6,7 @@ import os.path
 import signal
 
 from .deploy import deploy
-from .client import serve
+from .client import serve, logs
 
 def check_and_deploy(change):
     cur_dir_len = len(os.getcwd())+1
@@ -40,19 +40,21 @@ async def redeploy():
         print("Exception")
 
 def watch():
+    # start web server
+    serve()
+    # show logs
+    logs()
+
     loop = asyncio.get_event_loop()
-    task1 = loop.create_task(redeploy())
-    #task = asyncio.ensure_future(redeploy())
-    task2 = loop.create_task(serve())
+    task = loop.create_task(redeploy())
     def end_loop():
         print("Ending task.")
-        task1.cancel()
-        task2.cancel()
+        task.cancel()
     loop.add_signal_handler(signal.SIGTERM, end_loop)
 
     try:
-        loop.run_until_complete(task1)
-    except asyncio.CancelledError:
+        loop.run_until_complete(task)
+    except:
         pass
     finally:
         loop.stop()

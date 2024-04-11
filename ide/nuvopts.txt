@@ -8,7 +8,9 @@ Usage:
     ide clean
     ide setup 
     ide serve
+    ide logs
     ide shell
+    ide kill
     ide python
     ide nodejs
 
@@ -19,7 +21,9 @@ Commands:
     ide undeploy            undeploy everything or just one action
     ide clean               clean the temporay files
     ide setup               setup the ide 
-    ide serve               web server
-    ide shell                start a shell with current env
+    ide serve               serve web area
+    ide kill                kill current devel or deploy job
+    ide logs                poll for logs
+    ide shell               start a shell with current env
     ide python              python subcommands
     ide nodejs              nodejs subcommands

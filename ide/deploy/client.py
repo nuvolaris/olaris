@@ -16,35 +16,48 @@
 # under the License.
 
 from pathlib import Path
+from subprocess import Popen, PIPE
 import os, os.path, json
-from subprocess import Popen
+import threading
 import asyncio
 
-def get_nuvolaris_config(key):
+def get_nuvolaris_config(key, default):
     try:
         dir = os.environ.get("NUV_PWD", "/do_not_exists")
         file = f"{dir}/package.json"
         info = json.loads(Path(file).read_text())
-        return info.get("nuvolaris", {}).get(key)
+        return info.get("nuvolaris", {}).get(key, default)
     except:
-        return None
- 
+        return default
+
+def readlines(inp):
+    for line in iter(inp.readline, ''):
+        print(line, end='')
+
 # serve web area
-async def serve():
-    devel = get_nuvolaris_config("devel")
-    if devel is None:
-        devel = "nuv ide serve"
-    print(devel)
-    #Popen(devel, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ)
-    pwd = os.environ.get("NUV_PWD")
-    cmd = f"cd '{pwd}' ; {devel}"
-    proc = await asyncio.create_subprocess_shell(cmd,
-        stdin=asyncio.subprocess.PIPE,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE)
+def launch(key, default):
+    cmd = get_nuvolaris_config(key, default)
+    proc = Popen(
+        cmd, shell=True, 
+        cwd=os.environ.get("NUV_PWD"), env=os.environ, 
+        stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True
+    )
+    threading.Thread(target=readlines, args=(proc.stdout,)).start()
+    threading.Thread(target=readlines, args=(proc.stderr,)).start()
+
+def serve(): 
+    launch("devel", "nuv ide serve")
+
+def logs(): 
+    launch("logs", "nuv activation poll")
 
 # build
 def build():
-    deploy = get_nuvolaris_config("deploy")
-    if deploy is not None:
-        Popen(deploy, shell=True, cwd=os.environ.get("NUV_PWD"), env=os.environ)
+    deploy = get_nuvolaris_config("deploy", "true")
+    proc = Popen(
+        deploy, shell=True, 
+        env=os.environ,
+        cwd=os.environ.get("NUV_PWD"),
+        stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True
+    )
+    proc.communicate()

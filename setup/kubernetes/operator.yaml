@@ -35,6 +35,13 @@ spec:
     spec:
       serviceAccountName: nuvolaris-operator
       restartPolicy: Always
+      securityContext:
+          runAsUser: 1001
+          fsGroup: 1001      
+      volumes:
+      - name: deploy
+        persistentVolumeClaim:
+          claimName: nuvolaris-operator-deploy-pvc      
       containers:
         - name: nuvolaris-operator
           image: ${IMAGES_OPERATOR}
@@ -44,4 +51,7 @@ spec:
           securityContext:
               capabilities:
                 drop:
-                - ALL  
+                - ALL
+          volumeMounts:
+          - name: deploy
+            mountPath: "/home/nuvolaris/deploy"       

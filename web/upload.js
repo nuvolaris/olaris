@@ -24,16 +24,13 @@ main();
 
 function main() {
     let path = process.argv[2];
-    let quietParam = process.argv[3];
+    let verboseParam = process.argv[3];
     let cleanParam = process.argv[4];
 
-    let quiet = extractBoolFromParam(quietParam);
+    let verbose = extractBoolFromParam(verboseParam);
     let clean = extractBoolFromParam(cleanParam);
 
     let minioKey = `MINIO_SECRET_KEY`;
-    if (process.env.NUVUSER == 'nuvolaris') {
-        minioKey = "SECRET_MINIO_NUVOLARIS"
-    }
 
     const minioAuth = process.env[minioKey];
 
@@ -59,33 +56,33 @@ function main() {
             }
 
             if (clean) {
-                deleteContent(minioAuth, fileAddr, quiet);
+                deleteContent(minioAuth, fileAddr, verbose);
             } else {
-                uploadContent(file, minioAuth, fileAddr, quiet);
+                uploadContent(file, minioAuth, fileAddr, verbose);
             }
         }
     })
 }
 
-function uploadContent(file, minioAuth, fileAddr, quiet) {
+function uploadContent(file, minioAuth, fileAddr, verbose) {
     console.log(`Uploading ${fileAddr}...`);
-    let res = nuv.nuvExec("curl", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
-    if (!quiet) {
+    let res = nuv.nuvExec("curl", "-s", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
+    if (verbose) {
         console.log(res);
     }
 }
 
-function deleteContent(minioAuth, fileAddr, quiet) {
+function deleteContent(minioAuth, fileAddr, verbose) {
     console.log(`Deleting ${fileAddr}...`);
-    let res = nuv.nuvExec("curl", "-X", "DELETE", "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
-    if (!quiet) {
+    let res = nuv.nuvExec("curl", "-s", "-X", "DELETE", "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
+    if (verbose) {
         console.log(res);
     }
 }
 
 function extractBoolFromParam(param) {
-    let quietBool = param.split("=")[1];
-    if (quietBool === "true") {
+    let verboseBool = param.split("=")[1];
+    if (verboseBool === "true") {
         return true;
     }
     return false;

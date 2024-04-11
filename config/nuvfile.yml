@@ -67,7 +67,7 @@ tasks:
         fi
         if {{.__postgres}} || {{.__all}}
         then config NUVOLARIS_POSTGRES=true
-        fi
+        fi      
       - task: status
 
   disable:
@@ -337,6 +337,12 @@ tasks:
           VAR: "GCLOUD_SSHKEY"
           VAL: "{{.__key}}"
           DEF: "~/.ssh/id_rsa.pub"
+      - task: read
+        vars:
+          MSG: "GCloud VM image"
+          VAR: "GCLOUD_IMAGE"
+          VAL: "{{.__image}}"
+          DEF: "ubuntu-minimal-2204-lts"        
       - config -d | grep GCLOUD_
 
   gke:
@@ -505,7 +511,7 @@ tasks:
               else CUR=""
               fi
               for i in $NUV_TMP/*.kubeconfig
-              do  K=$(basename $i)
+              do  K=$(basename ${i//\\//})
                   if test "$CUR" == "$(cat $NUV_TMP/$K)"
                   then MSG="* "
                   else MSG="  "

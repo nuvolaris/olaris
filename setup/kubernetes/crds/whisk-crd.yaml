@@ -56,7 +56,7 @@ spec:
                     apiport:
                       type: integer
                     protocol:
-                      description: protocol to be used. Defaulted to http if TLS is not enabled. On Kind it will be always http
+                      description: protocol to be used. Defaulted to http if TLS is not enabled. On Kind it will be always http. This rules applied in auto mode, otherwise uses alway the required protocol. Default to auto.
                       type: string
                       enum:
                       - http
@@ -76,7 +76,13 @@ spec:
                       type: string
                     ingresslb:
                       description: allow to set the location of the ingress lb in the form namespace/service-name. Default to auto which will force the operator to use default values based on the environment.
-                      type: string                                                                   
+                      type: string
+                    affinity:
+                      description: enable/disable openwhisk configuration with node affinity. This flag can be true only on multinode cluster deployment. Default to false
+                      type: boolean
+                    tolerations:
+                      description: enable/disable openwhisk toleration. This flag can be true only on multinode cluster deployment. Default to false
+                      type: boolean                                                                                                                 
                   required:
                   - password    
                 components:
@@ -522,6 +528,9 @@ spec:
                       description: configure the OW controller
                       type: object
                       properties:
+                        replicas:
+                          description: controller statefulset replicas. Defaults to 1
+                          type: integer
                         javaOpts:
                           description: controller java memory settings defaulted to "-Xmx2048M"
                           type: string
@@ -561,6 +570,34 @@ spec:
                       description: configure the OW invoker if supported by the oeprator
                       type: object
                       properties:
+                        replicas:
+                          description: invoker statefulset replicas. Defaults to 1. When used be sure to enable also pod affinity
+                          type: integer
+                        kubernetes:
+                          description: specific kubernetes settings controlled by the invoker
+                          type: object
+                          properties:
+                           timeouts_run:
+                            description: pod run max timeout waited by the invoker. Defaults to 1 minute
+                            type: integer
+                           timeouts_logs:
+                            description: pod max timeout waited by the invoker to collect logs. Defaults to 1 minute
+                            type: integer
+                           user_pod_affinity_enabled:
+                            description: boolean falg to enable/disable user pod affinity. Default to false
+                            type: boolean 
+                           user_pod_affinity_key:
+                            description: node label to be used for the invoker pod affinity. Defaults to nuvolaris-role
+                            type: string 
+                           user_pod_affinity_value:
+                            description: node label value used for the invoker pod affinity. Defaults to invoker
+                            type: string                                                                                                               
+                           port_forwarding_enabled:
+                            description: boolean falg to enable/disable port forwarding. Default to false
+                            type: boolean
+                           action_namespace:
+                            description: Action namespace. Default to nuvolaris
+                            type: string                                                       
                         javaOpts:
                           description: invoker memory settings defaulted to "-Xmx1024M"
                           type: string

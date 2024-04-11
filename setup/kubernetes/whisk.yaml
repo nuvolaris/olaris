@@ -30,6 +30,8 @@ spec:
       ingressclass: ${NUVOLARIS_INGRESSCLASS:-auto}
       ingresslb: ${NUVOLARIS_INGRESSLB:-auto}
       protocol: ${NUVOLARIS_HOST_PROTOCOL:-auto}
+      affinity: false 
+      tolerations: false
   controller:
     image: "$IMAGES_CONTROLLER" 
   components:

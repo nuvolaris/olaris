@@ -8,13 +8,13 @@ Usage:
   util detect
   util poll
   util realpath <file>
+  util kubectl <args>...
+  util kubeconfig
   util 1password
   util notify <message>
   util install-notify-receiver
   util check-operator-version <version>
-  util kubectl <args>...
-  util boh <args>...
-
+ 
 Commands:
   secrets                 generate system secrets 
   nosecrets               remove system secrets
@@ -23,8 +23,9 @@ Commands:
   detect                  detect the current kubernetes cluster
   poll                    run wsk poll
   realpath                return full path of specified file
+  kubectl                 execute kubectl on current kubeconfig
+  kubeconfig              export OVERWRITING current kubeconfig to ~/.kube/config
   notify                  notify installation
   install-notify-receiver as described
   1password               1password support
   check-operator-version  as described
-  kubectl                 execute kubectl on current kubeconfig

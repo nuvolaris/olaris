@@ -30,6 +30,10 @@ env:
       else echo ~/.kube/config
       fi
 
+  OPERATOR_VOLUME_STORAGE_CLASS:
+    sh: |
+      echo $(kubectl get storageclass -ojsonpath="{.items[?(@.metadata.annotations.storageclass\.kubernetes\.io\/is-default-class=='true')].metadata.name}")      
+
 # sets memory parameter for the controller invoker and corresponding pods
   OPENWHISK_CONTROLLER_JAVA_OPTS: 
     sh: |
@@ -49,13 +53,13 @@ env:
     sh: | 
       if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ] && [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
       then echo 4G
-      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem+pool))G
+      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem))G
       fi  
   OPENWHISK_CONTROLLER_RES_MAX_MEM: 
     sh: | 
       if [ -z "$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB" ] && [ -z "$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB" ]
       then echo 5G
-      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem+pool+1))G
+      else mem=$OPENWHISK_CONTROLLER_JAVA_MEMORY_GB; pool=$OPENWHISK_CONTROLLER_CONTAINER_POOL_MEMORY_GB; echo $((mem+1))G
       fi       
 
 tasks:
@@ -162,9 +166,10 @@ tasks:
     #desc: deploy operator
     silent: true
     cmds:
+      - envsubst -i operator-pvc.yaml -o _operator-pvc.yaml
       - envsubst -i operator.yaml -o _operator.yaml
       #- "cat _operator.yaml"
-      - "kubectl apply -f _operator.yaml"
+      - "kubectl apply -f _operator-pvc.yaml -f _operator.yaml"
       - task: wait
         vars:
           OBJECT: pod/nuvolaris-operator-0
@@ -241,7 +246,7 @@ tasks:
             | jq -r '.items[].status.allocatable.cpu' 
             | awk '{sum+=$1} END {print sum}' 
             | awk '{if ($1 < 8 ) exit 1}'
-        msg: "Not enough CPU resources. Please ensure that the cluster has at least 8 CPU cores before proceeding."
+        msg: "Not enough CPU resources. Please ensure that the cluster has at least 8 CPU cores before proceeding. You can disable this check with 'export PREFL_NO_CPU_CHECK=1'"
       # check memory >= 8 GB on at least one node
       - sh: |
           if test -z "$PREFL_NO_MEM_CHECK"
@@ -252,7 +257,7 @@ tasks:
               exit 1
             fi
           fi
-        msg: "There is no node with at least 8GB of memory. Please ensure that at least one node meets the memory requirement before proceeding."
+        msg: "There is no node with at least 8GB of memory. Please ensure that at least one node meets the memory requirement before proceeding. You can disable this check with 'export PREFL_NO_MEM_CHECK=1'."
       # check memory >= 6 GB on all nodes
       - sh: |
           if test -z "$PREFL_NO_MEM_CHECK"
@@ -264,7 +269,7 @@ tasks:
               exit 1
             fi
           fi
-        msg: "Not all nodes have at least 6GB of memory. Please ensure that all nodes meet the memory requirement before proceeding."
+        msg: "Not all nodes have at least 6GB of memory. Please ensure that all nodes meet the memory requirement before proceeding. You can disable this check with 'export PREFL_NO_MEM_CHECK=1'"
     cmds:
       - task: permission
       - task: deploy

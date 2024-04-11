@@ -33,3 +33,5 @@ header:
     - '**/*.json'
     - '**/*.service'
     - 'update/update.ps1' 
+    - '**/mime.types'
+    - '**/*.txt'

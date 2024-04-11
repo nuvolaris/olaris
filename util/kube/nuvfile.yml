@@ -73,3 +73,22 @@ tasks:
         done
         $RES 
 
+  export:
+    desc: exporting NAMEd kubeconfig to specified FILE
+    requires: {vars: [FILE, NAME]}
+    cmds:
+    - test -e "$NUV_TMP/{{.NAME}}.kubeconfig" || die "no {{.NAME}} kubeconfig"
+    - |
+      FILE="$(realpath {{.FILE}})"
+      cp "$NUV_TMP/kubeconfig" "$FILE" 
+
+  import:
+    desc: importing FILE  to the NAMEd kubeconfig
+    requires: {vars: [FILE, NAME]}
+    cmds:
+    - |
+      FILE="$(realpath {{.FILE}})"
+      if test -e "$FILE"
+      then cp "$FILE" "$NUV_TMP/{{.NAME}}.kubeconfig"
+      else echo "$FILE" not found
+      fi

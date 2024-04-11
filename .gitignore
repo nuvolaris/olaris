@@ -16,6 +16,7 @@
 # under the License.
 
 _*
+!ide/deploy/__main__.py
 .vscode/
 .git-hooks/
 TODO.txt
@@ -23,3 +24,4 @@ TODO.txt
 **/id_rsa*
 .task/
 attic.txt
+**/venv/

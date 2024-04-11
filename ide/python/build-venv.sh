@@ -1,3 +1,4 @@
+#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -14,36 +15,23 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-#
 
-apiVersion: nuvolaris.org/v1
-kind: WhiskUser
-metadata:
-  name: ${USERNAME}
-  namespace: nuvolaris
-spec:
-  email: ${EMAIL}
-  password: ${PASSWORD}
-  namespace: ${USERNAME}
-  auth: ${AUTH}
-  redis:
-    enabled: ${REDIS_ENABLED}
-    prefix: ${USERNAME}
-    password: ${USER_SECRET_REDIS}
-  mongodb:
-    enabled: ${MONGODB_ENABLED}
-    database: ${USERNAME}
-    password: ${USER_SECRET_MONGODB}
-  postgres:
-    enabled: ${POSTGRES_ENABLED}
-    database: ${USERNAME}
-    password: ${USER_SECRET_POSTGRES}
-  object-storage:        
-    password: ${USER_SECRET_MINIO}
-    quota: "${MINIO_STORAGE_QUOTA:-auto}"
-    data:
-      enabled: ${MINIO_DATA_ENABLED}
-      bucket: ${USERNAME}-data
-    route:
-      enabled: ${MINIO_STATIC_ENABLED}
-      bucket: ${USERNAME}-web      
+DIR="${1:?directory}"
+ZIP="${2:?zip file}"
+cd "$DIR"
+if ! test -d virtualenv
+then virtualenv virtualenv
+fi
+source virtualenv/bin/activate
+pip install --upgrade pip
+pip install -r  requirements.txt
+virtualenv/bin/python -m pip uninstall -y -q setuptools wheel pip
+touch virtualenv/bin/activate
+if test -f "$ZIP"
+then rm "$ZIP"
+fi
+zip -r "$ZIP" virtualenv >/dev/null
+ls -l $ZIP
+date >virtualenv/date
+
+

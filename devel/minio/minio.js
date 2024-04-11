@@ -42,7 +42,6 @@ function main() {
     const downloadAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/devel_download`;
 
     command = process.argv[2]
-
     cmd = {}
 
     if ('ls' == command) {

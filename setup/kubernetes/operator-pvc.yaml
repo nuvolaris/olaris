@@ -15,35 +15,18 @@
 # specific language governing permissions and limitations
 # under the License.
 #
-
-apiVersion: nuvolaris.org/v1
-kind: WhiskUser
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: ${USERNAME}
+  name: nuvolaris-operator-deploy-pvc
   namespace: nuvolaris
+  labels:
+    app: nuvolaris-operator-storage-claim
 spec:
-  email: ${EMAIL}
-  password: ${PASSWORD}
-  namespace: ${USERNAME}
-  auth: ${AUTH}
-  redis:
-    enabled: ${REDIS_ENABLED}
-    prefix: ${USERNAME}
-    password: ${USER_SECRET_REDIS}
-  mongodb:
-    enabled: ${MONGODB_ENABLED}
-    database: ${USERNAME}
-    password: ${USER_SECRET_MONGODB}
-  postgres:
-    enabled: ${POSTGRES_ENABLED}
-    database: ${USERNAME}
-    password: ${USER_SECRET_POSTGRES}
-  object-storage:        
-    password: ${USER_SECRET_MINIO}
-    quota: "${MINIO_STORAGE_QUOTA:-auto}"
-    data:
-      enabled: ${MINIO_DATA_ENABLED}
-      bucket: ${USERNAME}-data
-    route:
-      enabled: ${MINIO_STATIC_ENABLED}
-      bucket: ${USERNAME}-web      
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ${OPERATOR_VOLUME_STORAGE_CLASS:-standard}
+  resources:
+    requests:
+      storage: 512M

@@ -96,6 +96,7 @@ tasks:
   prereq:
     silent: true
     cmds:
+      - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "This command must be run in a Nuvolaris DevContainer"
       - test "$(python3 -V | awk -F. '{print $2}')" -ge 10 || die "python 3.10 or greater not available"
       - test "$(node -v | awk -F. '{print substr($1,2) }')" -ge 18 || die "nodejs 18 or greater not available"
       - test -d "$NUV_PWD/packages" || die "no packages in current directory"

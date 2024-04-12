@@ -130,11 +130,12 @@ tasks:
           while $LOOP
           do
             LOOP=false
-            ps -a -o pgid,pid | while read GRP PID
+            ps -a -o pgid,pid,stat | grep -v 'Z' | while read GRP PID STAT
             do 
-              echo $GRP $PID
+              echo Terminating $PID in $GRP
               if test "$GRP" = "$PGRP"
-              then kill -9 "$PID" 
+              then echo $GRP $PID
+                   kill -9 "$PID" 
                    LOOP=true
               fi 
             done

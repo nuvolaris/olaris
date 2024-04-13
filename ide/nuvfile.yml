@@ -112,12 +112,13 @@ tasks:
              fi
         fi
       - |
-        PIP_FLAG="--user"
-        if which python3 | grep $HOME
-        then PIP_FLAG=""
-        fi
         if ! python3 -m pip list | grep watchfiles >/dev/null 2>/dev/null
-        then python3 -m pip install $PIP_FLAG watchfiles asyncio
+        then
+            PIP_FLAG="--user"
+            if which python3 | grep $HOME >/dev/null
+            then PIP_FLAG=""
+            fi
+            python3 -m pip install $PIP_FLAG watchfiles asyncio
         fi
       - |
         if ! which http-server >/dev/null 2>/dev/null
@@ -126,7 +127,7 @@ tasks:
       - task: kill
 
   kill:
-    silent: false
+    silent: true
     ignore: true
     cmds:
       - |
@@ -142,7 +143,7 @@ tasks:
             do 
               echo Terminating $PID in $GRP
               if test "$GRP" = "$PGRP"
-              then echo $GRP $PID
+              then #echo $GRP $PID
                    kill -9 "$PID" 
                    LOOP=true
               fi 

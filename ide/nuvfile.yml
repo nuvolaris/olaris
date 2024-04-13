@@ -86,7 +86,7 @@ tasks:
     cmds:
     - nuv activation poll
 
-  _info:
+  info:
     silent: true
     #desc: info
     cmds:
@@ -109,8 +109,12 @@ tasks:
              fi
         fi
       - |
+        PIP_FLAG="--user"
+        if which python3 | grep $HOME
+        then PIP_FLAG=""
+        fi
         if ! python3 -m pip list | grep watchfiles >/dev/null 2>/dev/null
-        then python3 -m pip install --user watchfiles asyncio
+        then python3 -m pip install $PIP_FLAG watchfiles asyncio
         fi
       - |
         if ! which http-server >/dev/null 2>/dev/null

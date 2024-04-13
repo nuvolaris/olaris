@@ -96,6 +96,7 @@ tasks:
   prereq:
     silent: true
     cmds:
+      - test $(("$NUVDEV_VERSION"+0)) -lt 2404130000 || die "Your .devcontainer.json is outdated - update it from here: https://raw.githubusercontent.com/mastrogpt/starter/main/.devcontainer.json"
       - test -e "/.nuvolaris" || test -n "$NUVDEV_FORCE" || die "This command must be run in a Nuvolaris DevContainer"
       - test "$(python3 -V | awk -F. '{print $2}')" -ge 10 || die "python 3.10 or greater not available"
       - test "$(node -v | awk -F. '{print substr($1,2) }')" -ge 18 || die "nodejs 18 or greater not available"

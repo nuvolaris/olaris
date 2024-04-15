@@ -58,9 +58,9 @@ async def redeploy():
 
 def watch():
     # start web server
-    #serve()
+    serve()
     # show logs
-    #logs()
+    logs()
 
     loop = asyncio.get_event_loop()
     task = loop.create_task(redeploy())

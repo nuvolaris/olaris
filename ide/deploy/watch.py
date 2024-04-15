@@ -46,7 +46,7 @@ def check_and_deploy(change):
     deploy(src)
 
 async def redeploy():
-    print("> Redeploy:")
+    print("> Watching:")
     iterator = watchfiles.awatch("packages", recursive=True)
     async for changes in iterator:
         for change in changes:

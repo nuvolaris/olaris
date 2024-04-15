@@ -128,7 +128,7 @@ tasks:
 
   kill:
     silent: true
-    ignore: true
+    ignore_errors: true
     cmds:
       - |
         if test -e ~/.nuv/tmp/deploy.pgrp
@@ -182,7 +182,7 @@ tasks:
 
   devel:
     interactive: true
-    silent: false
+    silent: true
     desc: start interactive development mode files
     cmds:
       - task: prereq
@@ -197,6 +197,9 @@ tasks:
         if {{.__dry_run}}
         then DRY="--dry-run" ; ECHO='echo'
         else DRY="" ; ECHO=""
+        fi
+        if cat /proc/version | grep -i microsoft
+        then export WATCHFILES_FORCE_POLLING=1
         fi
         python3 -m deploy "$NUV_PWD" -w $DRY
         #npm-run-all --parallel deploy serve
@@ -229,9 +232,10 @@ tasks:
       done
 
   clean:
+    silent: true
     cmds:
      - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
-     - test -e ~/.wskprops || die "please 'nuv ide login' first"
+     - task: kill
      - |
        if test -d "$NUV_PWD/packages" 
        then 

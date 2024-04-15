@@ -22,14 +22,15 @@ import asyncio
 import os.path
 import signal
 
+
 from .deploy import deploy
 from .client import serve, logs
 
 def check_and_deploy(change):
-    cur_dir_len = len(os.getcwd())+1
     change_type, path = change
+    path = os.path.abspath(path)
+    cur_dir_len = len(os.getcwd())+1
     src = path[cur_dir_len:]
-    print(f"{change_type}: {src}")
     # only modified
     if change_type != watchfiles.Change.modified: return
     # no directories
@@ -45,22 +46,21 @@ def check_and_deploy(change):
     deploy(src)
 
 async def redeploy():
-    print("redeploy")
+    print("> Redeploy:")
     iterator = watchfiles.awatch("packages", recursive=True)
-    try:
-        async for changes in iterator:
-            for change in changes:
+    async for changes in iterator:
+        for change in changes:
+            try:
+                #print(change)
                 check_and_deploy(change)
-    except KeyboardInterrupt:
-        print("Keyboard Interrupt")
-    except:
-        print("Exception")
+            except Exception as e:
+                print(e)
 
 def watch():
     # start web server
-    serve()
+    #serve()
     # show logs
-    logs()
+    #logs()
 
     loop = asyncio.get_event_loop()
     task = loop.create_task(redeploy())

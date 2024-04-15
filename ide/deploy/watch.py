@@ -58,8 +58,8 @@ async def redeploy():
 
 def watch():
     # start web server
-    #serve()
-    # show logs
+    serve()
+     show logs
     #logs()
 
     loop = asyncio.get_event_loop()

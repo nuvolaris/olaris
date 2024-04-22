@@ -210,8 +210,7 @@ tasks:
     prompt: "are you sure you want to remove all actions and packages?"
     silent: true
     cmds:
-    - test -e "/.nuvolaris" || die "nuv ide commands must be run in the ghrc.io/nuvolaris/devcontainer with VSCode"
-    - test -e ~/.wskprops || die "please 'nuv ide login' first"
+    - task: prereq
     - >
       nuv action list
       | awk  'NR>1 { print $1}' 

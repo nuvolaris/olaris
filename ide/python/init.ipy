@@ -17,12 +17,22 @@
 
 # invoked by ipython from the root folder
 from pathlib import Path
+from subprocess import run
 
+args = {}
+lines = []
+
+try: 
+    lines += Path(".env").read_text().splitlines()
+except: pass
+try: 
+    lines += Path("packages/.env").read_text().splitlines()
+except: pass
 try:
-    lines = Path(".env").read_text().splitlines()
-    args = { line.split("=",1)[0]: line.split("=",1)[-1]  for line in lines}
-except:
-    args = {}
+    lines += run(["nuv", "-config", "-dump"], capture_output=True, text=True).stdout.splitlines()
+except: pass
+
+args = { line.split("=",1)[0]: line.split("=",1)[-1]  for line in lines}
 
 %load_ext autoreload
 %autoreload 2

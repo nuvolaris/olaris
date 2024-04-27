@@ -63,11 +63,3 @@ tasks:
       fi
       ipython -i init.ipy
 
-
-  boh:
-    desc: boh
-    cmds:
-    - |
-      trap 'echo wakeup' EXIT
-      echo sleeping
-      sleep 100

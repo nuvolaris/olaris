@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-MAINS = ["__main__.py", "index.js"]
+MAINS = ["__main__.py", "index.js", "index.php"]
 
 import os
 from  os.path import exists, isdir
@@ -37,7 +37,7 @@ def extract_args(files):
     res = []
     for file in files:
         #if dry_run:
-        #    print(f": inspecting {file}")
+        #  print(f": inspecting {file}")
         if exists(file):
             with open(file, "r") as f:
                 for line in f.readlines():

@@ -18,32 +18,36 @@
 from glob import glob
 from .deploy import *
 
+
 def scan():
     # first look for requirements.txt and build the venv (add in set)
     deployments = set()
     packages = set()
 
     print("> Scan:")
-    reqs =  glob("packages/*/*/requirements.txt") + glob("packages/*/*/package.json")
+    reqs = glob("packages/*/*/requirements.txt") + \
+        glob("packages/*/*/package.json") + glob("packages/*/*/composer.json")
     # req = reqs[0]
     # from util.deploy.deploy import *
     for req in reqs:
         print(">> Requirements:", req)
         sp = req.split("/")
-        act = build_zip(sp[1],sp[2])
+        act = build_zip(sp[1], sp[2])
         deployments.add(act)
         packages.add(sp[1])
-        
-    mains = glob("packages/*/*/index.js") + glob("packages/*/*/__main__.py")
+
+    mains = glob("packages/*/*/index.js") + \
+        glob("packages/*/*/__main__.py") + glob("packages/*/*/index.php")
     # main = mains[2]
-    for main in mains: 
+    for main in mains:
         print(">> Main:", main)
         sp = main.split("/")
-        act = build_action(sp[1],sp[2])
+        act = build_action(sp[1], sp[2])
         deployments.add(act)
-        packages.add(sp[1])    
+        packages.add(sp[1])
 
-    singles = glob("packages/*/*.py") +  glob("packages/*/*.js")
+    singles = glob("packages/*/*.py") + \
+        glob("packages/*/*.js") + glob("packages/*/*.php")
     # single = singles[0]
     for single in singles:
         print(">> Action:", single)
@@ -56,7 +60,7 @@ def scan():
     for package in packages:
         print(">> Package:", package)
         deploy_package(package)
-    
+
     for action in deployments:
         print(">>> Action:", action)
         deploy_action(action)

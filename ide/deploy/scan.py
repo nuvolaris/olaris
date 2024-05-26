@@ -17,6 +17,7 @@
 
 from glob import glob
 from .deploy import *
+from .client import get_nuvolaris_config
 
 
 def scan():
@@ -25,8 +26,20 @@ def scan():
     packages = set()
 
     print("> Scan:")
-    reqs = glob("packages/*/*/requirements.txt") + \
-        glob("packages/*/*/package.json") + glob("packages/*/*/composer.json")
+
+    # => REQUIREMENTS
+    default_reqs_globs = ["packages/*/*/requirements.txt",
+                          "packages/*/*/package.json",
+                          "packages/*/*/composer.json"
+                          ]
+    package_globs = get_nuvolaris_config("requirements", default_reqs_globs)
+    reqs = list()
+
+    for pkg_glob in package_globs:
+        items = glob(pkg_glob)
+        # extend first list without duplicates
+        reqs.extend(x for x in items if x not in reqs)
+
     # req = reqs[0]
     # from util.deploy.deploy import *
     for req in reqs:
@@ -36,8 +49,17 @@ def scan():
         deployments.add(act)
         packages.add(sp[1])
 
-    mains = glob("packages/*/*/index.js") + \
-        glob("packages/*/*/__main__.py") + glob("packages/*/*/index.php")
+    # => MAINS
+    default_mains_globs = ["packages/*/*/index.js",
+                           "packages/*/*/__main__.py",
+                           "packages/*/*/index.php"]
+    mains_globs = get_nuvolaris_config("mains", default_mains_globs)
+    mains = list()
+    for main_glob in mains_globs:
+        items = glob(main_glob)
+        # extend first list without duplicates
+        mains.extend(x for x in items if x not in mains)
+
     # main = mains[2]
     for main in mains:
         print(">> Main:", main)
@@ -46,8 +68,15 @@ def scan():
         deployments.add(act)
         packages.add(sp[1])
 
-    singles = glob("packages/*/*.py") + \
-        glob("packages/*/*.js") + glob("packages/*/*.php")
+    # => SINGLES
+    default_singles_globs = ["packages/*/*.py",
+                             "packages/*/*.js", "packages/*/*.php"]
+    singles_globs = get_nuvolaris_config("singles", default_singles_globs)
+    singles = list()
+    for single_glob in singles_globs:
+        items = glob(single_glob)
+        singles.extend(x for x in items if x not in singles)
+
     # single = singles[0]
     for single in singles:
         print(">> Action:", single)
@@ -56,7 +85,6 @@ def scan():
         packages.add(sp[1])
 
     print("> Deploying:")
-
     for package in packages:
         print(">> Package:", package)
         deploy_package(package)

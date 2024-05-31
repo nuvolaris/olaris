@@ -85,10 +85,10 @@ tasks:
 
         export REDIS_ENABLED=false
         export MONGODB_ENABLED=false
-        export MINIO_DATA_ENABLED=false
-        export MINIO_STATIC_ENABLED=false
+        export STORAGE_DATA_ENABLED=false
+        export STORAGE_STATIC_ENABLED=false
         export POSTGRES_ENABLED=false
-        export MINIO_STORAGE_QUOTA=auto
+        export OBJECT_STORAGE_QUOTA=auto
 
         if {{.__redis}} || {{.__all}}
         then 
@@ -110,19 +110,19 @@ tasks:
           fi
         fi
 
-        if {{.__minio}} || {{.__all}}
+        if {{.__storage}} || {{.__all}}
         then 
-          if $NUVOLARIS_MINIO
+          if $NUVOLARIS_MINIO || $NUVOLARIS_COSI
           then 
-            MINIO_DATA_ENABLED=true
-            MINIO_STATIC_ENABLED=true
+            STORAGE_DATA_ENABLED=true
+            STORAGE_STATIC_ENABLED=true
           else 
-            nuv -die "Error! Minio is not enabled in Nuvolaris"
+            nuv -die "Error! Onject Storage is not enabled in Nuvolaris"
           fi
         fi
 
         if test -n "{{.__storagequota}}"
-        then MINIO_STORAGE_QUOTA={{.__storagequota}}
+        then OBJECT_STORAGE_QUOTA={{.__storagequota}}
         fi         
 
         if {{.__postgres}} || {{.__all}}

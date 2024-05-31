@@ -1,7 +1,7 @@
 Subcommand: nuv admin
 
 Usage:
-  admin adduser <username> <email> <password> [--all] [--redis] [--mongodb] [--minio] [--postgres] [--storagequota=<quota>|auto]
+  admin adduser <username> <email> <password> [--all] [--redis] [--mongodb] [--storage] [--postgres] [--storagequota=<quota>|auto]
   admin deleteuser <username>
 
 Commands:
@@ -12,6 +12,6 @@ Options:
   --all                   enable all services
   --redis                 enable redis
   --mongodb               enable mongodb
-  --minio                 enable minio
+  --storage               enable object based storage
   --postgres              enable postgres
   --storagequota=<quota>

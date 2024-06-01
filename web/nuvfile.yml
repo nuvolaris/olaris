@@ -17,6 +17,8 @@
 
 version: 3
 
+
+
 tasks:
   upload:
     silent: true
@@ -34,3 +36,8 @@ tasks:
         sh: wsk property get | awk '/whisk namespace/{print $3}'
       APIHOST:
         sh: wsk property get | awk '/whisk API host/{print $4}'
+      AUTHB64:
+        sh: |
+          if test -e ~/.wskprops
+          then source ~/.wskprops; echo $(base64 -e $AUTH)
+          fi        

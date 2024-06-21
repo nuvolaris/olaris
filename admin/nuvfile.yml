@@ -46,7 +46,7 @@ tasks:
         export USERNAME={{._username_}}
         export EMAIL={{._email_}}
         export PASSWORD={{._password_}} 
-        export AUTH="$(nuv -random -u):$(nuv -random --str 64)"
+        export NEW_USER_AUTH="$(nuv -random -u):$(nuv -random --str 64)"
 
         # check {{._username_}} is at least 5 chars long
         if [ ${#USERNAME} -lt 5 ]

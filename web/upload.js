@@ -17,7 +17,7 @@
 
 const nuv = require('nuv');
 
-const contentActionAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/content/${process.env.NUVUSER}`;
+const contentActionAddr = `${process.env.APIHOST}/api/v1/web/whisk-system/nuv/devel_upload/${process.env.MINIO_BUCKET_STATIC}`;
 
 // *** Main ***
 main();
@@ -30,9 +30,8 @@ function main() {
     let verbose = extractBoolFromParam(verboseParam);
     let clean = extractBoolFromParam(cleanParam);
 
-    let minioKey = `MINIO_SECRET_KEY`;
 
-    const minioAuth = process.env[minioKey];
+    const minioAuth = process.env.AUTHB64
 
     const pathFoundAsDir = nuv.isDir(path);
     if (!pathFoundAsDir) {
@@ -66,7 +65,7 @@ function main() {
 
 function uploadContent(file, minioAuth, fileAddr, verbose) {
     console.log(`Uploading ${fileAddr}...`);
-    let res = nuv.nuvExec("curl", "-s", "-X", "PUT", "-T", file, "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
+    let res = nuv.nuvExec("curl", "-s", "-X", "PUT", "-T", file, "-H", `x-impersonate-auth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
     if (verbose) {
         console.log(res);
     }
@@ -74,7 +73,7 @@ function uploadContent(file, minioAuth, fileAddr, verbose) {
 
 function deleteContent(minioAuth, fileAddr, verbose) {
     console.log(`Deleting ${fileAddr}...`);
-    let res = nuv.nuvExec("curl", "-s", "-X", "DELETE", "-H", `minioauth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
+    let res = nuv.nuvExec("curl", "-s", "-X", "DELETE", "-H", `x-impersonate-auth: ${minioAuth}`, `${contentActionAddr}/${fileAddr}`);
     if (verbose) {
         console.log(res);
     }

@@ -266,3 +266,6 @@ tasks:
   
   php:
     desc: php subcommand
+
+  golang:
+    desc: go subcommand

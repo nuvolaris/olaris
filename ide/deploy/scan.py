@@ -30,8 +30,9 @@ def scan():
     # => REQUIREMENTS
     default_reqs_globs = ["packages/*/*/requirements.txt",
                           "packages/*/*/package.json",
-                          "packages/*/*/composer.json"
-                          ]
+                          "packages/*/*/composer.json",
+                          "packages/*/*/go.mod"]
+                          
     package_globs = get_nuvolaris_config("requirements", default_reqs_globs)
     reqs = list()
 
@@ -52,7 +53,8 @@ def scan():
     # => MAINS
     default_mains_globs = ["packages/*/*/index.js",
                            "packages/*/*/__main__.py",
-                           "packages/*/*/index.php"]
+                           "packages/*/*/index.php",
+                           "packages/*/*/main.go"]
     mains_globs = get_nuvolaris_config("mains", default_mains_globs)
     mains = list()
     for main_glob in mains_globs:
@@ -70,7 +72,9 @@ def scan():
 
     # => SINGLES
     default_singles_globs = ["packages/*/*.py",
-                             "packages/*/*.js", "packages/*/*.php"]
+                             "packages/*/*.js", 
+                             "packages/*/*.php",
+                             "packages/*/*.go"]
     singles_globs = get_nuvolaris_config("singles", default_singles_globs)
     singles = list()
     for single_glob in singles_globs:

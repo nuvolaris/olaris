@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-MAINS = ["__main__.py", "index.js", "index.php"]
+MAINS = ["__main__.py", "index.js", "index.php", "main.go"]
 
 import os
 from  os.path import exists, isdir

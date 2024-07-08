@@ -15,47 +15,66 @@
 # specific language governing permissions and limitations
 # under the License.
 
-from pathlib import Path
 from subprocess import Popen, PIPE
-import os, os.path, json
+import os
+import os.path
 import threading
-import asyncio
+from typing import IO
+from .config import get_nuvolaris_config
 
-def get_nuvolaris_config(key, default):
-    try:
-        dir = os.environ.get("NUV_PWD", "/do_not_exists")
-        file = f"{dir}/package.json"
-        info = json.loads(Path(file).read_text())
-        return info.get("nuvolaris", {}).get(key, default)
-    except:
-        return default
 
-def readlines(inp):
+def readlines(inp: IO[str]):
+    """Read line from an file descriptor
+
+    Args:
+        inp (IO[str]): the file descriptor
+    """
     for line in iter(inp.readline, ''):
         print(line, end='')
 
 # serve web area
-def launch(key, default):
+
+
+def launch(key: str, default: (str | list)):
+    """Launch a command in a process, reading.
+    The command is extracted from nuvolaris config in package.json 
+    or a default command is used
+
+    Args:
+        key (str): the key from which read the command
+        default (str  |  list): the default if the key is not found
+    """
     cmd = get_nuvolaris_config(key, default)
     proc = Popen(
-        cmd, shell=True, 
-        cwd=os.environ.get("NUV_PWD"), env=os.environ, 
+        cmd, shell=True,
+        cwd=os.environ.get("NUV_PWD"), env=os.environ,
         stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True
     )
     threading.Thread(target=readlines, args=(proc.stdout,)).start()
     threading.Thread(target=readlines, args=(proc.stderr,)).start()
 
-def serve(): 
+
+def serve():
+    """Serve the web area
+    """
     launch("devel", "nuv ide serve")
 
-def logs(): 
+
+def logs():
+    """Serve the openwhisk activation's logs
+    """
     launch("logs", "nuv activation poll")
 
 # build
+
+
 def build():
+    """Try to build the frontend application, if the deploy command is set.
+    
+    """
     deploy = get_nuvolaris_config("deploy", "true")
     proc = Popen(
-        deploy, shell=True, 
+        deploy, shell=True,
         env=os.environ,
         cwd=os.environ.get("NUV_PWD"),
         stdin=PIPE, stdout=PIPE, stderr=PIPE, text=True

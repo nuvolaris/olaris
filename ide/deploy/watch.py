@@ -15,48 +15,66 @@
 # specific language governing permissions and limitations
 # under the License.
 
-SKIPDIR = ["virtualenv", "node_modules", "__pycache__"]
-
+from typing import Tuple
 import watchfiles
+
 import asyncio
 import os.path
 import signal
 
-
+from .config import SKIPDIR
 from .deploy import deploy
 from .client import serve, logs
 
-def check_and_deploy(change):
+
+def check_and_deploy(change: Tuple[watchfiles.Change, str]):
+    """Deploy a file if the received change is a file modification
+
+    Args:
+        change (Tuple[watchfiles.Change, str]): the change type and filename
+    """
     change_type, path = change
     path = os.path.abspath(path)
     cur_dir_len = len(os.getcwd())+1
     src = path[cur_dir_len:]
     # only modified
-    if change_type != watchfiles.Change.modified: return
+    if change_type != watchfiles.Change.modified:
+        return
     # no directories
-    if os.path.isdir(src): return
+    if os.path.isdir(src):
+        return
     # no missing files
-    if not os.path.exists(src): return
+    if not os.path.exists(src):
+        return
     # no generated directories
     for dir in src.split("/")[:-1]:
-        if dir in SKIPDIR: return
+        if dir in SKIPDIR:
+            return
     # no generated files
-    if src.endswith(".zip"): return
+    if src.endswith(".zip"):
+        return
     # now you can deploy
     deploy(src)
 
+
 async def redeploy():
+    """Install the filesystem watcher over the packages directory
+    """
     print("> Watching:")
     iterator = watchfiles.awatch("packages", recursive=True)
     async for changes in iterator:
         for change in changes:
             try:
-                #print(change)
+                # print(change)
                 check_and_deploy(change)
             except Exception as e:
                 print(e)
 
+
 def watch():
+    """This function will start the webserver and show logs.
+    After that it will watch the filesystem in a loop, until SIGTERM received.
+    """
     # start web server
     serve()
     # show logs
@@ -64,6 +82,7 @@ def watch():
 
     loop = asyncio.get_event_loop()
     task = loop.create_task(redeploy())
+
     def end_loop():
         print("Ending task.")
         task.cancel()

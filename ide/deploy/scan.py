@@ -18,22 +18,44 @@
 from glob import glob
 from .deploy import *
 from .client import get_nuvolaris_config
+from .config import DEFAULT_REQ_GLOBS, DEFAULT_MAIN_GLOBS, DEFAULT_SINGLES_GLOBS
 
 
 def scan():
+    """This function has two stages:\n
+    Scan
+    ===    
+    A) Packages requirements\n
+    Check for package requirements. It will look in a specific requirement file 
+    (from web package.json) or a default set of requirements (requirements.txt, 
+    composer.json etc. etc).\n
+    For each requirement found, a zip is built calling the task:
+    ``nuv ide util zip A={package}/{action}``\n
+    The zip is added to actions (deployments); the directory is added to 
+    packages (packages)\n
+    B) Mains for packages\n
+    After that, the scan continue checking the "mains". For each main, an
+    action is built calling the task:\n
+    ``nuv ide util action A={package}/{action}``\n
+    where package is the base directory of main file and the action is the
+    basename of the main file.\n
+    C) Singles\n
+    Finally the scan will take care of single file functions\n
+    
+    Deploy
+    ===
+    Each package is deployed with the command:\n
+    ``nuv package update {package} {pargs}``\n
+    Each deployment is deployed with the command:\n
+    ``nuv action update {package}/{name} {artifact} {args}``\n
+    """
+
     # first look for requirements.txt and build the venv (add in set)
     deployments = set()
     packages = set()
 
     print("> Scan:")
-
-    # => REQUIREMENTS
-    default_reqs_globs = ["packages/*/*/requirements.txt",
-                          "packages/*/*/package.json",
-                          "packages/*/*/composer.json",
-                          "packages/*/*/go.mod"]
-                          
-    package_globs = get_nuvolaris_config("requirements", default_reqs_globs)
+    package_globs = get_nuvolaris_config("requirements", DEFAULT_REQ_GLOBS)
     reqs = list()
 
     for pkg_glob in package_globs:
@@ -51,11 +73,7 @@ def scan():
         packages.add(sp[1])
 
     # => MAINS
-    default_mains_globs = ["packages/*/*/index.js",
-                           "packages/*/*/__main__.py",
-                           "packages/*/*/index.php",
-                           "packages/*/*/main.go"]
-    mains_globs = get_nuvolaris_config("mains", default_mains_globs)
+    mains_globs = get_nuvolaris_config("mains", DEFAULT_MAIN_GLOBS)
     mains = list()
     for main_glob in mains_globs:
         items = glob(main_glob)
@@ -71,11 +89,8 @@ def scan():
         packages.add(sp[1])
 
     # => SINGLES
-    default_singles_globs = ["packages/*/*.py",
-                             "packages/*/*.js", 
-                             "packages/*/*.php",
-                             "packages/*/*.go"]
-    singles_globs = get_nuvolaris_config("singles", default_singles_globs)
+
+    singles_globs = get_nuvolaris_config("singles", DEFAULT_SINGLES_GLOBS)
     singles = list()
     for single_glob in singles_globs:
         items = glob(single_glob)

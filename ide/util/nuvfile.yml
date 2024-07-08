@@ -32,6 +32,8 @@ tasks:
       then nuv ide nodejs zip DIR="$(realpath "packages/{{.A}}")"
       elif test -e "packages/{{.A}}/composer.json"
       then nuv ide php zip DIR="$(realpath "packages/{{.A}}")"
+      elif test -e "packages/{{.A}}/go.mod"
+      then nuv ide go zip DIR="$(realpath "packages/{{.A}}")"
       else echo "no zip environment"
       fi
 
@@ -48,6 +50,8 @@ tasks:
       then nuv ide nodejs action DIR="$(realpath "packages/{{.A}}")"
       elif test -e "packages/{{.A}}/index.php"
       then nuv ide php action DIR="$(realpath "packages/{{.A}}")"
+      elif test -e "packages/{{.A}}/main.go"
+      then nuv ide go action DIR="$(realpath "packages/{{.A}}")"
       else die "*** unknow action type"
       fi
 
@@ -64,6 +68,8 @@ tasks:
       then nuv ide nodejs clean DIR="$(realpath "packages/{{.A}}")"
       elif test -d "packages/{{.A}}/vendor"
       then nuv ide php clean DIR="$(realpath "packages/{{.A}}")"
+      elif test -e "packages/{{.A}}/_main.go"
+      then nuv ide go clean DIR="$(realpath "packages/{{.A}}")"
       else echo "nothing to clean"
       fi
       if test -e "packages/{{.A}}.zip"

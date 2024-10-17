@@ -324,7 +324,7 @@ spec:
                   - acme-registered-email
                   - acme-server-url
                 minio:
-                  description: used to oconfigure the internal minio data storage service
+                  description: used to configure the internal minio data storage service
                   type: object
                   properties:
                     volume-size:
@@ -352,6 +352,25 @@ spec:
                       required:
                       - user
                       - password
+                    ingress:
+                      description: configuration option for global minio ingresses exposure
+                      type: object
+                      properties:
+                        s3-enabled:
+                          description: boolean flag to activate MINIO S3 compatible ingress. Default to false
+                          type: boolean
+                        s3-hostname:
+                          description: ingress hostname to be used if true (normally s3.<apihost>)
+                          type: string
+                        console-enabled:
+                          description: boolean flag to expose MINIO console
+                          type: boolean
+                        console-hostname:
+                          description: ingress hostname to be used (nora=mally minio.<apihost>)
+                          type: string
+                      required:
+                      - s3-enabled
+                      - console-enabled                           
                   required:
                   - volume-size
                   - admin

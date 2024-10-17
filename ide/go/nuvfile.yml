@@ -15,29 +15,38 @@
 # specific language governing permissions and limitations
 # under the License.
 
-version: 3
-
-
+version: '3'
 
 tasks:
-  upload:
+
+  clean:
     silent: true
+    desc: clean action DIR
+    requires: {var: [DIR]}
     cmds:
-      - js upload.js $FOLDER_PATH quiet={{.__quiet}} clean={{.__clean}}
-    env:
-      FOLDER_PATH:
-        sh: |
-          P="$(realpath ./)"
-          if test -n "{{._folder_}}" 
-          then P="$(realpath {{._folder_}})"
-          fi
-          echo $P
-      NUVUSER:
-        sh: wsk property get | awk '/whisk namespace/{print $3}'
-      APIHOST:
-        sh: wsk property get | awk '/whisk API host/{print $4}'
-      AUTHB64:
-        sh: |
-          if test -e ~/.wskprops
-          then source ~/.wskprops; echo $(base64 -e $AUTH)
-          fi        
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - /usr/bin/rm -v -f {{.DIR}}/main_.go {{.DIR}}.zip {{.DIR}}/exec
+
+  zip:
+    silent: true
+    desc: prepare zip for action in DIR 
+    requires: {var: [DIR]}
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - /usr/bin/zip -v "{{.DIR}}.zip" exec.env
+    - /bin/cp -v launcher.go "{{.DIR}}/main_.go"
+    generates:
+    - "{{.DIR}}/main_.go"
+
+  action:
+    deps: [zip]
+    requires: {var: [DIR]}
+    silent: true
+    desc: compile action in DIR
+    dir: "{{.DIR}}"
+    cmds:
+    - test -d "{{.DIR}}" || die "{{.DIR}} not found or not a directory"
+    - go build -o exec
+    - /usr/bin/zip -u "{{.DIR}}.zip" exec
+
+

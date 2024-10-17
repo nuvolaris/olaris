@@ -37,7 +37,7 @@ tasks:
       echo "*** 'deploy' (alias for 'nuv ide deploy') to deploy your app to https://$NUVDEV_USERNAME.nuvolaris.dev"
       echo "*** 'devel'  (alias for 'nuv ide devel') to start incremental development mode"
       echo "*** 'login'  (alias for 'nuv ide login')  to login as a different user"
-      echo "*** 'nuv ide' for more informations
+      echo "*** 'nuv ide' for more informations"
       echo "*** https://nuvolaris.github.io for online documentation"
       echo "**************************************************************************************"
 
@@ -244,6 +244,8 @@ tasks:
           /bin/rm -rvf "$NUV_PWD"/packages/*/*/virtualenv/
           echo "*** removing node_modules"
           /bin/rm -rvf "$NUV_PWD"/packages/*/*/node_modules/
+          echo "*** removing vendor"
+          /bin/rm -rvf "$NUV_PWD"/packages/*/*/vendor/
           echo "*** removing .zip"
           /bin/rm -vf "$NUV_PWD"/packages/*/*.zip 
        else die "no packages in current directory"
@@ -261,3 +263,9 @@ tasks:
 
   nodejs:
     desc: nodejs subcommand
+  
+  php:
+    desc: php subcommand
+
+  golang:
+    desc: go subcommand

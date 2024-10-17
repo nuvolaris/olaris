@@ -128,13 +128,18 @@ spec:
     exposedExternally: False
     useOperator: False
   minio:
-    volume-size: 2
+    ingress:
+      s3-enabled: ${MINIO_CONFIG_INGRESS_S3_ENABLED:-true}
+      console-enabled: ${MINIO_CONFIG_INGRESS_CONSOLE_ENABLED:-false}
+      s3-hostname: ${MINIO_CONFIG_INGRESS_S3_HOSTNAME:-auto}
+      console-hostname: ${MINIO_CONFIG_INGRESS_CONSOLE_HOSTNAME:-auto}
+    volume-size: ${NUVOLARIS_STORAGE_VOLUME_SIZE:-50}
     admin:
       user: minioadmin
       password: $SECRET_MINIO_ADMIN    
     nuvolaris:
       user: nuvolaris
-      password: $SECRET_MINIO_NUVOLARIS
+      password: $SECRET_MINIO_NUVOLARIS      
   postgres:    
     volume-size: 5
     replicas: 2

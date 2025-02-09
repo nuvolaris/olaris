@@ -61,7 +61,7 @@ tasks:
       then 
         config NUVDEV_APIHOST="$NUVDEV_APIHOST"
         config NUVDEV_USERNAME="$NUVDEV_USERNAME"
-        config NUVDEV_HOST="https://$NUVDEV_USERNAME.nuvolaris.dev"
+        config NUVDEV_HOST="https://$NUVDEV_USERNAME.$(basename $NUVDEV_APIHOST)"
         source ~/.wskprops
         config OPENAI_API_HOST=https://openai.nuvolaris.io
         config OPENAI_API_KEY="$(echo "$AUTH" | awk -F: '{print $1 }')"
